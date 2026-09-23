@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "../components/landing/tokens.css";
+
+@theme inline {
+  --font-sans: var(--font-dm-sans);
+}
+
+/* Profundidad de fondo: mesh radial sutil detrás del héroe (55 gate G). */
+body {
+  background:
+    radial-gradient(900px 480px at 50% -8%, color-mix(in oklab, var(--accent) 7%, transparent), transparent 70%),
+    var(--bg);
+}
+
+/* Hairline degradada de marca (55 gate G): borde de acento que se desvanece. */
+.borde-degradado {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(135deg, color-mix(in oklab, var(--accent) 40%, transparent), transparent 60%) border-box;
+}

@@ -74,3 +74,21 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - FICHA-ARTE.md aprobada (Clínica humana, DM Sans, acento #0B5F5A). Cosa juzgada.
 - Varios perros (decisión): un selector de perros en la parte superior de "Hoy" (Todos · Toffee · Luna · +) y "Todos" agrupa los cuidados por perro. La pestaña "Perros" reemplaza a "Toffee" y lista las fichas. Un solo precio: hasta 4 perros y 3 cuidadores por cuenta, sin cobro por perro (competidores: Bitpet 3, Ruffo 5). Onboarding: tras el primer perro se ofrece "¿Tienes otro perro?" como paso opcional. Cada cuidado, stock y alerta pertenece a UN perro; "quién hizo qué" es por cuenta.
 - Siguiente: cerrar Sesión 1 pendiente (aprobación de FICHA-AVATAR + 2 frases reales) y pasar a Sesión 3 (página de ventas).
+
+## Avatar aprobado (2026-09-23) — riesgos
+- Usuario confirmó a Carolina. No tiene comentarios de su audiencia sobre olvidar medicamentos: su contenido hasta hoy es de primeros auxilios caninos. RIESGO: la audiencia puede no coincidir con "perro medicado". Mitigación: publicar una pregunta en TikTok/Stories ("¿Alguna vez olvidaste darle su medicamento a tu perro?") para conseguir frases reales y medir el tamaño del segmento; NO inventar testimonios en la landing.
+
+## Sesión 3 — Página de ventas (en revisión)
+- Stack: Next.js 16 (App Router) + Tailwind 4 + motion + lucide (scaffold de 51). Raíz del proyecto = esta carpeta. Dev: `npm run dev` (launch.json "web"). Build y lint pasan.
+- Kit de landing copiado a components/landing (tokens.css tematizado con FICHA-ARTE). Copy en docs/copy/landing.md, trazado a FICHA-AVATAR. Página: components/landing/LandingPage.tsx → app/page.tsx. Rutas: /empezar (provisional), /privacidad, /terminos, /reembolsos (borradores).
+- Capturas reales de la app en public/screens (script scripts/capturar-pantallas.mjs, desde vista-previa-app.html).
+- Decisión: trial unificado a 7 días en mensual y anual (el kit muestra un solo N y la landing debe coincidir con el paywall). La pantalla 3 del tour dice 14 días para anual: corregir al construir el paywall real.
+- Decisión: bonus del plan anual = ebook «Primeros Auxilios Caninos» (valor US$9) en el stack. La creadora puede vetarlo.
+- Estado del gate: pendiente el veredicto del revisor visual independiente (docs/revisiones/landing-veredicto.md) y captura a 375px archivada; la landing no se da por terminada hasta entonces.
+
+## Problemas conocidos
+- audit-conversion.sh marca críticos que vienen del propio kit (falsos positivos en comentarios/clases de components/landing/*.tsx y la prop `animate` de motion leída como voseo) y el test de similitud de DOM del comparador A/B/C. El copy visible pasa todas las comprobaciones. Pendiente: reportar al mantenedor del SO.
+- Soporte: el correo del footer (soporte@ladoctoraperritos.com) es provisional; falta un correo real que alguien lea y dominio propio.
+- CTA provisional: /empezar no tiene onboarding ni checkout; pendiente Hotmart (cuenta + producto con garantía de 7 días) y onboarding (Sesión 4). Sin eso la prueba de demanda aún no puede medir pagos.
+- Páginas legales son borradores pendientes de revisión con 47.
+- Garantía y reembolso prometidos (7 días): configurar Hotmart con 7 días ANTES de publicar.

@@ -1,6 +1,6 @@
 # FICHA DE AVATAR — La Doctora Perritos · Cuida y Recuerda
 
-- Estado: BORRADOR (8 frases VoC del PDF; faltan ≥2 más de la audiencia propia — comentarios/DMs — para APROBAR)
+- Estado: APROBADA CON RIESGO ASUMIDO (8 frases VoC de reseñas de competidores; 0 de la audiencia propia — la audiencia llegó por primeros auxilios, no por medicación. Se prohíben testimonios inventados; conseguir frases reales con la pregunta en TikTok)
 
 ## El avatar
 - Carolina · 38 · jornada completa, vive con pareja, 2 perros (uno de 10 años con medicación diaria) · Chile y México
@@ -60,4 +60,4 @@
 
 ## Cierre
 - Inventario prueba día-1: audiencia propia (por cuantificar), contenido canino existente
-- Aprobada por el usuario: NO
+- Aprobada por el usuario: SÍ (2026-09-23)
