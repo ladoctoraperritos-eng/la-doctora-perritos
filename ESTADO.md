@@ -95,3 +95,11 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - CORRECCIÓN DE DECISIÓN (2026-09-23): la garantía pasó de 7 a 15 días. Regla dura de 18: la garantía debe durar MÁS que la prueba (7). Hotmart admite 7/15/21/30 y en suscripciones cubre solo el primer cobro (FICHA-MERCADO §4). Copy y páginas legales actualizados.
 - REVISIÓN INDEPENDIENTE DE LA LANDING: 1ª pasada (docs/revisiones/landing-revision-1-no-lista.md) 30/40 · 12/20 · 14/20 → NO LISTA. 2ª pasada (docs/revisiones/landing-veredicto.md) 30/40 · 13/20 · 15/20 → NO LISTA. Corregido tras ellas: contraste del CTA final, precios/garantía en las cajas, textos repetidos, logo, footer, íconos en la agitación, microcopy en CTAs intermedios. La landing NO se da por terminada.
 - BLOQUEO PARA APROBAR (requiere al usuario): foto real del perro/creadora para el duotone de marca y prueba visual; sin ella el revisor puntúa la identidad en 2/5. Prueba social real (testimonios) = 0 hasta que existan usuarios.
+
+## Cambios pedidos por la creadora (2026-09-23)
+- Landing: sin cifra de seguidores de TikTok; «tutores» (hasta 3) en vez de «pareja»; agitación con el dolor en negrita y más grande; mecanismo con voz cercana y empática; ebook fuera de la oferta.
+- NUEVA FUNCIÓN PROMETIDA: chat de emergencias con IA «de La Doctora Perritos» (pasos a seguir ante una emergencia; no sustituye al veterinario). Está en ambos planes. Aviso legal: /aviso-ia (borrador).
+  · PENDIENTE (claim sin construir — ledger de 61): el chat no existe aún; la landing no debe publicarse con tráfico hasta construirlo o quitarlo.
+  · PENDIENTE (40/30): gate de viabilidad unitaria con costo REAL por mensaje; regla: costo de IA ≤ 20% del precio (≤ US$0,80/mes al plan mensual). Fijar cupo mensual justo por plan con la fórmula de 02C antes de prometer «ilimitado». Kill-switch de gasto (31).
+  · RIESGO DE SALUD: guardrails obligatorios (nunca diagnosticar ni dosificar, siempre derivar al veterinario, mensajes de alarma → «acude ya a una clínica»), evals con casos de emergencia (31) y base de conocimiento propia de la creadora (su ebook de primeros auxilios como fuente) — decidir en Sesión 6.
+- Decisión: funciones IGUALES en mensual y anual (solo cambia el precio). La diferencia en exportación de datos y resumen para el veterinario era un descuido de copy y quedó corregida.

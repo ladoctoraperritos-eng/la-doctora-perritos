@@ -7,11 +7,11 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - H1: Que cuidar a tu perro no dependa de tu [acento]memoria[/acento]
 - Subtítulo: Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]
 - CTA: Empezar mis 7 días gratis
-- Franja de prueba (solo hecho real): De La Doctora Perritos · +33 mil seguidores en TikTok · 7 días gratis
+- Franja de confianza (solo hechos de la oferta): Sin cobro hoy · cancela cuando quieras · garantía de 15 días
 
 ## 2. Problema  (dolores 1-5 de la ficha, en su lenguaje)
 1. ¿Te preguntas si [b]ya le diste[/b] su medicamento?
-2. ¿Tu pareja y tú no saben [b]quién lo hizo[/b]?
+2. ¿En casa nadie sabe con certeza [b]quién lo hizo[/b]?
 3. ¿Descubres tarde que se le acabaron las pastillas o la comida?
 4. ¿Buscas su receta entre WhatsApp, fotos y papeles?
 5. ¿Cuidarlo bien ya se siente como otra tarea mental?
@@ -20,15 +20,15 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - Una dosis olvidada o repetida no avisa: [b]lo notas cuando ya pasó[/b].
 - Alarmas, chat familiar y fotos de recetas: [b]cinco sistemas para una sola preocupación[/b].
 - Mientras sigas así, [acento]cuidarlo depende de que te acuerdes[/acento].
-- Contraste — Hoy: Alarmas sueltas y un «pensé que se lo habías dado tú».
-- Contraste — Si nada cambia: La misma carga mental, todos los días.
+- Contraste — Hoy: [b]Alarmas sueltas[/b] y un «[b]pensé que se lo habías dado tú[/b]».
+- Contraste — Si nada cambia: [b]La misma carga mental[/b], todos los días, y el miedo constante de [b]olvidar algo importante[/b].
 
 ## 4. Solución  (mecanismo: el Panel de Hoy)
 - Título: Abres la app y ya sabes [acento]qué le toca hoy[/acento]
-- Big Idea: No te falta memoria: te faltaba un lugar donde vivan sus cuidados. El Panel de Hoy los junta y [b]te avisa antes de que algo falle[/b].
-- Paso 1 · Agrega lo suyo — Un medicamento, su comida o una vacuna. Toma un minuto.
-- Paso 2 · Te avisamos a tiempo — Recordatorios y aviso antes de que algo se acabe.
-- Paso 3 · Todos ven qué se hizo — Quien lo da lo marca; tu familia lo ve al instante.
+- Big Idea: Sabemos lo que pesa acordarte de todo. [b]No es tu memoria[/b]: su cuidado vive en cinco lugares. El Panel de Hoy lo junta y [b]te avisa antes de que algo falle[/b].
+- Paso 1 · Cuéntanos lo suyo — Un medicamento, su comida o una vacuna. Nosotros lo recordamos por ti.
+- Paso 2 · Te avisamos a tiempo — Antes de cada dosis y antes de que algo se acabe. Tú respiras.
+- Paso 3 · Todos ven qué se hizo — Quien lo da lo marca y la familia lo ve. Nadie duda.
 - Antes: Alarmas, chats y recetas en fotos, y la duda de si ya se lo dieron.
 - Después: Una pantalla: qué toca hoy, quién lo hizo y qué falta.
 
@@ -38,10 +38,10 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 
 ## 6. Oferta  (precio decidido en ESTADO.md: US$3,99/mes · US$35/año · 7 días gratis)
 - Título: Empieza gratis. Sigue por [acento]US$0,10 al día[/acento]  (≤8 palabras; «menos de» va en la card)
-- Stack: Cuida y Recuerda, 12 meses — US$48 · Guía «Primeros Auxilios Caninos» (ebook) — US$9 · Total tachado US$57 · Hoy: US$3,99/mes (se cobra US$35/año)
+- Sin stack de valor tachado (el ebook salió de la oferta y no se inventa un valor para el chat).
 - Anual: US$2,92/mes · Se cobra US$35/año · 3 meses gratis · menos de US$0,10 al día
 - Mensual: US$3,99/mes
-- Features: Avisos de medicamentos, comida y vacunas · Hasta 3 cuidadores: quién hizo qué · Hasta 4 perros, un solo precio · Resumen para el veterinario en 1 toque · Tus datos siempre tuyos y exportables
+- Features (IGUALES en mensual y anual; solo cambia el precio): Avisos de medicamentos, comida y vacunas · Hasta 3 tutores: quién hizo qué · Hasta 4 perros, un solo precio · Chat de emergencias de La Doctora Perritos (IA) · Resumen para el veterinario y datos exportables · Garantía de 15 días sobre tu primer pago
 
 ## 7. Garantía
 - Nombre: la Garantía del Primer Aviso
@@ -54,14 +54,14 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 3. ¿Tendré que llenar una ficha enorme? — No. Empiezas con un solo medicamento o comida, en [b]un minuto[/b]. El resto lo agregas cuando quieras.
 4. ¿Y si el aviso no me llega? — Te avisamos por la app y por correo de respaldo. En iPhone, te guiamos para instalarla en tu pantalla de inicio.
 5. ¿Qué pasa con mis datos si dejo de pagar? — Siguen siendo tuyos: puedes descargarlos siempre y [b]nunca los borramos de golpe[/b].
-6. ¿Reemplaza a mi veterinario? — No. Organiza y recuerda; no diagnostica ni receta. Ante una duda de salud, consulta a tu veterinario.
+6. ¿Reemplaza a mi veterinario? — No. Organiza, recuerda y, en una emergencia, el chat te guía [b]mientras llegas al veterinario[/b]. No diagnostica ni receta.
 
 ## 9. CTA final
 - H2: Imagina abrir la app y [acento]tener todo claro[/acento]
-- Future pacing: Esta noche, a las 19:00, la app te avisa. Lo marcas y tu pareja lo ve al instante.
+- Future pacing: Esta noche, a las 19:00, la app te avisa. Lo marcas y tu familia lo ve al instante.
 - Recap: 7 días gratis · Garantía del Primer Aviso · Cancela cuando quieras
 - PS: PS: Empiezas con 7 días gratis y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos tu primer pago.
 
 ## 10. Footer legal
-- Enlaces: Privacidad · Términos y Condiciones · Reembolsos  (páginas borrador existentes, pendientes de revisión con 47)
+- Enlaces: Privacidad · Términos y Condiciones · Reembolsos · Aviso de IA  (páginas borrador existentes, pendientes de revisión con 47)
 - Aviso visible: «La Doctora Perritos no es un servicio veterinario ni reemplaza a tu veterinario.»

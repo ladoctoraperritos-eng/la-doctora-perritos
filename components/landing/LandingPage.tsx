@@ -52,7 +52,7 @@ export default function LandingPage() {
         subtitleMarked="Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]"
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
-        socialProof={<span className="text-base font-medium">De La Doctora Perritos · +33 mil seguidores en TikTok</span>}
+        socialProof={<span className="text-base font-medium">Sin cobro hoy · cancela cuando quieras · garantía de 15 días</span>}
         visual={
           <div className="flex justify-center bg-[var(--surface-2)] px-6 pt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,7 +72,7 @@ export default function LandingPage() {
         titulo="¿Te suena?"
         preguntas={[
           { icon: Pill, textoMarked: '¿Te preguntas si [b]ya le diste[/b] su medicamento?' },
-          { icon: Users, textoMarked: '¿Tu pareja y tú no saben [b]quién lo hizo[/b]?' },
+          { icon: Users, textoMarked: '¿En casa nadie sabe con certeza [b]quién lo hizo[/b]?' },
           { icon: Package, textoMarked: '¿Descubres tarde que se le acabaron las pastillas o la comida?' },
           { icon: FileSearch, textoMarked: '¿Buscas su receta entre WhatsApp, fotos y papeles?' },
           { icon: Brain, textoMarked: '¿Cuidarlo bien ya se siente como otra tarea mental?' },
@@ -88,20 +88,20 @@ export default function LandingPage() {
         ]}
         contraste={{
           labelHoy: 'Hoy',
-          hoy: 'Alarmas sueltas y un «pensé que se lo habías dado tú».',
+          hoy: '[b]Alarmas sueltas[/b] y un «[b]pensé que se lo habías dado tú[/b]».',
           labelFuturo: 'Si nada cambia',
-          futuro: 'La misma carga mental, todos los días.',
+          futuro: '[b]La misma carga mental[/b], todos los días, y el miedo constante de [b]olvidar algo importante[/b].',
         }}
       />
 
       <Solucion
         tituloMarked="Abres la app y ya sabes [acento]qué le toca hoy[/acento]"
         mecanismo="el Panel de Hoy"
-        bigIdeaMarked="No te falta memoria: te faltaba un lugar donde vivan sus cuidados. El Panel de Hoy los junta y [b]te avisa antes de que algo falle[/b]."
+        bigIdeaMarked="Sabemos lo que pesa acordarte de todo. [b]No es tu memoria[/b]: su cuidado vive en cinco lugares. El Panel de Hoy lo junta y [b]te avisa antes de que algo falle[/b]."
         pasos={[
-          { titulo: 'Agrega lo suyo', detalle: 'Un medicamento, su comida o una vacuna. Toma un minuto.' },
-          { titulo: 'Te avisamos a tiempo', detalle: 'Recordatorios y aviso antes de que algo se acabe.' },
-          { titulo: 'Todos ven qué se hizo', detalle: 'Quien lo da lo marca; tu familia lo ve al instante.' },
+          { titulo: 'Cuéntanos lo suyo', detalle: 'Un medicamento, su comida o una vacuna. Nosotros lo recordamos por ti.' },
+          { titulo: 'Te avisamos a tiempo', detalle: 'Antes de cada dosis y antes de que algo se acabe. Tú respiras.' },
+          { titulo: 'Todos ven qué se hizo', detalle: 'Quien lo da lo marca y la familia lo ve. Nadie duda.' },
         ]}
         antesDespues={{
           labelAntes: 'Antes',
@@ -128,13 +128,6 @@ export default function LandingPage() {
       <Oferta
         tituloMarked="Empieza gratis. Sigue por [acento]US$0,10 al día[/acento]"
         trialDias={7}
-        stack={{
-          lineas: [
-            { resultado: 'Cuida y Recuerda: avisos, familia y ficha (12 meses)', valor: 'US$48' },
-            { resultado: 'Guía «Primeros Auxilios Caninos» (ebook)', valor: 'US$9' },
-          ],
-          totalTachado: 'US$57',
-        }}
         anual={{
           nombre: 'Anual',
           badge: 'MEJOR VALOR',
@@ -146,10 +139,10 @@ export default function LandingPage() {
           ctaHref: CTA_HREF,
           features: [
             'Avisos de medicamentos, comida y vacunas',
-            'Hasta 3 cuidadores: quién hizo qué',
+            'Hasta 3 tutores: quién hizo qué',
             'Hasta 4 perros, un solo precio',
-            'Resumen para el veterinario en 1 toque',
-            'Tus datos siempre tuyos y exportables',
+            'Chat de emergencias de La Doctora Perritos (IA)',
+            'Resumen para el veterinario y datos exportables',
             'Garantía de 15 días sobre tu primer pago',
           ],
         }}
@@ -160,10 +153,11 @@ export default function LandingPage() {
           ctaHref: CTA_HREF,
           features: [
             'Avisos de medicamentos, comida y vacunas',
-            'Hasta 3 cuidadores: quién hizo qué',
+            'Hasta 3 tutores: quién hizo qué',
             'Hasta 4 perros, un solo precio',
+            'Chat de emergencias de La Doctora Perritos (IA)',
+            'Resumen para el veterinario y datos exportables',
             'Garantía de 15 días sobre tu primer pago',
-            'Cancelas cuando quieras',
           ],
         }}
       />
@@ -200,14 +194,14 @@ export default function LandingPage() {
           },
           {
             pregunta: '¿Reemplaza a mi veterinario?',
-            respuestaMarked: 'No. Organiza y recuerda; no diagnostica ni receta. Ante una duda de salud, consulta a tu veterinario.',
+            respuestaMarked: 'No. Organiza, recuerda y, en una emergencia, el chat te guía [b]mientras llegas al veterinario[/b]. No diagnostica ni receta.',
           },
         ]}
       />
 
       <CtaFinal
         h2Marked="Imagina abrir la app y [acento]tener todo claro[/acento]"
-        futurePacingMarked="Esta noche, a las 19:00, la app te avisa. Lo marcas y tu pareja lo ve al instante."
+        futurePacingMarked="Esta noche, a las 19:00, la app te avisa. Lo marcas y tu familia lo ve al instante."
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
         recap="7 días gratis · Garantía del Primer Aviso · Cancela cuando quieras"
@@ -222,6 +216,7 @@ export default function LandingPage() {
           { label: 'Privacidad', href: '/privacidad' },
           { label: 'Términos y Condiciones', href: '/terminos' },
           { label: 'Reembolsos', href: '/reembolsos' },
+          { label: 'Aviso de IA', href: '/aviso-ia' },
         ]}
       />
       <div className="mx-auto mb-16 max-w-6xl px-6">

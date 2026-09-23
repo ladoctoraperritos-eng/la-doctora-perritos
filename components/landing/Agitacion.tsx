@@ -58,14 +58,14 @@ export function Agitacion({ frases, iconos, contraste, id }: AgitacionProps) {
               <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
                 {contraste.labelHoy}
               </p>
-              <p className="mt-2 text-[15px] leading-snug text-[var(--text-primary)]">{contraste.hoy}</p>
+              <p className="mt-2 text-[17px] leading-snug text-[var(--text-primary)]"><MarkedCopy text={contraste.hoy} /></p>
             </div>
             {/* "si nada cambia": más apagado/frío — el peso lo pone el copy, no el rojo */}
             <div className="rounded-[var(--radius-card)] bg-[var(--surface-2)] p-5">
               <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
                 {contraste.labelFuturo}
               </p>
-              <p className="mt-2 text-[15px] leading-snug text-[var(--text-secondary)]">{contraste.futuro}</p>
+              <p className="mt-2 text-[17px] leading-snug text-[var(--text-secondary)]"><MarkedCopy text={contraste.futuro} /></p>
             </div>
           </motion.div>
         )}
