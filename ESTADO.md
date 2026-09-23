@@ -48,3 +48,4 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 
 ## Problemas conocidos
 - Ninguna pantalla (landing, onboarding, paywall, app) está construida todavía: pendiente, aún en Sesión 1 de validación.
+- FICHA-MODELO en BORRADOR: falta verificar ≥2 señales de revenue de DogLog (Sensor Tower, Meta Ads Library); posponer hasta antes de la landing (Sesión 3).
