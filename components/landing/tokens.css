@@ -29,7 +29,8 @@
 
   /* ── MARCA ── */
   --accent: #0b5f5a;          /* ← reemplazar con FICHA-ARTE — el acento del brand kit */
-  --accent-2: #e8896b;        /* ← reemplazar con FICHA-ARTE — 2ª nota SOLO si la ficha la define;
+  --accent-2: #e8896b;
+  --accent-on-dark: #7cd1c6;   /* acento legible sobre el bloque invertido (CTA final): ≥7:1 sobre --text-primary */        /* ← reemplazar con FICHA-ARTE — 2ª nota SOLO si la ficha la define;
                                  si no hay 2ª nota, repetir aquí el valor de --accent */
 
   /* ── FORMA (radios del brand kit — UNO por rol, toda la página) ── */

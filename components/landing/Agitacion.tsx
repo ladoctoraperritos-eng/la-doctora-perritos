@@ -8,12 +8,15 @@
 // (un solo movimiento visual, sin separador). Cero decoración de miedo.
 
 import { motion } from 'motion/react';
-import { SectionShell, useReveal, VIEWPORT_ONCE } from './ui';
+import type { LucideIcon } from 'lucide-react';
+import { IconChip, SectionShell, useReveal, VIEWPORT_ONCE } from './ui';
 import { MarkedCopy, warnCopy, warnRango } from './MarkedCopy';
 
 export interface AgitacionProps {
   /** 2-4 frases MARCADAS y cortas — el array es el contrato: nada de párrafos. */
   frases: string[];
+  /** Ícono de dolor opcional por frase (mismo orden) — ancla visual para escanear (55). */
+  iconos?: LucideIcon[];
   /** Mini-card opcional "hoy vs en 6 meses" (55 §3). */
   contraste?: {
     labelHoy: string;
@@ -24,7 +27,7 @@ export interface AgitacionProps {
   id?: string;
 }
 
-export function Agitacion({ frases, contraste, id }: AgitacionProps) {
+export function Agitacion({ frases, iconos, contraste, id }: AgitacionProps) {
   warnRango('Agitación → frases', frases.length, 2, 4);
   frases.forEach((f, i) => warnCopy(`Agitación → frase ${i + 1}`, f, 18));
   const { contenedor, item } = useReveal();
@@ -40,13 +43,12 @@ export function Agitacion({ frases, contraste, id }: AgitacionProps) {
       >
         <div className="flex flex-col gap-4">
           {frases.map((f, i) => (
-            <motion.p
-              key={i}
-              variants={item}
-              className="text-[17px] leading-[1.6] text-[var(--text-secondary)]"
-            >
-              <MarkedCopy text={f} />
-            </motion.p>
+            <motion.div key={i} variants={item} className="flex items-start gap-4">
+              {iconos?.[i] && <IconChip icon={iconos[i]} tone="muted" />}
+              <p className="text-[17px] leading-[1.6] text-[var(--text-secondary)]">
+                <MarkedCopy text={f} />
+              </p>
+            </motion.div>
           ))}
         </div>
 

@@ -48,7 +48,7 @@ export function CtaFinal({
       id={id}
       aria-label="Empieza hoy"
       className="relative overflow-hidden py-20 md:py-24"
-      style={{ background: 'var(--text-primary)' }}
+      style={{ background: 'var(--text-primary)', ['--accent' as string]: 'var(--accent-on-dark)' }}
     >
       {/* Profundidad también en el bloque invertido: radial sutil del acento */}
       <div
@@ -85,7 +85,7 @@ export function CtaFinal({
 
         <motion.div variants={item} className="mt-8 w-full sm:w-auto">
           {/* Acento pleno sobre fondo invertido = el máximo contraste de la página */}
-          <CtaButton href={ctaHref} alto={56}>
+          <CtaButton href={ctaHref} alto={56} onDark>
             {ctaLabel}
           </CtaButton>
         </motion.div>

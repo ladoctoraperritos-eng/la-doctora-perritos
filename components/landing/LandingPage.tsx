@@ -3,7 +3,7 @@
 // Landing de La Doctora Perritos — compone las 10 secciones canónicas de 19 desde el kit.
 // TODO el copy sale de docs/copy/landing.md (trazado a FICHA-AVATAR.md).
 
-import { Brain, FileSearch, Package, Pill, Users } from 'lucide-react';
+import { AlertTriangle, Brain, FileSearch, Layers, Package, PawPrint, Pill, Users } from 'lucide-react';
 import { Hero } from './Hero';
 import { Problema } from './Problema';
 import { Agitacion } from './Agitacion';
@@ -14,7 +14,7 @@ import { Garantia } from './Garantia';
 import { Faq } from './Faq';
 import { CtaFinal } from './CtaFinal';
 import { FooterLegal } from './FooterLegal';
-import { StickyCtaMobile } from './ui';
+import { CtaButton, StickyCtaMobile } from './ui';
 
 // Mismo destino en hero, mid-page, oferta, CTA final y sticky.
 // Provisional: /empezar hasta que existan el onboarding y el checkout de Hotmart.
@@ -23,17 +23,36 @@ const CTA_LABEL = 'Empezar mis 7 días gratis';
 // PENDIENTE (ESTADO.md): correo de soporte REAL que alguien lea.
 const SOPORTE_EMAIL = 'soporte@ladoctoraperritos.com';
 
+// CTA repetido a mitad de scroll: mismo destino y mismo verbo que el hero (19).
+function CtaIntermedio() {
+  return (
+    <div className="mx-auto flex w-full max-w-md justify-center px-6 py-8">
+      <div className="flex w-full flex-col items-center gap-2">
+        <CtaButton href={CTA_HREF}>{CTA_LABEL}</CtaButton>
+        <p className="text-sm text-[var(--text-secondary)]">Sin cobro hoy · cancela cuando quieras</p>
+      </div>
+    </div>
+  );
+}
+
+const LOGO = (
+  <span aria-hidden="true" className="inline-flex size-8 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)]">
+    <PawPrint size={18} color="var(--bg)" />
+  </span>
+);
+
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-[var(--bg)] text-[var(--text-primary)] [font-family:var(--font-body)]">
       <Hero
         appName="La Doctora Perritos"
+        logo={LOGO}
         loginHref="/empezar"
         h1Marked="Que cuidar a tu perro no dependa de tu [acento]memoria[/acento]"
         subtitleMarked="Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]"
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
-        socialProof={<span>De La Doctora Perritos · +33 mil seguidores en TikTok · 7 días gratis</span>}
+        socialProof={<span className="text-base font-medium">De La Doctora Perritos · +33 mil seguidores en TikTok</span>}
         visual={
           <div className="flex justify-center bg-[var(--surface-2)] px-6 pt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -61,6 +80,7 @@ export default function LandingPage() {
       />
 
       <Agitacion
+        iconos={[AlertTriangle, Layers, Brain]}
         frases={[
           'Una dosis olvidada o repetida no avisa: [b]lo notas cuando ya pasó[/b].',
           'Alarmas, chat familiar y fotos de recetas: [b]cinco sistemas para una sola preocupación[/b].',
@@ -85,11 +105,13 @@ export default function LandingPage() {
         ]}
         antesDespues={{
           labelAntes: 'Antes',
-          antes: 'Alarmas, chats y recetas en fotos, y la duda de si ya se lo dieron.',
+          antes: 'Cada dato en un lugar distinto y nadie sabe qué falta.',
           labelDespues: 'Después',
-          despues: 'Una pantalla: qué toca hoy, quién lo hizo y qué falta.',
+          despues: 'Todo en el Panel de Hoy: qué toca, quién lo hizo y qué falta.',
         }}
       />
+
+      <CtaIntermedio />
 
       <AppPorDentro
         tituloMarked="Tu perro, [acento]todo en orden[/acento]"
@@ -112,7 +134,6 @@ export default function LandingPage() {
             { resultado: 'Guía «Primeros Auxilios Caninos» (ebook)', valor: 'US$9' },
           ],
           totalTachado: 'US$57',
-          nota: 'Hoy: US$3,99/mes (se cobra US$35/año)',
         }}
         anual={{
           nombre: 'Anual',
@@ -129,6 +150,7 @@ export default function LandingPage() {
             'Hasta 4 perros, un solo precio',
             'Resumen para el veterinario en 1 toque',
             'Tus datos siempre tuyos y exportables',
+            'Garantía de 15 días sobre tu primer pago',
           ],
         }}
         mensual={{
@@ -140,16 +162,19 @@ export default function LandingPage() {
             'Avisos de medicamentos, comida y vacunas',
             'Hasta 3 cuidadores: quién hizo qué',
             'Hasta 4 perros, un solo precio',
+            'Garantía de 15 días sobre tu primer pago',
             'Cancelas cuando quieras',
           ],
         }}
       />
 
       <Garantia
-        nombre="la Garantía del Primer Aviso"
+        nombre="Garantía del Primer Aviso"
         condicionMarked="Si la app no te quita el peso de recordar, escribes un correo dentro de los 15 días de garantía y te devolvemos tu primer pago. [b]Sin preguntas.[/b]"
         pisoLegal="Respaldada por la garantía de 15 días de Hotmart"
       />
+
+      <CtaIntermedio />
 
       <Faq
         items={[
@@ -191,6 +216,7 @@ export default function LandingPage() {
 
       <FooterLegal
         appName="La Doctora Perritos"
+        logo={LOGO}
         soporteEmail={SOPORTE_EMAIL}
         enlaces={[
           { label: 'Privacidad', href: '/privacidad' },
@@ -199,7 +225,7 @@ export default function LandingPage() {
         ]}
       />
       <div className="mx-auto mb-16 max-w-6xl px-6">
-        <p className="borde-degradado rounded-[var(--radius-card)] px-4 py-3 text-xs leading-relaxed text-[var(--text-secondary)]">
+        <p className="borde-degradado rounded-[var(--radius-card)] px-4 py-3 text-sm leading-relaxed text-[var(--text-secondary)]">
           La Doctora Perritos no es un servicio veterinario ni reemplaza a tu veterinario.
         </p>
       </div>
