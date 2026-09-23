@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="es" data-kit="abc-v2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tour de la app — La Doctora Perritos</title>
+
+<!-- ============================================================================
+  KIT-ABC-V2 — PLANTILLA DEL PROTOCOLO A/B/C (54, Regla Dura #0 + gate del CLAUDE.md)
+  ⚠️ EL MARCADOR data-kit="abc-v2" DEL <html> NO SE BORRA: el hook pre-stop lo
+  verifica. Una comparativa sin ese marcador se trata como escrita desde cero
+  (prohibido). Este archivo se COPIA y se TEMATIZA — nunca se reescribe a mano.
+  Comparativa AUTOCONTENIDA: 3 layouts ESTRUCTURALMENTE DISTINTOS de la MISMA
+  pantalla clave, cada uno con su dirección de arte completa. El usuario la ABRE
+  y VE — prohibido presentar direcciones solo con texto.
+
+  CÓMO USARLA:
+  1. Reemplazar los tokens de .op-a / .op-b / .op-c (marcados "← reemplazar") con
+     las 3 direcciones derivadas (16 PASO 0.2bis + banco del 54). La paleta del
+     líder/banco se toma TAL CUAL — la divergencia va en composición y dispositivo.
+  2. Reemplazar los DATOS SEMILLA por datos del dominio REAL del avatar (nunca
+     lorem ipsum, nunca pantallas a medias — el mockup ES la promesa de calidad).
+  3. Llenar la "Hipótesis de conversión" de cada opción (1 línea).
+  4. EMBEBER LAS FUENTES (obligatorio antes de mostrar — ver bloque de abajo).
+  5. Verificar el TEST DE DIVERGENCIA (54): en escala de grises deben verse 3
+     diseños distintos; si solo cambia el acento, NO son 3 opciones — rehacer.
+
+  ── CÓMO EMBEBER LAS FUENTES (elegir UNA vía según el vehículo) ──────────────
+  FALLBACK-TRAMPA: cada familia se declara `font-family: "X", monospace` — si la
+  fuente no carga, el monospace GRITA y el fallo no pasa desapercibido. NO quitar
+  el monospace "para que se vea mejor": es el detector.
+
+  VÍA A — data-URI (artifacts / CSP estricta que bloquea hosts externos):
+  descargar el .woff2 (solo los pesos usados), convertir a base64 y pegar:
+
+    @font-face {
+      font-family: 'NombreFamilia';
+      font-style: normal;
+      font-weight: 400 700;            /* variable font: rango */
+      font-display: swap;
+      src: url(data:font/woff2;base64,AAAA...) format('woff2');
+    }
+
+  (un @font-face por familia; los subsets latin bastan; vigilar el peso total —
+  el vehículo de artifacts admite hasta 16MB por página)
+
+  VÍA B — Google Fonts (solo si el vehículo permite red — p. ej. /dev/direcciones
+  servido por el dev server del proyecto): descomentar y ajustar familias:
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..700&family=Mulish:wght@400..700&family=Geologica:wght@400..700&family=Wix+Madefor+Text:wght@400..700&family=EB+Garamond:wght@400..700&family=Inter+Tight:wght@400..700&display=swap" rel="stylesheet">
+
+  VERIFICACIÓN: el ESPÉCIMEN de cada opción muestra el nombre de la familia EN su
+  propia fuente. Si ahí se ve letra de máquina (monospace), la fuente NO está
+  embebida — no mostrar la comparativa así.
+============================================================================= -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..800&display=swap" rel="stylesheet">
+<style>
+  /* ── Shell neutro de la comparativa (no compite con las opciones) ── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    /* fondo con PROFUNDIDAD (54): banda con mesh sutil, nunca un fill plano */
+    background:
+      radial-gradient(1100px 520px at 12% -6%, #f7f7f9, transparent 62%),
+      radial-gradient(900px 460px at 92% 4%, #e2e2e9, transparent 58%),
+      linear-gradient(180deg, #ededf0, #e4e4e9);
+    color: #1c1c1f;
+    font-family: 'Segoe UI', system-ui, sans-serif; /* shell utilitario — las OPCIONES llevan sus fuentes */
+    padding: 32px 20px 64px;
+  }
+  .cabecera { max-width: 1180px; margin: 0 auto 12px; }
+  .cabecera h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  .cabecera p.sub { margin-top: 6px; font-size: 14px; color: #55555c; max-width: 70ch; }
+
+  /* Las 4 SALIDAS del usuario (protocolo del 54): elegir · combinar · otras 3 · ajustar */
+  .salidas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .salidas span {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid #c9c9cf; border-radius: 999px;
+    padding: 6px 12px; font-size: 12.5px; font-weight: 600; color: #3a3a40;
+    background: #f7f7f8;
+  }
+  .salidas b { color: #1c1c1f; }
+  .aviso-fuentes {
+    max-width: 1180px; margin: 10px auto 28px; font-size: 12.5px; color: #6a6a72;
+  }
+
+  .opciones { max-width: 1180px; margin: 0 auto; display: grid; gap: 40px;
+              grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+  .opcion { display: flex; flex-direction: column; gap: 18px; }
+
+  /* ── Panel meta por opción ── */
+  .meta { background: #f7f7f8; border: 1px solid #d9d9de; border-radius: 14px; padding: 18px; }
+  .meta .letra {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px; font-weight: 800; font-size: 15px;
+    color: #f7f7f8; background: #1c1c1f; margin-right: 8px;
+  }
+  .meta h2 { display: flex; align-items: center; font-size: 17px; font-weight: 700; }
+  .meta .direccion { margin-top: 4px; font-size: 13px; color: #55555c; }
+  .hipotesis { margin-top: 10px; font-size: 13px; line-height: 1.5; color: #3a3a40; }
+  .hipotesis .slot {
+    background: #fff3c7; border-radius: 4px; padding: 1px 4px; font-style: italic;
+  }
+  .meta ul.tokens { margin-top: 10px; list-style: none; font-size: 12px; color: #6a6a72;
+                    font-family: ui-monospace, monospace; line-height: 1.7; }
+
+  /* Espécimen tipográfico: el NOMBRE de la familia EN su fuente + fallback-trampa */
+  .especimen { margin-top: 12px; border-top: 1px solid #d9d9de; padding-top: 12px; }
+  .especimen .esp-display { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+  .especimen .esp-body { margin-top: 4px; font-size: 13.5px; color: #3a3a40; }
+
+  /* ── Chasis de teléfono REAL ── */
+  .telefono {
+    width: 310px; margin: 0 auto;
+    aspect-ratio: 9 / 19.5;
+    border: 10px solid #101014;
+    border-radius: 46px;
+    box-shadow: 0 24px 60px rgb(20 18 24 / 0.28);
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .statusbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px 6px; font-size: 13px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .statusbar .der { display: flex; align-items: center; gap: 5px; }
+  .statusbar svg { display: block; }
+  .home-indicator {
+    position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
+    width: 116px; height: 5px; border-radius: 999px; opacity: 0.85;
+  }
+  .pantalla { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Utilidades compartidas de los mockups */
+  .chip-icono {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; flex-shrink: 0;
+  }
+  .cta {
+    display: flex; align-items: center; justify-content: center;
+    height: 48px; font-size: 15px; font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Tab bar del teléfono (mockup LLENO = nav visible — 54 Regla #3) ── */
+  .tabbar {
+    display: flex; align-items: stretch; justify-content: space-around;
+    margin: 12px -18px 0; padding: 8px 8px 16px;
+    border-top: 1px solid color-mix(in oklab, var(--text-2) 18%, transparent);
+    background: color-mix(in oklab, var(--surface) 88%, transparent);
+  }
+  .op-c .tabbar { margin-inline: -20px; }
+  .tabbar a {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 9.5px; font-weight: 600; color: var(--text-2); text-decoration: none;
+  }
+  .tabbar .tab-chip {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 26px; border-radius: 9px;
+  }
+  .tabbar a.activa { color: var(--accent); }
+  .tabbar a.activa .tab-chip { background: color-mix(in oklab, var(--accent) 14%, transparent); }
+
+  /* ── Muestra de paleta (54: 4-6 círculos con los colores reales) ── */
+  .paleta { display: flex; gap: 8px; margin-top: 10px; }
+  .paleta span {
+    width: 26px; height: 26px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.10), 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+
+  /* ── HERO DE LANDING por opción (54: la dirección se elige mirando TAMBIÉN la
+       pantalla que vende — y aquí vive el MOMENTO DE COLOR VALIENTE) ── */
+  .rotulo-frame {
+    text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #85858e; margin-top: 2px;
+  }
+  .hero-landing {
+    width: 310px; margin: 6px auto 0; border-radius: 18px; overflow: hidden;
+    border: 1px solid rgb(0 0 0 / 0.10);
+    box-shadow: 0 16px 40px rgb(20 18 24 / 0.16);
+    background: var(--bg); color: var(--text-1);
+    font-family: var(--font-body); padding: 22px 18px 18px;
+  }
+  .hero-landing .hl-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+    border-radius: 999px; padding: 4px 10px;
+  }
+  .hero-landing h4 {
+    font-family: var(--font-display); font-size: 24px; font-weight: 700;
+    line-height: 1.14; letter-spacing: -0.01em; margin-top: 10px;
+  }
+  .hero-landing h4 em { font-style: normal; color: var(--accent); } /* la palabra que VENDE, en acento */
+  .hero-landing .hl-sub { margin-top: 8px; font-size: 13px; color: var(--text-2); line-height: 1.5; }
+  .hero-landing .hl-sub b { color: var(--text-1); font-weight: 600; }
+  .hero-landing .hl-cta {
+    margin-top: 14px; display: flex; align-items: center; justify-content: center;
+    height: 46px; border-radius: var(--radius-btn); font-size: 14.5px; font-weight: 700;
+    color: var(--bg);
+    /* botón VALIENTE: degradé tonal + luz interior + sombra TINTADA del propio acento (29) */
+    background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 86%, white), var(--accent));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35),
+                0 10px 24px -6px color-mix(in oklab, var(--accent) 45%, transparent);
+  }
+  .hero-landing .hl-prueba { margin-top: 10px; font-size: 11.5px; color: var(--text-2); text-align: center; }
+
+  /* ═══ OPCIÓN A — Clínica humana (banco 5) · DM Sans (fila Bienestar de 29) ═══ */
+  .op-a { --bg:#f4f7f6; --surface:#fdfefd; --text-1:#22302c; --text-2:#5f706b; --accent:#0b5f5a; --accent-2:#e8896b; --duo-1:#cfe3df; --duo-2:#5f9c95; --on-accent:#ffffff;
+    --radius-card:18px; --radius-btn:14px; --font-display:'DM Sans', monospace; --font-body:'DM Sans', monospace; --shadow-tinta:10 50 46; }
+  .op-a .especimen .esp-display{font-family:var(--font-display);} .op-a .especimen .esp-body{font-family:var(--font-body);}
+  .op-a .telefono{background:var(--bg);} .op-a .pantalla{font-family:var(--font-body);color:var(--text-1);padding:0 16px;}
+  .op-a .statusbar{color:var(--text-1);} .op-a .home-indicator{background:var(--text-1);}
+  .op-a .cab{display:flex;align-items:center;gap:10px;margin-top:6px;}
+  .foto-duotone{position:relative;overflow:hidden;width:42px;height:42px;border-radius:999px;background:linear-gradient(140deg,var(--duo-1),var(--duo-2));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .foto-duotone::after{content:'';position:absolute;inset:0;background:var(--accent);mix-blend-mode:soft-light;opacity:.55;}
+  .foto-duotone svg{position:relative;z-index:1;}
+  .op-a .cab .sub{font-size:11.5px;color:var(--text-2);font-weight:500;} .op-a h3.titulo-a{font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.1;}
+  .op-a .heroe{margin-top:12px;border-radius:var(--radius-card);border:1.5px solid transparent;
+    background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,color-mix(in oklab,var(--accent) 50%,transparent),transparent 60%) border-box;
+    box-shadow:0 10px 26px -10px rgb(var(--shadow-tinta)/.28),0 2px 6px rgb(var(--shadow-tinta)/.06);padding:14px;}
+  .op-a .heroe .label{font-size:11.5px;font-weight:600;color:var(--text-2);} .op-a .heroe .dato{font-size:40px;font-weight:800;line-height:1.05;letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
+  .op-a .heroe .dato small{font-size:14px;font-weight:600;color:var(--text-2);letter-spacing:0;}
+  .op-a .heroe .insight{margin-top:2px;font-size:12.5px;font-weight:700;color:var(--accent);}
+  .op-a .pasos{display:flex;gap:6px;margin-top:10px;} .op-a .pasos i{flex:1;height:6px;border-radius:99px;background:color-mix(in oklab,var(--accent) 16%,transparent);} .op-a .pasos i.ok{background:var(--accent);}
+  .op-a .card{margin-top:8px;background:var(--surface);border-radius:var(--radius-card);border:1px solid color-mix(in oklab,var(--text-2) 16%,transparent);
+    box-shadow:0 4px 14px -8px rgb(var(--shadow-tinta)/.25);padding:10px 12px;display:flex;gap:10px;align-items:center;}
+  .op-a .chip-icono{width:38px;height:38px;border-radius:12px;background:color-mix(in oklab,var(--accent) 10%,transparent);border:1px solid color-mix(in oklab,var(--accent) 22%,transparent);}
+  .op-a .chip-icono.c2{background:color-mix(in oklab,var(--accent-2) 14%,transparent);border-color:color-mix(in oklab,var(--accent-2) 30%,transparent);}
+  .op-a .card h4{font-size:13.5px;font-weight:700;} .op-a .card p{margin-top:1px;font-size:11.8px;color:var(--text-2);}
+  .op-a .card .hora{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .op-a .cta{margin-top:auto;margin-bottom:0;border-radius:var(--radius-btn);color:var(--on-accent);background:linear-gradient(180deg,color-mix(in oklab,var(--accent) 86%,white),var(--accent));
+    box-shadow:inset 0 1px 0 rgb(255 255 255/.3),0 10px 22px -6px color-mix(in oklab,var(--accent) 50%,transparent);font-weight:700;}
+
+
+  .opciones{grid-template-columns:repeat(auto-fit,minmax(330px,1fr));}
+  .op-a .rotulo{text-align:center;font-size:12.5px;font-weight:700;color:#3a3a40;margin-bottom:4px;}
+  .op-a .tabbar{margin-inline:-16px;margin-top:auto;}
+  .op-a .cab.sola{margin-top:8px;}
+  .op-a .paso{display:flex;align-items:center;gap:8px;margin-top:8px;} .op-a .paso .atras{width:32px;height:32px;border-radius:99px;border:1px solid color-mix(in oklab,var(--text-2) 25%,transparent);display:flex;align-items:center;justify-content:center;background:var(--surface);}
+  .op-a .paso .barras{flex:1;display:flex;gap:5px;} .op-a .paso .barras i{flex:1;height:5px;border-radius:99px;background:color-mix(in oklab,var(--accent) 16%,transparent);} .op-a .paso .barras i.ok{background:var(--accent);}
+  .op-a h3.q{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-top:18px;} .op-a p.q-sub{margin-top:6px;font-size:12.5px;color:var(--text-2);line-height:1.45;}
+  .op-a .op{margin-top:8px;display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid color-mix(in oklab,var(--text-2) 18%,transparent);border-radius:var(--radius-card);padding:11px 12px;font-size:13.5px;font-weight:700;}
+  .op-a .op.sel{border-color:var(--accent);background:color-mix(in oklab,var(--accent) 7%,var(--surface));box-shadow:0 8px 20px -12px rgb(var(--shadow-tinta)/.5);}
+  .op-a .op .chk{margin-left:auto;width:22px;height:22px;border-radius:99px;border:1.5px solid color-mix(in oklab,var(--text-2) 35%,transparent);display:flex;align-items:center;justify-content:center;}
+  .op-a .op.sel .chk{background:var(--accent);border-color:var(--accent);}
+  .op-a .op small{display:block;font-size:11.5px;font-weight:500;color:var(--text-2);margin-top:1px;}
+  .op-a .plan{margin-top:8px;border-radius:var(--radius-card);border:1.5px solid color-mix(in oklab,var(--text-2) 20%,transparent);background:var(--surface);padding:12px;position:relative;}
+  .op-a .plan.rec{border-color:transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,var(--accent),color-mix(in oklab,var(--accent) 30%,transparent)) border-box;box-shadow:0 12px 26px -12px rgb(var(--shadow-tinta)/.45);}
+  .op-a .plan .etq{position:absolute;top:-9px;right:12px;background:var(--accent-2);color:var(--text-1);font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:3px 9px;}
+  .op-a .plan h4{font-size:14px;font-weight:800;} .op-a .plan .precio{font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:2px;} .op-a .plan .precio small{font-size:12px;font-weight:600;color:var(--text-2);}
+  .op-a .plan p{font-size:11.5px;color:var(--text-2);margin-top:2px;}
+  .op-a .lista-b{margin-top:12px;display:flex;flex-direction:column;gap:7px;} .op-a .lista-b li{list-style:none;display:flex;gap:8px;font-size:12.5px;font-weight:600;align-items:center;}
+  .op-a .lista-b .ck{width:18px;height:18px;border-radius:99px;background:color-mix(in oklab,var(--accent) 14%,transparent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .op-a .legal{margin-top:8px;text-align:center;font-size:10.8px;color:var(--text-2);line-height:1.4;}
+  .op-a .fila{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid color-mix(in oklab,var(--text-2) 14%,transparent);} .op-a .fila:last-child{border-bottom:0;}
+  .op-a .fila h4{font-size:13px;font-weight:700;} .op-a .fila p{font-size:11.5px;color:var(--text-2);margin-top:1px;} .op-a .fila .fecha{margin-left:auto;text-align:right;font-size:12px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .op-a .fila .fecha small{display:block;font-size:10.5px;font-weight:600;color:var(--text-2);}
+  .op-a .panel{margin-top:10px;background:var(--surface);border-radius:var(--radius-card);border:1px solid color-mix(in oklab,var(--text-2) 16%,transparent);box-shadow:0 4px 14px -8px rgb(var(--shadow-tinta)/.25);padding:4px 12px;}
+  .op-a .prog{margin-top:10px;} .op-a .prog .fila-p{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--text-2);} .op-a .prog .fila-p b{color:var(--accent);}
+  .op-a .prog .bar{margin-top:5px;height:7px;border-radius:99px;background:color-mix(in oklab,var(--accent) 14%,transparent);overflow:hidden;} .op-a .prog .bar i{display:block;height:100%;width:60%;background:var(--accent);border-radius:99px;}
+  .op-a .av{width:34px;height:34px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--on-accent);background:var(--accent);flex-shrink:0;} .op-a .av.d{background:var(--accent-2);color:var(--text-1);}
+  .op-a .cta.sec{margin-top:8px;background:var(--surface);color:var(--accent);border:1.5px solid var(--accent);box-shadow:none;}
+  .op-a .grupo{margin-top:12px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);}
+
+  .pie{max-width:1180px;margin:40px auto 0;font-size:12.5px;color:#6a6a72;border-top:1px solid #d0d0d6;padding-top:14px;line-height:1.6;}
+</style>
+</head>
+<body>
+<header class="cabecera"><h1>Tu app por dentro — La Doctora Perritos</h1><p class="sub">Así se vería con el estilo que elegiste: Clínica humana con el verde un poco más oscuro. Cinco pantallas de la app, con los datos de Toffee.</p>
+<div class="salidas"><span><b>1 · Me encanta</b> — sigamos con este estilo</span><span><b>2 · Ajusta un detalle</b> — dime qué cambiar</span><span><b>3 · Repensar el estilo</b> — volvemos a las opciones</span></div></header>
+<p class="aviso-fuentes">Ábrelo con conexión a internet para ver la tipografía.</p><div class="opciones op-a-wrap"><style>.op-a-wrap>div{display:flex;flex-direction:column;}</style><div class="op-a"><div><p class="rotulo">1 · Tu pantalla de cada día</p><div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="cab"><span class="foto-duotone"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span><div><h3 class="titulo-a">Hoy con Toffee</h3><p class="sub">Miércoles 23 de septiembre</p></div></div>
+<div class="heroe"><p class="label">Le toca hoy</p><p class="dato">3 <small>cuidados</small></p><p class="insight">Primero: Meloxicam a las 19:00</p><div class="pasos"><i class="ok"></i><i class="ok"></i><i></i></div></div>
+<div class="card"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span><div><h4>Meloxicam 7,5 mg</h4><p>1 tableta con comida</p></div><span class="hora">19:00</span></div>
+<div class="card"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18a9 9 0 0 1-18 0Z"/><path d="M8 8c0-2 2-2 2-4M14 8c0-2 2-2 2-4"/></svg></span><div><h4>Alimento</h4><p>Quedan ~8 días · te aviso el sábado</p></div></div>
+<div class="card"><span class="chip-icono c2"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#c96a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><div><h4>Camila dio el Omega-3</h4><p>Hoy 08:04 · ya no se repite</p></div></div>
+<div class="card"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><div><h4>Antiparasitario</h4><p>Le toca en 12 días</p></div></div>
+<div class="cta">Ya se lo di</div><nav class="tabbar" aria-label="Navegación"><a class="activa" href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></span>Hoy</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>Cuidados</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.8 0 4.5 1.5 4.5 4"/></svg></span>Familia</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span>Toffee</a></nav></div><div class="home-indicator"></div></div></div></div>
+<div class="op-a"><div><p class="rotulo">2 · Así te pregunta al empezar</p><div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="paso"><span class="atras"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span><div class="barras"><i class="ok"></i><i class="ok"></i><i></i><i></i></div></div>
+<h3 class="q">¿Qué le das a Toffee todos los días?</h3><p class="q-sub">Elige una para empezar. El resto lo agregas después, sin prisa.</p>
+<div class="op sel"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span><div>Medicamento<small>Con dosis y hora</small></div><span class="chk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+<div class="op"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 4 13c0-6 6-9 16-9 0 10-3 16-9 16Z"/><path d="M4 21c3-6 6-8 9-10"/></svg></span><div>Suplemento<small>Omega-3, condroitina…</small></div><span class="chk"></span></div>
+<div class="op"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18a9 9 0 0 1-18 0Z"/><path d="M8 8c0-2 2-2 2-4M14 8c0-2 2-2 2-4"/></svg></span><div>Comida<small>Te aviso antes de que se acabe</small></div><span class="chk"></span></div>
+<div class="op"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><div>Solo vacunas y controles<small>Sin tratamiento por ahora</small></div><span class="chk"></span></div>
+<div class="cta">Continuar</div><p class="legal" style="margin-bottom:26px">Toma menos de un minuto. Puedes cambiarlo cuando quieras.</p></div><div class="home-indicator"></div></div></div></div>
+<div class="op-a"><div><p class="rotulo">3 · Aquí eliges tu plan</p><div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="paso"><span class="atras"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span></div>
+<h3 class="q" style="margin-top:10px">Empieza 7 días gratis</h3><p class="q-sub">Tu prueba incluye todo: recordatorios, familia, stock y ficha completa.</p>
+<ul class="lista-b"><li><span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>Avisos de medicamentos, comida y vacunas</li><li><span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>Hasta 3 cuidadores: quién hizo qué</li><li><span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>Tus datos siempre tuyos y exportables</li></ul>
+<div class="plan rec"><span class="etq">Ahorra 27%</span><h4>Anual · 14 días gratis</h4><p class="precio">US$35 <small>/año · ≈ US$2,92 al mes</small></p><p>Hoy pagas US$0</p></div>
+<div class="plan"><h4>Mensual · 7 días gratis</h4><p class="precio">US$3,99 <small>/mes</small></p></div>
+<div class="cta" style="margin-top:auto">Empezar mi prueba gratis</div>
+<p class="legal">Sin cobro hoy. Te avisamos 2 días antes de la renovación. Cancela cuando quieras.</p><div style="height:22px"></div></div><div class="home-indicator"></div></div></div></div>
+<div class="op-a"><div><p class="rotulo">4 · La ficha completa de tu perro</p><div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="cab sola"><span class="foto-duotone"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span><div><h3 class="titulo-a">Ficha de Toffee</h3><p class="sub">Cocker · 11 años · 12,4 kg</p></div></div>
+<div class="prog"><div class="fila-p"><span>Ficha completa</span><b>60%</b></div><div class="bar"><i></i></div></div>
+<p class="grupo">Vacunas y prevención</p>
+<div class="panel">
+<div class="fila"><span class="chip-icono" style="width:34px;height:34px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><div><h4>Antirrábica</h4><p>Última: 14 nov 2025</p></div><span class="fecha">14 nov<small>en 52 días</small></span></div>
+<div class="fila"><span class="chip-icono" style="width:34px;height:34px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="7" width="8" height="12" rx="4"/><path d="M12 7V4M8 11H4M16 11h4M8 15H5M16 15h3"/></svg></span><div><h4>Antiparasitario</h4><p>Última: 5 sep</p></div><span class="fecha">5 oct<small>en 12 días</small></span></div>
+<div class="fila"><span class="chip-icono" style="width:34px;height:34px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg></span><div><h4>Baño</h4><p>Cada 15 días</p></div><span class="fecha">Sáb 26<small>en 3 días</small></span></div>
+<div class="fila"><span class="chip-icono" style="width:34px;height:34px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><div><h4>Control veterinario</h4><p>Dra. Paula Rojas</p></div><span class="fecha">28 sep<small>en 5 días</small></span></div>
+</div>
+<p class="grupo">Datos</p>
+<div class="panel"><div class="fila"><div><h4>Alergias</h4><p>Pollo · agregada por Camila</p></div></div><div class="fila"><div><h4>Chip</h4><p>Falta agregar</p></div><span class="fecha">Agregar</span></div></div>
+<nav class="tabbar" aria-label="Navegación"><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></span>Hoy</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>Cuidados</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.8 0 4.5 1.5 4.5 4"/></svg></span>Familia</a><a class="activa" href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span>Toffee</a></nav></div><div class="home-indicator"></div></div></div></div>
+<div class="op-a"><div><p class="rotulo">5 · Quién hizo qué, sin preguntar</p><div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="enc" style="margin-top:8px"><h3 class="titulo-a">Familia</h3><p class="sub" style="font-size:11.5px;color:var(--text-2)">Toffee · 2 cuidadores</p></div>
+<p class="grupo" style="margin-top:10px">Hoy</p>
+<div class="panel">
+<div class="fila"><span class="av">C</span><div><h4>Camila dio el Meloxicam</h4><p>Dosis de la mañana</p></div><span class="fecha">08:12</span></div>
+<div class="fila"><span class="av">C</span><div><h4>Camila dio el Omega-3</h4><p>Con la comida</p></div><span class="fecha">08:04</span></div>
+</div>
+<p class="grupo">Ayer</p>
+<div class="panel">
+<div class="fila"><span class="av d">D</span><div><h4>Diego dio el Meloxicam</h4><p>Dosis de la noche</p></div><span class="fecha">19:05</span></div>
+<div class="fila"><span class="av d">D</span><div><h4>Diego le dio de comer</h4><p>1 taza y media</p></div><span class="fecha">18:30</span></div>
+</div>
+<div class="cta sec" style="margin-top:12px;margin-bottom:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b5f5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>&nbsp; Resumen para el veterinario</div>
+<div style="height:10px"></div><nav class="tabbar" aria-label="Navegación"><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></span>Hoy</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>Cuidados</a><a class="activa" href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.8 0 4.5 1.5 4.5 4"/></svg></span>Familia</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span>Toffee</a></nav></div><div class="home-indicator"></div></div></div></div></div>
+<footer class="pie">Precios y fechas son datos de ejemplo. La app real se construye en React con este mismo sistema y cada pantalla pasa su propia revisión.</footer>
+</body></html>

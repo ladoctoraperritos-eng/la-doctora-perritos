@@ -67,3 +67,5 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 ## Sesión 2 — Identidad visual (en curso)
 - Sin captura de referencia del usuario → protocolo A/B/C. Archivo: direcciones-abc.html (copia en docs/revisiones/). Pantalla clave: "Hoy con Toffee".
 - A Clínica humana (banco 5, DM Sans, teal #0F766E + coral) · B Cítrica utilitaria (banco 11, Unbounded+Familjen, #D97E00 + verde) · C Nocturna (banco 6, Nunito, #E0B458 sobre #14121B). Esperando elección del usuario.
+- Elegida A "Clínica humana" con verde más oscuro (acento #0B5F5A). Tour vista-previa-app.html construido; FICHA-ARTE.md en borrador hasta OK del usuario.
+- Contexto de negocio: la creadora ya vende el ebook "Primeros Auxilios Caninos" (US$9, landing con urgencia/miedo, 6 bonos). Compradores del ebook = audiencia caliente para el fake-door; el modo emergencia de la app puede enlazar al ebook. Ojo: el tono de miedo del ebook contrasta con la promesa de tranquilidad de la app.
