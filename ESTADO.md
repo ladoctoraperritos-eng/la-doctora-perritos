@@ -58,3 +58,8 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Comida: ración diaria (gramos/tazas) × cantidad del saco → días restantes ("quedan ~8 días") y aviso de reposición. Es lo que hoy ya muestra "Alimento — quedan aprox. 8 días" en la pantalla Hoy.
 - Onboarding sigue corto: se pide primero 1 cosa (medicamento o comida, a elección); el resto se agrega después.
 - Copy: ampliar de "medicamentos" a "medicamentos, suplementos y comida" sin perder el foco en el perro con tratamiento (hero sigue en medicamentos).
+
+## Ajuste de alcance 2 (pedido del usuario, 2026-09-23)
+- Ficha del perro (perfil): datos personales (nombre, foto, raza, nacimiento/edad, peso, sexo, esterilizado, chip, alergias, veterinario y contacto) + cuidados periódicos con fecha y alerta: vacunas, antiparasitarios (interno/externo), baños/grooming, controles. Cada uno guarda última fecha, próxima fecha calculada y alerta anticipada.
+- Modelo unificado: todo es un "cuidado" con tipo (medicamento | suplemento | comida | vacuna | antiparasitario | baño | control), frecuencia, recordatorio, quién lo hizo y (si aplica) stock. Así el "Hoy con [perro]" y el resumen para el vet salen de una sola fuente.
+- Riesgo de alcance: es mucho para el onboarding. Regla: el onboarding pide solo nombre + 1 cosa; la ficha completa se llena después con progreso visible ("ficha 60% completa"). Estado: pendiente de construir.
