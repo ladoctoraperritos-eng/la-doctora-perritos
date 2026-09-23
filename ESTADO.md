@@ -69,3 +69,8 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - A Clínica humana (banco 5, DM Sans, teal #0F766E + coral) · B Cítrica utilitaria (banco 11, Unbounded+Familjen, #D97E00 + verde) · C Nocturna (banco 6, Nunito, #E0B458 sobre #14121B). Esperando elección del usuario.
 - Elegida A "Clínica humana" con verde más oscuro (acento #0B5F5A). Tour vista-previa-app.html construido; FICHA-ARTE.md en borrador hasta OK del usuario.
 - Contexto de negocio: la creadora ya vende el ebook "Primeros Auxilios Caninos" (US$9, landing con urgencia/miedo, 6 bonos). Compradores del ebook = audiencia caliente para el fake-door; el modo emergencia de la app puede enlazar al ebook. Ojo: el tono de miedo del ebook contrasta con la promesa de tranquilidad de la app.
+
+## Estilo APROBADO (2026-09-23) y multi-perro
+- FICHA-ARTE.md aprobada (Clínica humana, DM Sans, acento #0B5F5A). Cosa juzgada.
+- Varios perros (decisión): un selector de perros en la parte superior de "Hoy" (Todos · Toffee · Luna · +) y "Todos" agrupa los cuidados por perro. La pestaña "Perros" reemplaza a "Toffee" y lista las fichas. Un solo precio: hasta 4 perros y 3 cuidadores por cuenta, sin cobro por perro (competidores: Bitpet 3, Ruffo 5). Onboarding: tras el primer perro se ofrece "¿Tienes otro perro?" como paso opcional. Cada cuidado, stock y alerta pertenece a UN perro; "quién hizo qué" es por cuenta.
+- Siguiente: cerrar Sesión 1 pendiente (aprobación de FICHA-AVATAR + 2 frases reales) y pasar a Sesión 3 (página de ventas).
