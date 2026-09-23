@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="es" data-kit="abc-v2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direcciones de arte A/B/C — La Doctora Perritos</title>
+
+<!-- ============================================================================
+  KIT-ABC-V2 — PLANTILLA DEL PROTOCOLO A/B/C (54, Regla Dura #0 + gate del CLAUDE.md)
+  ⚠️ EL MARCADOR data-kit="abc-v2" DEL <html> NO SE BORRA: el hook pre-stop lo
+  verifica. Una comparativa sin ese marcador se trata como escrita desde cero
+  (prohibido). Este archivo se COPIA y se TEMATIZA — nunca se reescribe a mano.
+  Comparativa AUTOCONTENIDA: 3 layouts ESTRUCTURALMENTE DISTINTOS de la MISMA
+  pantalla clave, cada uno con su dirección de arte completa. El usuario la ABRE
+  y VE — prohibido presentar direcciones solo con texto.
+
+  CÓMO USARLA:
+  1. Reemplazar los tokens de .op-a / .op-b / .op-c (marcados "← reemplazar") con
+     las 3 direcciones derivadas (16 PASO 0.2bis + banco del 54). La paleta del
+     líder/banco se toma TAL CUAL — la divergencia va en composición y dispositivo.
+  2. Reemplazar los DATOS SEMILLA por datos del dominio REAL del avatar (nunca
+     lorem ipsum, nunca pantallas a medias — el mockup ES la promesa de calidad).
+  3. Llenar la "Hipótesis de conversión" de cada opción (1 línea).
+  4. EMBEBER LAS FUENTES (obligatorio antes de mostrar — ver bloque de abajo).
+  5. Verificar el TEST DE DIVERGENCIA (54): en escala de grises deben verse 3
+     diseños distintos; si solo cambia el acento, NO son 3 opciones — rehacer.
+
+  ── CÓMO EMBEBER LAS FUENTES (elegir UNA vía según el vehículo) ──────────────
+  FALLBACK-TRAMPA: cada familia se declara `font-family: "X", monospace` — si la
+  fuente no carga, el monospace GRITA y el fallo no pasa desapercibido. NO quitar
+  el monospace "para que se vea mejor": es el detector.
+
+  VÍA A — data-URI (artifacts / CSP estricta que bloquea hosts externos):
+  descargar el .woff2 (solo los pesos usados), convertir a base64 y pegar:
+
+    @font-face {
+      font-family: 'NombreFamilia';
+      font-style: normal;
+      font-weight: 400 700;            /* variable font: rango */
+      font-display: swap;
+      src: url(data:font/woff2;base64,AAAA...) format('woff2');
+    }
+
+  (un @font-face por familia; los subsets latin bastan; vigilar el peso total —
+  el vehículo de artifacts admite hasta 16MB por página)
+
+  VÍA B — Google Fonts (solo si el vehículo permite red — p. ej. /dev/direcciones
+  servido por el dev server del proyecto): descomentar y ajustar familias:
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..700&family=Mulish:wght@400..700&family=Geologica:wght@400..700&family=Wix+Madefor+Text:wght@400..700&family=EB+Garamond:wght@400..700&family=Inter+Tight:wght@400..700&display=swap" rel="stylesheet">
+
+  VERIFICACIÓN: el ESPÉCIMEN de cada opción muestra el nombre de la familia EN su
+  propia fuente. Si ahí se ve letra de máquina (monospace), la fuente NO está
+  embebida — no mostrar la comparativa así.
+============================================================================= -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..800&family=Unbounded:wght@400..700&family=Familjen+Grotesk:wght@400..700&family=Nunito:wght@400..900&display=swap" rel="stylesheet">
+<style>
+  /* ── Shell neutro de la comparativa (no compite con las opciones) ── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    /* fondo con PROFUNDIDAD (54): banda con mesh sutil, nunca un fill plano */
+    background:
+      radial-gradient(1100px 520px at 12% -6%, #f7f7f9, transparent 62%),
+      radial-gradient(900px 460px at 92% 4%, #e2e2e9, transparent 58%),
+      linear-gradient(180deg, #ededf0, #e4e4e9);
+    color: #1c1c1f;
+    font-family: 'Segoe UI', system-ui, sans-serif; /* shell utilitario — las OPCIONES llevan sus fuentes */
+    padding: 32px 20px 64px;
+  }
+  .cabecera { max-width: 1180px; margin: 0 auto 12px; }
+  .cabecera h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  .cabecera p.sub { margin-top: 6px; font-size: 14px; color: #55555c; max-width: 70ch; }
+
+  /* Las 4 SALIDAS del usuario (protocolo del 54): elegir · combinar · otras 3 · ajustar */
+  .salidas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .salidas span {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid #c9c9cf; border-radius: 999px;
+    padding: 6px 12px; font-size: 12.5px; font-weight: 600; color: #3a3a40;
+    background: #f7f7f8;
+  }
+  .salidas b { color: #1c1c1f; }
+  .aviso-fuentes {
+    max-width: 1180px; margin: 10px auto 28px; font-size: 12.5px; color: #6a6a72;
+  }
+
+  .opciones { max-width: 1180px; margin: 0 auto; display: grid; gap: 40px;
+              grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+  .opcion { display: flex; flex-direction: column; gap: 18px; }
+
+  /* ── Panel meta por opción ── */
+  .meta { background: #f7f7f8; border: 1px solid #d9d9de; border-radius: 14px; padding: 18px; }
+  .meta .letra {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px; font-weight: 800; font-size: 15px;
+    color: #f7f7f8; background: #1c1c1f; margin-right: 8px;
+  }
+  .meta h2 { display: flex; align-items: center; font-size: 17px; font-weight: 700; }
+  .meta .direccion { margin-top: 4px; font-size: 13px; color: #55555c; }
+  .hipotesis { margin-top: 10px; font-size: 13px; line-height: 1.5; color: #3a3a40; }
+  .hipotesis .slot {
+    background: #fff3c7; border-radius: 4px; padding: 1px 4px; font-style: italic;
+  }
+  .meta ul.tokens { margin-top: 10px; list-style: none; font-size: 12px; color: #6a6a72;
+                    font-family: ui-monospace, monospace; line-height: 1.7; }
+
+  /* Espécimen tipográfico: el NOMBRE de la familia EN su fuente + fallback-trampa */
+  .especimen { margin-top: 12px; border-top: 1px solid #d9d9de; padding-top: 12px; }
+  .especimen .esp-display { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+  .especimen .esp-body { margin-top: 4px; font-size: 13.5px; color: #3a3a40; }
+
+  /* ── Chasis de teléfono REAL ── */
+  .telefono {
+    width: 310px; margin: 0 auto;
+    aspect-ratio: 9 / 19.5;
+    border: 10px solid #101014;
+    border-radius: 46px;
+    box-shadow: 0 24px 60px rgb(20 18 24 / 0.28);
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .statusbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px 6px; font-size: 13px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .statusbar .der { display: flex; align-items: center; gap: 5px; }
+  .statusbar svg { display: block; }
+  .home-indicator {
+    position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
+    width: 116px; height: 5px; border-radius: 999px; opacity: 0.85;
+  }
+  .pantalla { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Utilidades compartidas de los mockups */
+  .chip-icono {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; flex-shrink: 0;
+  }
+  .cta {
+    display: flex; align-items: center; justify-content: center;
+    height: 48px; font-size: 15px; font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Tab bar del teléfono (mockup LLENO = nav visible — 54 Regla #3) ── */
+  .tabbar {
+    display: flex; align-items: stretch; justify-content: space-around;
+    margin: 12px -18px 0; padding: 8px 8px 16px;
+    border-top: 1px solid color-mix(in oklab, var(--text-2) 18%, transparent);
+    background: color-mix(in oklab, var(--surface) 88%, transparent);
+  }
+  .op-c .tabbar { margin-inline: -20px; }
+  .tabbar a {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 9.5px; font-weight: 600; color: var(--text-2); text-decoration: none;
+  }
+  .tabbar .tab-chip {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 26px; border-radius: 9px;
+  }
+  .tabbar a.activa { color: var(--accent); }
+  .tabbar a.activa .tab-chip { background: color-mix(in oklab, var(--accent) 14%, transparent); }
+
+  /* ── Muestra de paleta (54: 4-6 círculos con los colores reales) ── */
+  .paleta { display: flex; gap: 8px; margin-top: 10px; }
+  .paleta span {
+    width: 26px; height: 26px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.10), 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+
+  /* ── HERO DE LANDING por opción (54: la dirección se elige mirando TAMBIÉN la
+       pantalla que vende — y aquí vive el MOMENTO DE COLOR VALIENTE) ── */
+  .rotulo-frame {
+    text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #85858e; margin-top: 2px;
+  }
+  .hero-landing {
+    width: 310px; margin: 6px auto 0; border-radius: 18px; overflow: hidden;
+    border: 1px solid rgb(0 0 0 / 0.10);
+    box-shadow: 0 16px 40px rgb(20 18 24 / 0.16);
+    background: var(--bg); color: var(--text-1);
+    font-family: var(--font-body); padding: 22px 18px 18px;
+  }
+  .hero-landing .hl-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+    border-radius: 999px; padding: 4px 10px;
+  }
+  .hero-landing h4 {
+    font-family: var(--font-display); font-size: 24px; font-weight: 700;
+    line-height: 1.14; letter-spacing: -0.01em; margin-top: 10px;
+  }
+  .hero-landing h4 em { font-style: normal; color: var(--accent); } /* la palabra que VENDE, en acento */
+  .hero-landing .hl-sub { margin-top: 8px; font-size: 13px; color: var(--text-2); line-height: 1.5; }
+  .hero-landing .hl-sub b { color: var(--text-1); font-weight: 600; }
+  .hero-landing .hl-cta {
+    margin-top: 14px; display: flex; align-items: center; justify-content: center;
+    height: 46px; border-radius: var(--radius-btn); font-size: 14.5px; font-weight: 700;
+    color: var(--bg);
+    /* botón VALIENTE: degradé tonal + luz interior + sombra TINTADA del propio acento (29) */
+    background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 86%, white), var(--accent));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35),
+                0 10px 24px -6px color-mix(in oklab, var(--accent) 45%, transparent);
+  }
+  .hero-landing .hl-prueba { margin-top: 10px; font-size: 11.5px; color: var(--text-2); text-align: center; }
+
+  /* ═══ OPCIÓN A — Clínica humana (banco 5) · DM Sans (fila Bienestar de 29) ═══ */
+  .op-a { --bg:#f4f7f6; --surface:#fdfefd; --text-1:#22302c; --text-2:#5f706b; --accent:#0f766e; --accent-2:#e8896b; --duo-1:#cfe3df; --duo-2:#6fa8a0; --on-accent:#ffffff;
+    --radius-card:18px; --radius-btn:14px; --font-display:'DM Sans', monospace; --font-body:'DM Sans', monospace; --shadow-tinta:20 60 55; }
+  .op-a .especimen .esp-display{font-family:var(--font-display);} .op-a .especimen .esp-body{font-family:var(--font-body);}
+  .op-a .telefono{background:var(--bg);} .op-a .pantalla{font-family:var(--font-body);color:var(--text-1);padding:0 16px;}
+  .op-a .statusbar{color:var(--text-1);} .op-a .home-indicator{background:var(--text-1);}
+  .op-a .cab{display:flex;align-items:center;gap:10px;margin-top:6px;}
+  .foto-duotone{position:relative;overflow:hidden;width:42px;height:42px;border-radius:999px;background:linear-gradient(140deg,var(--duo-1),var(--duo-2));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .foto-duotone::after{content:'';position:absolute;inset:0;background:var(--accent);mix-blend-mode:soft-light;opacity:.55;}
+  .foto-duotone svg{position:relative;z-index:1;}
+  .op-a .cab .sub{font-size:11.5px;color:var(--text-2);font-weight:500;} .op-a h3.titulo-a{font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.1;}
+  .op-a .heroe{margin-top:12px;border-radius:var(--radius-card);border:1.5px solid transparent;
+    background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,color-mix(in oklab,var(--accent) 50%,transparent),transparent 60%) border-box;
+    box-shadow:0 10px 26px -10px rgb(var(--shadow-tinta)/.28),0 2px 6px rgb(var(--shadow-tinta)/.06);padding:14px;}
+  .op-a .heroe .label{font-size:11.5px;font-weight:600;color:var(--text-2);} .op-a .heroe .dato{font-size:40px;font-weight:800;line-height:1.05;letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
+  .op-a .heroe .dato small{font-size:14px;font-weight:600;color:var(--text-2);letter-spacing:0;}
+  .op-a .heroe .insight{margin-top:2px;font-size:12.5px;font-weight:700;color:var(--accent);}
+  .op-a .pasos{display:flex;gap:6px;margin-top:10px;} .op-a .pasos i{flex:1;height:6px;border-radius:99px;background:color-mix(in oklab,var(--accent) 16%,transparent);} .op-a .pasos i.ok{background:var(--accent);}
+  .op-a .card{margin-top:8px;background:var(--surface);border-radius:var(--radius-card);border:1px solid color-mix(in oklab,var(--text-2) 16%,transparent);
+    box-shadow:0 4px 14px -8px rgb(var(--shadow-tinta)/.25);padding:10px 12px;display:flex;gap:10px;align-items:center;}
+  .op-a .chip-icono{width:38px;height:38px;border-radius:12px;background:color-mix(in oklab,var(--accent) 10%,transparent);border:1px solid color-mix(in oklab,var(--accent) 22%,transparent);}
+  .op-a .chip-icono.c2{background:color-mix(in oklab,var(--accent-2) 14%,transparent);border-color:color-mix(in oklab,var(--accent-2) 30%,transparent);}
+  .op-a .card h4{font-size:13.5px;font-weight:700;} .op-a .card p{margin-top:1px;font-size:11.8px;color:var(--text-2);}
+  .op-a .card .hora{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .op-a .cta{margin-top:auto;margin-bottom:0;border-radius:var(--radius-btn);color:var(--on-accent);background:linear-gradient(180deg,color-mix(in oklab,var(--accent) 86%,white),var(--accent));
+    box-shadow:inset 0 1px 0 rgb(255 255 255/.3),0 10px 22px -6px color-mix(in oklab,var(--accent) 50%,transparent);font-weight:700;}
+
+  /* ═══ OPCIÓN B — Cítrica utilitaria (banco 11) · Unbounded + Familjen Grotesk ═══ */
+  .op-b { --bg:#fbfaf6; --surface:#fffefb; --text-1:#232019; --text-2:#6d675a; --accent:#d97e00; --accent-2:#2f6b4f; --accent-text:#231a05; --on-accent:#ffffff;
+    --radius-card:16px; --radius-btn:12px; --font-display:'Unbounded', monospace; --font-body:'Familjen Grotesk', monospace; --shadow-tinta:90 60 10; }
+  .op-b .especimen .esp-display{font-family:var(--font-display);font-weight:600;font-size:18px;} .op-b .especimen .esp-body{font-family:var(--font-body);}
+  .op-b .telefono{background:var(--bg);} .op-b .pantalla{font-family:var(--font-body);color:var(--text-1);padding:0 16px;}
+  .op-b .statusbar{color:var(--text-1);} .op-b .home-indicator{background:var(--text-1);}
+  .pastilla-dato{background:var(--accent);color:var(--accent-text);border-radius:6px;padding:.05em .3em;box-decoration-break:clone;-webkit-box-decoration-break:clone;font-variant-numeric:tabular-nums;}
+  .op-b .enc{margin-top:8px;} .op-b .enc .fecha{font-size:11px;font-weight:600;color:var(--text-2);letter-spacing:.04em;text-transform:uppercase;}
+  .op-b h3.titulo-b{font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1.4;margin-top:4px;letter-spacing:-.01em;}
+  .op-b .bento{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .op-b .tile{background:var(--surface);border-radius:var(--radius-card);border:1px solid color-mix(in oklab,var(--text-2) 18%,transparent);padding:10px;box-shadow:0 6px 16px -10px rgb(var(--shadow-tinta)/.3);}
+  .op-b .tile.grande{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1.5px solid transparent;
+    background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,color-mix(in oklab,var(--accent) 60%,transparent),transparent 60%) border-box;}
+  .op-b .tile .t-label{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.03em;}
+  .op-b .tile .t-dato{margin-top:5px;font-family:var(--font-display);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+  .op-b .tile .t-dato small{font-family:var(--font-body);font-size:11.5px;color:var(--text-2);font-weight:600;letter-spacing:0;}
+  .op-b .barra{margin-top:7px;height:5px;border-radius:99px;background:color-mix(in oklab,var(--accent-2) 15%,transparent);overflow:hidden;} .op-b .barra i{display:block;height:100%;background:var(--accent-2);border-radius:99px;}
+  .op-b .chip-icono{width:36px;height:36px;border-radius:11px;background:color-mix(in oklab,var(--accent) 13%,transparent);}
+  .op-b .tile.grande h4{font-size:13px;font-weight:700;} .op-b .tile.grande p{font-size:11.5px;color:var(--text-2);margin-top:1px;}
+  .op-b .quien{margin-top:8px;display:flex;align-items:center;gap:8px;font-size:11.8px;color:var(--text-2);}
+  .op-b .quien b{color:var(--text-1);} .op-b .quien .av{width:22px;height:22px;border-radius:99px;background:var(--accent-2);color:var(--on-accent);font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .op-b .cta{margin-top:auto;margin-bottom:0;border-radius:var(--radius-btn);background:var(--accent);color:var(--accent-text);font-weight:700;
+    box-shadow:inset 0 1px 0 rgb(255 255 255/.35),0 10px 22px -6px color-mix(in oklab,var(--accent) 50%,transparent);}
+
+  /* ═══ OPCIÓN C — Nocturna de estudio (banco 6, paleta íntegra) · Nunito (fila Hábitos de 29) ═══ */
+  .op-c { --bg:#14121b; --surface:#1c1926; --text-1:#eae6f2; --text-2:#a49fb5; --accent:#e0b458; --accent-2:#7fb7a6;
+    --radius-card:18px; --radius-btn:16px; --font-display:'Nunito', monospace; --font-body:'Nunito', monospace; --shadow-tinta:0 0 0; }
+  .op-c .especimen .esp-display{font-family:var(--font-display);font-weight:800;} .op-c .especimen .esp-body{font-family:var(--font-body);}
+  .op-c .telefono{background:var(--bg);} .op-c .pantalla{font-family:var(--font-body);color:var(--text-1);padding:0 16px;position:relative;
+    background:radial-gradient(420px 300px at 50% 0%,color-mix(in oklab,var(--accent) 12%,transparent) 0%,transparent 70%);}
+  .op-c .telefono::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");}
+  .op-c .statusbar{color:var(--text-1);} .op-c .home-indicator{background:var(--text-1);z-index:2;}
+  .op-c .enc{margin-top:8px;} .op-c .enc .edicion{font-size:11px;font-weight:700;color:var(--text-2);}
+  .op-c h3.titulo-c{font-size:22px;font-weight:900;letter-spacing:-.01em;line-height:1.15;margin-top:1px;} .op-c h3.titulo-c em{font-style:normal;color:var(--accent);}
+  .op-c .timeline{margin-top:12px;display:flex;flex-direction:column;}
+  .op-c .evento{display:grid;grid-template-columns:38px 14px 1fr;gap:0 8px;padding-bottom:11px;}
+  .op-c .evento .hora{font-size:11.5px;font-weight:700;color:var(--text-2);font-variant-numeric:tabular-nums;padding-top:2px;}
+  .op-c .evento .nodo{position:relative;display:flex;justify-content:center;}
+  .op-c .evento .nodo::before{content:'';position:absolute;top:14px;bottom:-4px;width:1.5px;background:color-mix(in oklab,var(--text-2) 32%,transparent);}
+  .op-c .evento:last-child .nodo::before{display:none;}
+  .op-c .evento .punto{width:11px;height:11px;border-radius:99px;margin-top:4px;border:2px solid color-mix(in oklab,var(--text-2) 55%,transparent);background:var(--bg);z-index:1;}
+  .op-c .evento.hecho .punto{background:var(--accent-2);border-color:var(--accent-2);}
+  .op-c .evento.activo .punto{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 5px color-mix(in oklab,var(--accent) 22%,transparent);}
+  .op-c .evento h4{font-size:13.5px;font-weight:800;line-height:1.3;} .op-c .evento.hecho h4{color:var(--text-2);text-decoration:line-through;text-decoration-color:color-mix(in oklab,var(--text-2) 40%,transparent);}
+  .op-c .evento.activo h4{color:var(--accent);} .op-c .evento p{margin-top:1px;font-size:11.5px;color:var(--text-2);line-height:1.4;font-weight:600;}
+  .op-c .cierre-nota{border:1px solid transparent;border-radius:var(--radius-card);
+    background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,color-mix(in oklab,var(--accent) 45%,transparent),transparent 60%) border-box;
+    padding:10px 12px;display:flex;gap:10px;align-items:flex-start;}
+  .op-c .chip-icono{width:34px;height:34px;border-radius:12px;background:color-mix(in oklab,var(--accent) 13%,transparent);}
+  .op-c .cierre-nota p{font-size:12px;color:var(--text-2);line-height:1.45;font-weight:600;} .op-c .cierre-nota p b{color:var(--text-1);}
+  .op-c .cta{margin-top:auto;margin-bottom:0;border-radius:var(--radius-btn);color:#1a1405;font-weight:800;
+    background:linear-gradient(180deg,color-mix(in oklab,var(--accent) 86%,white),var(--accent));
+    box-shadow:inset 0 1px 0 rgb(255 255 255/.35),0 10px 26px -6px color-mix(in oklab,var(--accent) 45%,transparent);}
+  .op-a .tabbar,.op-b .tabbar,.op-c .tabbar{margin-inline:-16px;}
+  .op-b .hero-landing h4 em{font-style:normal;} .op-b .hl-cta{color:var(--accent-text);} .op-c .hl-cta{color:#1a1405;} .op-a .hl-cta{color:var(--on-accent);}
+  .op-a .hero-landing h4{font-weight:800;} .op-c .hero-landing h4{font-weight:900;} .op-b .hero-landing h4{font-family:var(--font-display);font-weight:600;font-size:18px;line-height:1.3;}
+  .op-c .hero-landing{border-color:rgb(255 255 255/.09);}
+
+
+  .meta{min-height:392px;}
+
+  .pie {
+    max-width: 1180px; margin: 40px auto 0; font-size: 12.5px; color: #6a6a72;
+    border-top: 1px solid #d0d0d6; padding-top: 14px; line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <h1>Dirección de arte — 3 opciones para La Doctora Perritos</h1>
+  <p class="sub">
+    Tu app resuelta en tres estilos de verdad distintos. Ninguno es un borrador:
+    cualquiera de las tres puede ser la app final.
+  </p>
+  <!-- Las 4 salidas del usuario — SIEMPRE visibles (protocolo del 54) -->
+  <div class="salidas" role="list">
+    <span role="listitem"><b>1 · Elegir</b> A, B o C</span>
+    <span role="listitem"><b>2 · Combinar</b> («la B pero con la tipografía de la A»)</span>
+    <span role="listitem"><b>3 · Pedir otras 3</b> direcciones nuevas</span>
+    <span role="listitem"><b>4 · Ajustar un detalle</b> («la A con el acento más profundo»)</span>
+  </div>
+</header>
+<p class="aviso-fuentes">
+  Verificación de fuentes: el nombre de cada familia (abajo, en cada panel) se muestra EN su propia
+  fuente. Si se ve letra de máquina de escribir, esa fuente no está embebida — no evaluar la opción así.
+</p>
+
+<div class="opciones">
+<section class="opcion op-a" aria-label="Opción A">
+<div class="meta"><h2><span class="letra">A</span> Clínica humana</h2><p class="direccion">Calma y confianza: tu día en un número grande, con tarjetas claras debajo. Se siente como una enfermera amable, no como un hospital.</p>
+<p class="hipotesis"><strong>Hipótesis de conversión:</strong> Un dueño con miedo a olvidar una dosis confía primero en lo que se ve serio y cálido a la vez; el número "3 cuidados hoy" responde de golpe su pregunta.</p><ul class="tokens"><li>--bg #F4F7F6 · --accent #0F766E · 2ª nota coral #E8896B</li><li>radius 18/14 · sombra tintada teal</li><li>Dispositivo: duotone de marca sobre la foto del perro</li></ul><div class="paleta" aria-hidden="true"><span style="background:#f4f7f6"></span><span style="background:#fdfefd"></span><span style="background:#22302c"></span><span style="background:#0f766e"></span><span style="background:#e8896b"></span></div>
+<div class="especimen"><p class="esp-display">DM Sans — Toffee tiene 3 cuidados hoy</p><p class="esp-body">DM Sans — El veloz murciélago hindú comía feliz cardillo y kiwi.</p></div></div>
+<div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="cab"><span class="foto-duotone"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span><div><h3 class="titulo-a">Hoy con Toffee</h3><p class="sub">Miércoles 23 de septiembre</p></div></div>
+<div class="heroe"><p class="label">Le toca hoy</p><p class="dato">3 <small>cuidados</small></p><p class="insight">Primero: Meloxicam a las 19:00</p>
+<div class="pasos"><i class="ok"></i><i class="ok"></i><i></i></div></div>
+<div class="card"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span><div><h4>Meloxicam 7,5 mg</h4><p>1 tableta con comida</p></div><span class="hora">19:00</span></div>
+<div class="card"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18a9 9 0 0 1-18 0Z"/><path d="M8 8c0-2 2-2 2-4M14 8c0-2 2-2 2-4"/></svg></span><div><h4>Alimento</h4><p>Quedan ~8 días · te aviso el sábado</p></div></div>
+<div class="card"><span class="chip-icono c2"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#c96a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><div><h4>Camila dio el Omega-3</h4><p>Hoy 08:04 · ya no se repite</p></div></div>
+<div class="card"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><div><h4>Antiparasitario</h4><p>Le toca en 12 días</p></div></div>
+<div class="cta">Ya se lo di</div><nav class="tabbar" aria-label="Navegación"><a class="activa" href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></span>Hoy</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>Cuidados</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.8 0 4.5 1.5 4.5 4"/></svg></span>Familia</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span>Toffee</a></nav></div><div class="home-indicator"></div></div>
+<p class="rotulo-frame">Así se vería la página que vende tu app</p><div class="hero-landing"><span class="hl-badge">Para perros con tratamiento</span><h4>Su medicamento no debería ser <em>una cosa más</em> en tu cabeza</h4><p class="hl-sub"><b>Abre la app y sabe qué necesita hoy tu perro</b>, quién ya se encargó y qué se está acabando.</p><div class="hl-cta">Empezar mi prueba de 7 días</div><p class="hl-prueba">7 días gratis · cancela cuando quieras · tus datos siempre tuyos</p></div>
+</section>
+<section class="opcion op-b" aria-label="Opción B">
+<div class="meta"><h2><span class="letra">B</span> Cítrica utilitaria</h2><p class="direccion">Rápida y práctica: todo en tarjetas de un vistazo, con la hora o el dato resaltado como una pastilla naranja. Se siente como una app de hacer cosas, no de llenar fichas.</p>
+<p class="hipotesis"><strong>Hipótesis de conversión:</strong> Al dueño ocupado le gusta ver el dato clave resaltado: la hora exacta convierte el miedo en una tarea concreta y marca el botón de compra como "esto me sirve ya".</p><ul class="tokens"><li>--bg #FBFAF6 · --accent #D97E00 · 2ª nota verde #2F6B4F</li><li>radius 16/12 · sombra tintada ámbar</li><li>Dispositivo: pastilla de dato resaltada</li></ul><div class="paleta" aria-hidden="true"><span style="background:#fbfaf6"></span><span style="background:#fffefb"></span><span style="background:#232019"></span><span style="background:#d97e00"></span><span style="background:#2f6b4f"></span></div>
+<div class="especimen"><p class="esp-display">Unbounded — Toffee hoy 19:00</p><p class="esp-body">Familjen Grotesk — El veloz murciélago hindú comía feliz cardillo y kiwi.</p></div></div>
+<div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="enc"><p class="fecha">Miércoles 23 sep</p><h3 class="titulo-b">Toffee hoy: medicamento a las <span class="pastilla-dato">19:00</span></h3></div>
+<div class="bento">
+<div class="tile grande"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#d97e00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span><div><h4>Meloxicam 7,5 mg</h4><p>1 tableta con comida · falta dar</p></div></div>
+<div class="tile"><p class="t-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18a9 9 0 0 1-18 0Z"/><path d="M8 8c0-2 2-2 2-4M14 8c0-2 2-2 2-4"/></svg> Alimento</p><p class="t-dato">~8<small> días</small></p><div class="barra"><i style="width:28%"></i></div></div>
+<div class="tile"><p class="t-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg> Antiparasit.</p><p class="t-dato">12<small> días</small></p><div class="barra"><i style="width:60%"></i></div></div>
+<div class="tile"><p class="t-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 4 13c0-6 6-9 16-9 0 10-3 16-9 16Z"/><path d="M4 21c3-6 6-8 9-10"/></svg> Omega-3</p><p class="t-dato">Hecho<small> 08:04</small></p></div>
+<div class="tile"><p class="t-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/></svg> Control</p><p class="t-dato">28<small> sep</small></p></div>
+</div>
+<div class="tile grande" style="margin-top:8px"><span class="chip-icono"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#d97e00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><div><h4>Vacuna antirrábica</h4><p>Vence el 14 de noviembre · te aviso 15 días antes</p></div></div>
+<p class="quien"><span class="av">C</span><span><b>Camila</b> dio el Omega-3 · 08:04</span></p>
+<div class="cta">Ya se lo di</div><nav class="tabbar" aria-label="Navegación"><a class="activa" href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></span>Hoy</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>Cuidados</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.8 0 4.5 1.5 4.5 4"/></svg></span>Familia</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span>Toffee</a></nav></div><div class="home-indicator"></div></div>
+<p class="rotulo-frame">Así se vería la página que vende tu app</p><div class="hero-landing"><span class="hl-badge">Para perros con tratamiento</span><h4>¿Ya se lo diste? <em>Míralo en un segundo</em></h4><p class="hl-sub"><b>Medicamento, alimento y control de tu perro</b> en una sola pantalla, con quién ya lo hizo.</p><div class="hl-cta">Probar 7 días gratis</div><p class="hl-prueba">7 días gratis · cancela cuando quieras · tus datos siempre tuyos</p></div>
+</section>
+<section class="opcion op-c" aria-label="Opción C">
+<div class="meta"><h2><span class="letra">C</span> Nocturna de estudio</h2><p class="direccion">Íntima y tranquila: fondo oscuro con luz cálida, como la lámpara de la sala a la hora del remedio de la noche. Tu día contado en una línea de tiempo.</p>
+<p class="hipotesis"><strong>Hipótesis de conversión:</strong> Los tutores de perros medicados actúan al final del día (la dosis de la noche); una pantalla oscura y calmada abre confianza justo en ese momento de cansancio.</p><ul class="tokens"><li>--bg #14121B · --accent #E0B458 · 2ª nota salvia #7FB7A6</li><li>radius 18/16 · halo de lámpara + grano</li><li>Dispositivo: halo de lámpara sobre la tarea activa</li></ul><div class="paleta" aria-hidden="true"><span style="background:#14121b"></span><span style="background:#1c1926"></span><span style="background:#eae6f2"></span><span style="background:#e0b458"></span><span style="background:#7fb7a6"></span></div>
+<div class="especimen"><p class="esp-display">Nunito — Toffee, esta noche</p><p class="esp-body">Nunito — El veloz murciélago hindú comía feliz cardillo y kiwi.</p></div></div>
+<div class="telefono"><div class="statusbar"><span>9:41</span><span class="der">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="0.8"/><rect x="4.5" y="5" width="3" height="6" rx="0.8"/><rect x="9" y="3" width="3" height="8" rx="0.8"/><rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8"/></svg>
+<svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M3.8 6.6a6.2 6.2 0 0 1 8.4 0"/><path d="M6.2 9a2.8 2.8 0 0 1 3.6 0"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.6" fill="currentColor"/><rect x="22.5" y="3.8" width="2" height="4.4" rx="1" fill="currentColor" opacity="0.4"/></svg></span></div><div class="pantalla"><div class="enc"><p class="edicion">Miércoles 23 sep · Toffee, 11 años</p><h3 class="titulo-c">Toffee, <em>esta noche</em></h3></div>
+<div class="timeline">
+<div class="evento hecho"><span class="hora">08:00</span><span class="nodo"><span class="punto"></span></span><div><h4>Omega-3</h4><p>Camila · 08:04</p></div></div>
+<div class="evento hecho"><span class="hora">08:10</span><span class="nodo"><span class="punto"></span></span><div><h4>Meloxicam de la mañana</h4><p>Camila · 08:12</p></div></div>
+<div class="evento activo"><span class="hora">19:00</span><span class="nodo"><span class="punto"></span></span><div><h4>Meloxicam de la noche</h4><p>Le toca a quien llegue primero</p></div></div>
+<div class="evento"><span class="hora">Sáb</span><span class="nodo"><span class="punto"></span></span><div><h4>Comprar alimento</h4><p>Quedan ~8 días</p></div></div>
+<div class="evento"><span class="hora">28 sep</span><span class="nodo"><span class="punto"></span></span><div><h4>Control con el veterinario</h4><p>Lleva el resumen de 1 toque</p></div></div>
+</div>
+<div class="cierre-nota"><span class="chip-icono"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e0b458" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><p><b>Nadie ha dado la dosis de la noche.</b> Al marcarla, Diego deja de recibir el aviso.</p></div>
+<div class="cta">Marcar 19:00 como dado</div><nav class="tabbar" aria-label="Navegación"><a class="activa" href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></span>Hoy</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>Cuidados</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 3-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.8 0 4.5 1.5 4.5 4"/></svg></span>Familia</a><a href="#"><span class="tab-chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><circle cx="5" cy="8" r="2"/><path d="M9 11a5 5 0 0 1 5 5v2.5a3.5 3.5 0 0 1-6.8 1C6.5 17.5 4.5 17 4 15.5A4.5 4.5 0 0 1 9 11Z"/></svg></span>Toffee</a></nav></div><div class="home-indicator"></div></div>
+<p class="rotulo-frame">Así se vería la página que vende tu app</p><div class="hero-landing"><span class="hl-badge">Para perros con tratamiento</span><h4>Duerme tranquila: <em>ya se lo dieron</em></h4><p class="hl-sub"><b>Sabes qué se dio, quién y cuándo</b>, sin preguntar en el chat de la familia.</p><div class="hl-cta">Empezar mi prueba de 7 días</div><p class="hl-prueba">7 días gratis · cancela cuando quieras · tus datos siempre tuyos</p></div>
+</section>
+</div>
+
+<footer class="pie">
+  Gates antes de mostrar esta página (54): TEST DE DIVERGENCIA — en escala de grises se ven 3
+  diseños distintos (si solo cambia el acento, no son 3 opciones: rehacer) · fuentes verificadas
+  clase por clase en el espécimen (el fallback monospace delata la que no cargó) · mockups LLENOS
+  con datos del dominio real Y tab bar visible, cero emojis (todo ícono es SVG inline), materiales
+  premium presentes (hairline, chip, sombra tintada) · cada opción con su HERO DE LANDING aplicado
+  (palabra que vende en acento + botón valiente) y su muestra de paleta · el marcador
+  data-kit="abc-v2" del &lt;html&gt; intacto (Regla Dura #0 — el hook lo verifica). La opción
+  elegida y las descartadas se anotan en FICHA-ARTE.md (sección "Trazabilidad") y ESTADO.md.
+</footer>
+
+</body>
+</html>
