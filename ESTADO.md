@@ -91,4 +91,5 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Soporte: el correo del footer (soporte@ladoctoraperritos.com) es provisional; falta un correo real que alguien lea y dominio propio.
 - CTA provisional: /empezar no tiene onboarding ni checkout; pendiente Hotmart (cuenta + producto con garantía de 7 días) y onboarding (Sesión 4). Sin eso la prueba de demanda aún no puede medir pagos.
 - Páginas legales son borradores pendientes de revisión con 47.
-- Garantía y reembolso prometidos (7 días): configurar Hotmart con 7 días ANTES de publicar.
+- Garantía prometida de 15 días (prueba 7): configurar Hotmart en 15 días ANTES de publicar; el inicio del plazo no está confirmado.
+- CORRECCIÓN DE DECISIÓN (2026-09-23): la garantía pasó de 7 a 15 días. Regla dura de 18: la garantía debe durar MÁS que la prueba (7). Hotmart admite 7/15/21/30 y en suscripciones cubre solo el primer cobro (FICHA-MERCADO §4). Copy y páginas legales actualizados.

@@ -9,8 +9,7 @@ export default function Reembolsos() {
       </p>
       <h2 className="mt-6 text-lg font-semibold">Garantía del Primer Aviso</h2>
       <p className="mt-2">
-        Si en los primeros 7 días sientes que la app no te quita el peso de recordar, escríbenos y te devolvemos todo,
-        sin preguntas.
+        Tu primer pago tiene 15 días de garantía. Si la app no te quita el peso de recordar, escríbenos dentro de ese plazo y te devolvemos ese primer pago, sin preguntas. La garantía cubre el primer cobro de la suscripción, no las renovaciones.
       </p>
     </main>
   );

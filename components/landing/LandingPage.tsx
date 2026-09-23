@@ -147,8 +147,8 @@ export default function LandingPage() {
 
       <Garantia
         nombre="la Garantía del Primer Aviso"
-        condicionMarked="Si en 7 días no sientes que la app te quita el peso de recordar, escribes un correo y te devolvemos todo. [b]Sin preguntas.[/b]"
-        pisoLegal="Respaldada por la garantía de 7 días de Hotmart"
+        condicionMarked="Si la app no te quita el peso de recordar, escribes un correo dentro de los 15 días de garantía y te devolvemos tu primer pago. [b]Sin preguntas.[/b]"
+        pisoLegal="Respaldada por la garantía de 15 días de Hotmart"
       />
 
       <Faq
@@ -186,7 +186,7 @@ export default function LandingPage() {
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
         recap="7 días gratis · Garantía del Primer Aviso · Cancela cuando quieras"
-        psMarked="PS: Empiezas con 7 días gratis y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos todo."
+        psMarked="PS: Empiezas con 7 días gratis y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos tu primer pago."
       />
 
       <FooterLegal

@@ -45,8 +45,8 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 
 ## 7. Garantía
 - Nombre: la Garantía del Primer Aviso
-- Condición: Si en 7 días no sientes que la app te quita el peso de recordar, escribes un correo y te devolvemos todo. Sin preguntas.
-- Piso legal: Respaldada por la garantía de 7 días de Hotmart  (⚠️ configurar Hotmart con 7 días ANTES de publicar)
+- Condición: Si la app no te quita el peso de recordar, escribes un correo dentro de los 15 días de garantía y te devolvemos tu primer pago. Sin preguntas.
+- Piso legal: Respaldada por la garantía de 15 días de Hotmart  (configurar Hotmart en 15 días ANTES de publicar; garantía 15 > prueba 7)
 
 ## 8. FAQ  (objeciones 1-5 de la ficha + límite legal)
 1. ¿Para eso no pongo una alarma? — Una alarma suena; no te dice [b]quién lo dio ni cuánto queda[/b]. El Panel de Hoy sí.
@@ -60,7 +60,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - H2: Imagina abrir la app y [acento]tener todo claro[/acento]
 - Future pacing: Esta noche, a las 19:00, la app te avisa. Lo marcas y tu pareja lo ve al instante.
 - Recap: 7 días gratis · Garantía del Primer Aviso · Cancela cuando quieras
-- PS: PS: Empiezas con 7 días gratis y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos todo.
+- PS: PS: Empiezas con 7 días gratis y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos tu primer pago.
 
 ## 10. Footer legal
 - Enlaces: Privacidad · Términos y Condiciones · Reembolsos  (páginas borrador existentes, pendientes de revisión con 47)
