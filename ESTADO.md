@@ -44,4 +44,7 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Señales: dolor confirmado (DogLog: reseñas sobre no duplicar alimentación/medicación entre varias personas; 11pets: quejas de pérdida de datos). Pago: hay disposición (competidores cobran US$2-5). NO verificado: volumen de búsquedas en Chile/México, rating en Google Play.
 - Precio: mercado US$1,99–4,99; mediana ~US$3,99. PRECIO AJUSTADO: US$3,99/mes o US$35/año (antes 4,99/49). Motivo: 4,99 quedaba en el techo frente a Bitpet/DogLog y Ruffo a 1,99.
 - Riesgos: (1) competidores son apps nativas con push confiable; nuestra web app depende de PWA → objeción "¿y si falla el aviso?" es la #1: probar con ≥10 usuarios reales antes de vender anual; (2) competidores tienen plan gratis → el trial debe mostrar valor en 1 minuto; (3) comisión Hotmart en precio bajo; (4) "Doctora": no dar consejo clínico.
-- Ajustes al producto: hero = perro con tratamiento; resumen 1-toque para el veterinario (PDF/enlace) como diferenciador y gancho viral; stock que se descuenta solo; promesa "tus datos siempre exportables, nunca se borran"; onboarding con 1 medicamento y listo.
+- Ajustes al producto: hero = perro con tratamiento; resumen 1-toque para el veterinario (PDF/enlace) como diferenciador y gancho viral; stock que se descuenta solo; promesa "tus datos siempre exportables, nunca se borran"; primer registro del onboarding: solo 1 medicamento (pendiente de construir).
+
+## Problemas conocidos
+- Ninguna pantalla (landing, onboarding, paywall, app) está construida todavía: pendiente, aún en Sesión 1 de validación.
