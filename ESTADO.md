@@ -49,3 +49,6 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 ## Problemas conocidos
 - Ninguna pantalla (landing, onboarding, paywall, app) está construida todavía: pendiente, aún en Sesión 1 de validación.
 - FICHA-MODELO en BORRADOR: falta verificar ≥2 señales de revenue de DogLog (Sensor Tower, Meta Ads Library); posponer hasta antes de la landing (Sesión 3).
+
+## Decisión legal/copy
+- La creadora NO es veterinaria (2026-09-23). La app organiza, no diagnostica. Modo emergencia solo educativo con aviso "no reemplaza al veterinario". Copy sin autoridad clínica ni promesas de salud; la marca "La Doctora Perritos" se usa como marca de contenido, con descargo visible en la landing y la app (ver 47-LEGAL). Riesgo a revisar: que el nombre "Doctora" no induzca a creer que hay atención veterinaria.
