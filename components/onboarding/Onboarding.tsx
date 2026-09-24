@@ -142,13 +142,13 @@ function Rejilla({
         const Icono = o.icono;
         const on = seleccion.includes(o.valor);
         return (
-          <motion.div key={o.valor} {...entradaEscalonada(i)}>
+          <motion.div key={o.valor} {...entradaEscalonada(i)} className="h-full">
             <button
               type="button"
               role="checkbox"
               aria-checked={on}
               onClick={() => onElegir(o.valor)}
-              className={`${base} min-h-[6.5rem] flex-col justify-between gap-2 p-3 ${estiloOpcion(on)}`}
+              className={`${base} h-full min-h-[6.5rem] flex-col justify-between gap-2 p-3 ${estiloOpcion(on)}`}
             >
               <span className="flex w-full items-start justify-between">
                 <span className="inline-flex size-10 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
@@ -580,7 +580,7 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
   const primero = panel.hoy[0];
   const lineas = [
     `Ordenando lo que necesita ${nombre}…`,
-    primero ? `Poniendo el aviso de ${primero.titulo} a las ${primero.etiqueta}…` : 'Calculando cuándo toca cada cuidado…',
+    primero && r.avisos === 'si' ? `Poniendo el aviso de ${primero.titulo} a las ${primero.etiqueta}…` : 'Calculando cuándo toca cada cuidado…',
     `Dejando todo listo para ${nombre}…`,
   ];
   const [visibles, setVisibles] = useState(0);

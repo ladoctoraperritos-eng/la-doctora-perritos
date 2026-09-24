@@ -180,7 +180,7 @@ export function armarPanel(r: Respuestas): Panel {
     panel.proximo.push({
       id: 'com',
       titulo: 'Alimento',
-      detalle: r.comidaAviso ? `Te avisamos ${r.comidaAviso} días antes` : 'Aviso antes de que se acabe',
+      detalle: r.avisos === 'si' && r.comidaAviso ? `Te avisamos ${r.comidaAviso} días antes` : 'Activa los avisos cuando quieras',
       etiqueta: diasTexto(r.comidaDias),
     });
   }
@@ -188,7 +188,7 @@ export function armarPanel(r: Respuestas): Panel {
     panel.proximo.push({
       id: 'rep',
       titulo: `Reponer ${med}`,
-      detalle: 'Aviso antes de que se acabe',
+      detalle: r.avisos === 'si' ? 'Te avisamos antes de que se acabe' : 'Activa los avisos cuando quieras',
       etiqueta: diasTexto(r.stockDias),
     });
   }
