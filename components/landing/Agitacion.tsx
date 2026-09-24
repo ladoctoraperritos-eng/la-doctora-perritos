@@ -14,6 +14,8 @@ import { MarkedCopy, warnCopy, warnRango } from './MarkedCopy';
 
 export interface AgitacionProps {
   /** 2-4 frases MARCADAS y cortas — el array es el contrato: nada de párrafos. */
+  /** Título de la sección (una línea) — separa el bloque del Problema. */
+  titulo?: string;
   frases: string[];
   /** Ícono de dolor opcional por frase (mismo orden) — ancla visual para escanear (55). */
   iconos?: LucideIcon[];
@@ -27,7 +29,7 @@ export interface AgitacionProps {
   id?: string;
 }
 
-export function Agitacion({ frases, iconos, contraste, id }: AgitacionProps) {
+export function Agitacion({ titulo, frases, iconos, contraste, id }: AgitacionProps) {
   warnRango('Agitación → frases', frases.length, 2, 4);
   frases.forEach((f, i) => warnCopy(`Agitación → frase ${i + 1}`, f, 18));
   const { contenedor, item } = useReveal();
@@ -41,6 +43,11 @@ export function Agitacion({ frases, iconos, contraste, id }: AgitacionProps) {
         viewport={VIEWPORT_ONCE}
         className="mx-auto max-w-[620px]"
       >
+        {titulo && (
+          <h2 className="mb-6 text-balance text-3xl font-bold leading-tight text-[var(--text-primary)] [font-family:var(--font-display)]">
+            {titulo}
+          </h2>
+        )}
         <div className="flex flex-col gap-4">
           {frases.map((f, i) => (
             <motion.div key={i} variants={item} className="flex items-start gap-4">

@@ -117,11 +117,11 @@ export default function LandingPage() {
       />
 
       <Agitacion
-        iconos={[AlertTriangle, Layers, Brain]}
+        titulo="Lo que cuesta seguir así"
+        iconos={[AlertTriangle, Layers]}
         frases={[
           'Una dosis olvidada o repetida no avisa: [b]lo notas cuando ya pasó[/b].',
           'Alarmas, chat familiar y fotos de recetas: [b]cinco sistemas para una sola preocupación[/b].',
-          'Mientras sigas así, [acento]cuidarlo depende de que te acuerdes[/acento].',
         ]}
         contraste={{
           labelHoy: 'Hoy',
@@ -173,7 +173,7 @@ export default function LandingPage() {
         tituloMarked={P.titulo}
         trialDias={7}
         anual={{
-          nombre: `Anual · ${P.nombre}`,
+          nombre: 'Anual',
           badge: 'MEJOR VALOR',
           precioMes: P.anualMes,
           totalAnual: P.anualTotal,
@@ -181,14 +181,14 @@ export default function LandingPage() {
           descomposicionDia: P.dia,
           ctaLabel: CTA_LABEL,
           ctaHref: CTA_HREF,
-          features: featuresPlan(P.perros),
+          features: [...featuresPlan(P.perros), 'Regalo: ebook «Primeros Auxilios Caninos»'],
         }}
         mensual={{
-          nombre: `Mensual · ${P.nombre}`,
+          nombre: 'Mensual',
           precioMes: P.mensual,
           ctaLabel: 'Elegir mensual',
           ctaHref: CTA_HREF,
-          features: featuresPlan(P.perros),
+          features: ['Todas las funciones del plan anual', P.perros, 'Garantía de 15 días sobre tu primer pago', 'Cancelas cuando quieras'],
         }}
       />
 

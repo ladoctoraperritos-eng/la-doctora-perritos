@@ -140,10 +140,10 @@ export function AppPorDentro({
                 onClick={() => irA(i)}
                 aria-label={`Ir a: ${f.label}`}
                 aria-current={activo === i ? 'true' : undefined}
-                className="flex size-6 items-center justify-center [touch-action:manipulation]"
+                className="flex size-11 items-center justify-center [touch-action:manipulation]"
               >
                 <span
-                  className={`size-2 rounded-full transition-colors duration-200 ${
+                  className={`size-3 rounded-full transition-colors duration-200 ${
                     activo === i
                       ? 'bg-[var(--accent)]'
                       : 'bg-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)]'
