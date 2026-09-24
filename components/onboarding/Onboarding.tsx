@@ -74,13 +74,13 @@ function Opciones<T extends string>({
         const Icono = o.icono;
         const on = activa(o.valor);
         return (
+          <motion.div key={o.valor} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: 0.05 * opciones.indexOf(o), ease: [0.16, 1, 0.3, 1] }}>
           <button
-            key={o.valor}
             type="button"
             role={multiple ? 'checkbox' : 'radio'}
             aria-checked={on}
             onClick={() => onElegir(o.valor)}
-            className={`flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
+            className={`flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
               on ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))]' : 'border-[var(--border-ui)] bg-[var(--surface)]'
             }`}
           >
@@ -100,6 +100,7 @@ function Opciones<T extends string>({
               {on && <Check size={14} color="var(--bg)" strokeWidth={3} />}
             </span>
           </button>
+          </motion.div>
         );
       })}
     </div>
@@ -172,7 +173,7 @@ function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
         className="flex flex-1 gap-2"
       >
         {PASOS.map((p, i) => (
-          <span key={p} className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--accent)_28%,var(--surface-2))]">
+          <span key={p} className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_55%,var(--surface-2))]">
             <span
               className="absolute inset-y-0 left-0 rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
               style={{ width: i <= paso ? '100%' : '0%' }}
@@ -282,10 +283,6 @@ export default function Onboarding() {
     <div ref={raiz} className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
       <div className="-mt-2 mb-1 flex items-center justify-between">
         <Marca />
-        <span className="foto-duotone size-11 rounded-full border-2 border-[var(--surface)] shadow-[var(--shadow-1)]" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/perros-duotone.jpg" alt="" width={88} height={88} className="object-[70%_40%]" />
-        </span>
       </div>
       {fase === 'preguntas' || fase === 'reconocimiento' ? (
         <Cabecera paso={fase === 'preguntas' ? paso : PASOS.length - 1} onAtras={atras} />
@@ -304,6 +301,10 @@ export default function Onboarding() {
         <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-8">
           {actual === 'nombre' && (
             <>
+              <div className="foto-duotone mb-6 aspect-[5/2] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={360} />
+              </div>
               <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Cómo se llama tu perro?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Así armamos su Panel de Hoy.</p>
               <label htmlFor="nombre" className="sr-only">
@@ -411,9 +412,9 @@ function resumen(r: Respuestas): { etiqueta: string; valor: string }[] {
     { etiqueta: 'Nombre', valor: r.nombre.trim() || 'Sin responder' },
     { etiqueta: 'Perros', valor: nombreOpc(CANTIDAD, r.cantidad) },
     { etiqueta: 'Etapa', valor: nombreOpc(ETAPA, r.etapa) },
-    { etiqueta: 'Cada día', valor: r.cuidados.length ? r.cuidados.map((c) => nombreOpc(CUIDADOS, c)).join(', ') : 'Sin responder' },
+    { etiqueta: 'Cada día', valor: r.cuidados.length ? (r.cuidados.length === 1 ? nombreOpc(CUIDADOS, r.cuidados[0]) : `${r.cuidados.length} cuidados`) : 'Sin responder' },
     { etiqueta: 'Lo cuidan', valor: nombreOpc(CUIDADORES, r.cuidadores) },
-    { etiqueta: 'Aviso principal', valor: r.momento ? `${nombreOpc(MOMENTO, r.momento)} · ${HORA_POR_MOMENTO[r.momento]}` : 'Sin responder' },
+    { etiqueta: 'Aviso principal', valor: r.momento ? HORA_POR_MOMENTO[r.momento] : 'Sin responder' },
   ];
 }
 
@@ -433,9 +434,9 @@ function Reconocimiento({
   return (
     <motion.main {...entrada} className="flex flex-1 flex-col gap-5 pt-4">
       {/* Dispositivo de marca: duotone de sus perros */}
-      <div className="foto-duotone aspect-[2/1] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+      <div className="foto-duotone aspect-[5/2] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={506} />
+        <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={360} />
       </div>
       <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">
         {nombre} tiene a alguien que quiere hacerlo <span className="text-[var(--accent)]">bien</span>
@@ -461,7 +462,7 @@ function Reconocimiento({
         ))}
       </ul>
 
-      <div className="sticky bottom-0 -mx-6 mt-auto border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--bg)] px-6 pb-4 pt-3">
+      <div className="mt-auto pt-5">
         <button type="button" className={botonPrimario} onClick={onSeguir}>
           Armar el Panel de {nombre}
         </button>
@@ -476,10 +477,11 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
   const [visibles, setVisibles] = useState(0);
   useEffect(() => {
     const t = [
-      setTimeout(() => setVisibles(1), 400),
-      setTimeout(() => setVisibles(2), 1900),
-      setTimeout(() => setVisibles(3), 3400),
-      setTimeout(onListo, 5000),
+      setTimeout(() => setVisibles(1), 300),
+      setTimeout(() => setVisibles(2), 1700),
+      setTimeout(() => setVisibles(3), 3100),
+      setTimeout(() => setVisibles(4), 4500),
+      setTimeout(onListo, 5300),
     ];
     return () => t.forEach(clearTimeout);
   }, [onListo]);
@@ -489,12 +491,12 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
         <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
       </span>
       <h1 tabIndex={-1} className="text-2xl font-bold outline-none">Armando el Panel de Hoy de {nombre}</h1>
-      <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--accent)_28%,var(--surface-2))]" aria-hidden="true">
+      <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_55%,var(--surface-2))]" aria-hidden="true">
         <motion.div
           className="h-full rounded-full bg-[var(--accent)]"
           initial={{ width: '0%' }}
-          animate={{ width: '100%' }}
-          transition={{ duration: 5, ease: 'easeInOut' }}
+          animate={{ width: `${(visibles / 4) * 100}%` }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
         />
       </div>
       <button
@@ -505,7 +507,7 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
         Ver mi Panel ya
       </button>
       <ul className="flex min-h-24 flex-col gap-3 text-left" aria-live="polite">
-        {lineas.slice(0, visibles).map((l) => (
+        {lineas.slice(0, Math.min(visibles, 3)).map((l, i) => (
           <motion.li
             key={l}
             initial={{ opacity: 0, y: 6 }}
@@ -513,7 +515,11 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
             transition={{ duration: 0.25 }}
             className="flex items-center gap-3 text-base text-[var(--text-secondary)]"
           >
-            <Check size={18} color="var(--accent)" aria-hidden="true" />
+            {i < visibles - 1 || visibles === 4 ? (
+              <Check size={18} color="var(--accent)" aria-hidden="true" />
+            ) : (
+              <span aria-hidden="true" className="inline-block size-4 rounded-full border-2 border-[var(--accent)] border-t-transparent motion-safe:animate-spin" />
+            )}
             {l}
           </motion.li>
         ))}
@@ -537,6 +543,11 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
       <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Tu Panel de Hoy</p>
       <h1 tabIndex={-1} className="mt-1 text-3xl font-bold leading-tight outline-none">Hoy con {nombre}</h1>
       <p className="mt-2 text-base text-[var(--text-secondary)]">Toca un cuidado para marcarlo como hecho. Así se siente.</p>
+      {hechos.length > 0 && (
+        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 rounded-[var(--radius-button)] bg-[var(--chip-bg)] px-4 py-3 text-base font-semibold" role="status">
+          ¡Eso es! Así de simple queda el día de {nombre}.
+        </motion.p>
+      )}
 
       <ul className="mt-6 flex flex-col gap-3">
         {items.map((it) => {
@@ -560,7 +571,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
                   {hecho && <Check size={18} color="var(--bg)" strokeWidth={3} />}
                 </motion.span>
                 <span className="flex-1">
-                  <span className={`block text-base font-semibold ${hecho ? 'text-[var(--text-secondary)] line-through' : ''}`}>{it.titulo}</span>
+                  <span className={`block text-base font-semibold ${hecho ? 'text-[var(--text-primary)]' : ''}`}>{it.titulo}</span>
                   <span className="block text-sm text-[var(--text-secondary)]">
                     {hecho ? (comparte ? 'Listo · así lo verán los demás tutores' : 'Listo · así queda registrado con la hora') : it.detalle}
                   </span>

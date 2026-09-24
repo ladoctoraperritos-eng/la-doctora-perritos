@@ -95,7 +95,7 @@ export function armarPanel(r: Respuestas): ItemHoy[] {
     items.push({ id: 'sup', titulo: 'Suplemento', detalle: 'Con su comida', hora, tipo: 'suplemento' });
   }
   if (r.cuidados.includes('comida')) {
-    items.push({ id: 'com', titulo: 'Alimento', detalle: 'Quedan ~8 días de ejemplo', hora: '8 días', tipo: 'comida' });
+    items.push({ id: 'com', titulo: 'Comida', detalle: 'Quedan ~8 días de ejemplo', hora: '8 días', tipo: 'comida' });
   }
   const controlEtapa =
     r.etapa === 'cachorro' ? 'Vacunas del primer año' : r.etapa === 'senior' ? 'Control veterinario de rutina' : 'Antiparasitario y vacunas';
