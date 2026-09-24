@@ -32,6 +32,8 @@
   /* ── MARCA ── */
   --accent: #0b5f5a;          /* ← reemplazar con FICHA-ARTE — el acento del brand kit */
   --accent-2: #e8896b;
+  --warn: #8a5300;             /* vence pronto: texto ≥4.5:1 sobre --surface; el fondo se mezcla al 14% */
+  --danger: #a83232;           /* vencido o atrasado: texto ≥4.5:1 sobre --surface */
   --accent-on-dark: #7cd1c6;   /* acento legible sobre el bloque invertido (CTA final): ≥7:1 sobre --text-primary */        /* ← reemplazar con FICHA-ARTE — 2ª nota SOLO si la ficha la define;
                                  si no hay 2ª nota, repetir aquí el valor de --accent */
 
