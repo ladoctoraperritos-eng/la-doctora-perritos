@@ -10,6 +10,7 @@
 //   estados: cargando (esqueleto) · vacío · al día (éxito) · sin conexión · deshabilitado (menú «Pronto»)
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import Link from 'next/link';
 import { AnimatePresence, MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
 import {
   Bug,
@@ -45,7 +46,7 @@ import {
   type Tipo,
 } from '@/lib/app';
 
-const ICONO: Record<Tipo, LucideIcon> = {
+export const ICONO: Record<Tipo, LucideIcon> = {
   medicamento: Pill,
   suplemento: Leaf,
   comida: Utensils,
@@ -85,13 +86,13 @@ const etiquetaFaltan = (min: number): { texto: string; tono: 'atrasado' | 'pront
   return { texto: `En ${Math.floor(min / 60)} h`, tono: 'normal' };
 };
 
-const tono = {
+export const tono = {
   atrasado: 'bg-[color-mix(in_oklab,var(--danger)_14%,var(--surface))] text-[var(--danger)]',
   pronto: 'bg-[color-mix(in_oklab,var(--warn)_14%,var(--surface))] text-[var(--warn)]',
   normal: 'bg-[var(--chip-bg)] text-[var(--accent)]',
 } as const;
 
-const entrada = (i: number) => ({
+export const entrada = (i: number) => ({
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.28, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] as const },
@@ -133,7 +134,7 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
   );
 }
 
-function Avatar({ perro }: { perro: Perro }) {
+export function Avatar({ perro }: { perro: Perro }) {
   return perro.foto ? (
     <span className="borde-degradado size-14 shrink-0 overflow-hidden rounded-full border-2 shadow-[var(--shadow-1)]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -158,7 +159,7 @@ function Esqueleto() {
   );
 }
 
-function ChipIcono({ tipo, tam = 'size-11' }: { tipo: Tipo; tam?: string }) {
+export function ChipIcono({ tipo, tam = 'size-11' }: { tipo: Tipo; tam?: string }) {
   const Icono = ICONO[tipo];
   return (
     <span className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]`}>
@@ -251,7 +252,7 @@ function FilaHecha({ fila, varios, onDeshacer }: { fila: FilaHoy; varios: boolea
   );
 }
 
-function textoDias(d: number): { texto: string; tono: keyof typeof tono } {
+export function textoDias(d: number): { texto: string; tono: keyof typeof tono } {
   if (d < 0) return { texto: d === -1 ? 'Venció ayer' : `Venció hace ${-d} días`, tono: 'atrasado' };
   if (d === 0) return { texto: 'Hoy', tono: 'pronto' };
   if (d === 1) return { texto: 'Mañana', tono: 'pronto' };
@@ -264,10 +265,10 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
     <motion.li {...entrada(i)} className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4">
       <ChipIcono tipo={fila.cuidado.tipo} />
       <span className="min-w-0 flex-1">
-        <span className="block text-base font-semibold">{fila.cuidado.nombre}</span>
+        <span className="block text-base font-semibold">{fila.cuidado.hora ? `Reponer ${fila.cuidado.nombre}` : fila.cuidado.nombre}</span>
         <span className="block text-sm text-[var(--text-secondary)]">
           {varios ? `${fila.perro.nombre} · ` : ''}
-          {fila.cuidado.detalle}
+          {fila.cuidado.hora ? 'Se acaba' : fila.cuidado.detalle}
         </span>
         <span className={`mt-1 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>
       </span>
@@ -275,21 +276,32 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
   );
 }
 
-function Menu() {
+export function Menu({ activa }: { activa: 'hoy' | 'perros' }) {
+  const items = [
+    { id: 'hoy', icono: Home, texto: 'Hoy', href: '/app' },
+    { id: 'perros', icono: PawPrint, texto: 'Perros', href: '/app/perros' },
+  ] as const;
   const pronto = [
-    { icono: PawPrint, texto: 'Perros' },
     { icono: ClipboardList, texto: 'Historial' },
     { icono: User, texto: 'Yo' },
   ];
   return (
     <nav aria-label="Secciones" className="sticky bottom-0 z-10 border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--surface)] px-2 pb-2 pt-1">
       <ul className="grid grid-cols-4">
-        <li>
-          <span aria-current="page" className="flex min-h-16 flex-col items-center justify-start gap-1 rounded-[var(--radius-button)] bg-[var(--chip-bg)] pt-2 text-sm font-semibold text-[var(--accent)]">
-            <Home size={22} aria-hidden="true" />
-            Hoy
-          </span>
-        </li>
+        {items.map(({ id, icono: Icono, texto, href }) => (
+          <li key={id}>
+            <Link
+              href={href}
+              aria-current={activa === id ? 'page' : undefined}
+              className={`flex min-h-16 flex-col items-center justify-start gap-1 rounded-[var(--radius-button)] pt-2 text-sm ${
+                activa === id ? 'bg-[var(--chip-bg)] font-semibold text-[var(--accent)]' : 'font-medium text-[var(--text-secondary)]'
+              }`}
+            >
+              <Icono size={22} aria-hidden="true" />
+              {texto}
+            </Link>
+          </li>
+        ))}
         {pronto.map(({ icono: Icono, texto }) => (
           <li key={texto}>
             <span aria-disabled="true" className="flex min-h-16 flex-col items-center justify-start gap-1 pt-2 text-sm text-[var(--text-tertiary)]">
@@ -349,7 +361,7 @@ export default function Hoy() {
         <main className="flex-1">
           <Esqueleto />
         </main>
-        <Menu />
+        <Menu activa="hoy" />
       </div>
     );
   }
@@ -497,7 +509,7 @@ export default function Hoy() {
           </motion.div>
         )}
         </AnimatePresence>
-        <Menu />
+        <Menu activa="hoy" />
       </div>
     </MotionConfig>
   );

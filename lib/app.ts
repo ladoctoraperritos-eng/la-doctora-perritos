@@ -2,7 +2,7 @@
 // servicios externos; el modelo ya es el definitivo (perro · cuidado · registro · tutor) para migrar sin
 // cambiar las pantallas. Se siembra con lo que la persona contó en el onboarding, o con un ejemplo.
 
-import { armarPanel, leer as leerRespuestas, TEXTO_CUIDADORES, type Respuestas } from './onboarding';
+import { armarPanel, leer as leerRespuestas, planRecomendado, TEXTO_CUIDADORES, type IdPlan, type Respuestas } from './onboarding';
 
 export type Tipo = 'medicamento' | 'suplemento' | 'comida' | 'vacuna' | 'antiparasitario' | 'bano' | 'control';
 
@@ -11,6 +11,11 @@ export interface Perro {
   nombre: string;
   /** Foto del perro (opcional): se sube desde la ficha del perro. */
   foto?: string;
+  /** Día de nacimiento «YYYY-MM-DD» (opcional). */
+  nacimiento?: string;
+  pesoKg?: number;
+  raza?: string;
+  notas?: string;
 }
 export interface Tutor {
   id: string;
@@ -24,8 +29,12 @@ export interface Cuidado {
   detalle: string;
   /** Cuidado diario: hora del aviso («20:00»). */
   hora?: string;
-  /** Cuidado con fecha (vacuna, control, alimento que se acaba): día «YYYY-MM-DD». */
+  /** Cuidado con fecha (vacuna, control, alimento que se acaba): día «YYYY-MM-DD». Si además tiene `hora`, es la fecha de reposición. */
   proxima?: string;
+  /** Última vez que se hizo (vacunas, baños, controles). */
+  ultima?: string;
+  /** Cada cuántos días se repite: al registrarlo hoy, la próxima fecha se recalcula sola. */
+  cada?: number;
 }
 export interface Registro {
   id: string;
@@ -35,6 +44,7 @@ export interface Registro {
   hora: string;
 }
 export interface EstadoApp {
+  plan: IdPlan;
   perros: Perro[];
   tutores: Tutor[];
   /** Tutor que usa este aparato: quien queda registrado al marcar. */
@@ -88,16 +98,17 @@ function desdeOnboarding(r: Respuestas, ahora: Date): EstadoApp {
   }
   const tutores: Tutor[] = [{ id: 't1', nombre: 'Tú' }];
   if (r.cuidadores && r.cuidadores !== 'solo_yo') tutores.push({ id: 't2', nombre: TEXTO_CUIDADORES[r.cuidadores] });
-  return { perros: [perro], tutores, yo: 't1', cuidados, registros: [] };
+  return { plan: planRecomendado(r), perros: [perro], tutores, yo: 't1', cuidados, registros: [] };
 }
 
 /** Ejemplo completo para quien entra sin haber hecho el onboarding (y para las capturas). */
 function ejemplo(ahora: Date): EstadoApp {
   const hoy = claveDia(ahora);
   return {
+    plan: 'esencial',
     perros: [
-      { id: 'p1', nombre: 'Toffee', foto: '/brand/perro-golden-onboarding.webp' },
-      { id: 'p2', nombre: 'Luna' },
+      { id: 'p1', nombre: 'Toffee', foto: '/brand/perro-golden-onboarding.webp', raza: 'Golden retriever', pesoKg: 29, nacimiento: `${ahora.getFullYear() - 4}-03-12`, notas: 'Alérgico al pollo. Medicado con Apoquel.' },
+      { id: 'p2', nombre: 'Luna', raza: 'Mestiza', pesoKg: 12, nacimiento: `${ahora.getFullYear() - 8}-08-02` },
     ],
     tutores: [
       { id: 't1', nombre: 'Camila' },
@@ -111,8 +122,10 @@ function ejemplo(ahora: Date): EstadoApp {
       { id: 'c4', perroId: 'p2', tipo: 'suplemento', nombre: 'Probiótico', detalle: '1 sobre con la cena', hora: '19:00' },
       { id: 'c5', perroId: 'p1', tipo: 'comida', nombre: 'Alimento', detalle: 'Quedan unos 7 días', proxima: enDias(7, ahora) },
       { id: 'c6', perroId: 'p1', tipo: 'medicamento', nombre: 'Reponer Apoquel', detalle: 'Quedan 12 comprimidos', proxima: enDias(6, ahora) },
-      { id: 'c7', perroId: 'p2', tipo: 'antiparasitario', nombre: 'Antiparasitario', detalle: 'Pipeta mensual', proxima: enDias(12, ahora) },
-      { id: 'c8', perroId: 'p1', tipo: 'vacuna', nombre: 'Vacuna anual', detalle: 'Con el veterinario', proxima: enDias(-2, ahora) },
+      { id: 'c7', perroId: 'p2', tipo: 'antiparasitario', nombre: 'Antiparasitario', detalle: 'Pipeta mensual', proxima: enDias(12, ahora), ultima: enDias(-18, ahora), cada: 30 },
+      { id: 'c8', perroId: 'p1', tipo: 'vacuna', nombre: 'Vacuna anual', detalle: 'Con el veterinario', proxima: enDias(-2, ahora), ultima: enDias(-367, ahora), cada: 365 },
+      { id: 'c9', perroId: 'p1', tipo: 'bano', nombre: 'Baño', detalle: 'Shampoo hipoalergénico', proxima: enDias(9, ahora), ultima: enDias(-21, ahora), cada: 30 },
+      { id: 'c10', perroId: 'p2', tipo: 'control', nombre: 'Control veterinario', detalle: 'Chequeo senior', proxima: enDias(40, ahora), ultima: enDias(-140, ahora), cada: 180 },
     ],
     registros: [{ id: 'r1', cuidadoId: 'c1', dia: hoy, quien: 'Diego', hora: '08:12' }],
   };
@@ -127,7 +140,10 @@ const avisar = () => oyentes.forEach((f) => f());
 function cargar(): EstadoApp {
   try {
     const crudo = window.localStorage.getItem(CLAVE);
-    if (crudo) return JSON.parse(crudo) as EstadoApp;
+    if (crudo) {
+      const guardado = JSON.parse(crudo) as EstadoApp;
+      return { ...guardado, plan: guardado.plan ?? 'esencial' };
+    }
   } catch {
     // almacenamiento bloqueado: se siembra en memoria
   }
@@ -234,4 +250,52 @@ export function proximos(e: EstadoApp, perroId: string | null, ahora: Date): Fil
     if (perro) filas.push({ cuidado: c, perro, dias: diasHasta(c.proxima, ahora) });
   }
   return filas.sort((a, b) => a.dias - b.dias);
+}
+
+// ── Edición: perros y cuidados ──
+export const LIMITE_PERROS: Record<IdPlan, number> = { esencial: 2, familia: 5 };
+export const nuevoId = (prefijo: string): string => `${prefijo}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+export function guardarPerro(p: Perro): void {
+  const e = obtenerApp();
+  const existe = e.perros.some((x) => x.id === p.id);
+  cambiar({ ...e, perros: existe ? e.perros.map((x) => (x.id === p.id ? p : x)) : [...e.perros, p] });
+}
+/** Borra al perro con sus cuidados y su historial. */
+export function eliminarPerro(id: string): void {
+  const e = obtenerApp();
+  const suyos = new Set(e.cuidados.filter((c) => c.perroId === id).map((c) => c.id));
+  cambiar({ ...e, perros: e.perros.filter((p) => p.id !== id), cuidados: e.cuidados.filter((c) => c.perroId !== id), registros: e.registros.filter((r) => !suyos.has(r.cuidadoId)) });
+}
+export function guardarCuidado(c: Cuidado): void {
+  const e = obtenerApp();
+  const existe = e.cuidados.some((x) => x.id === c.id);
+  cambiar({ ...e, cuidados: existe ? e.cuidados.map((x) => (x.id === c.id ? c : x)) : [...e.cuidados, c] });
+}
+export function eliminarCuidado(id: string): void {
+  const e = obtenerApp();
+  cambiar({ ...e, cuidados: e.cuidados.filter((c) => c.id !== id), registros: e.registros.filter((r) => r.cuidadoId !== id) });
+}
+/** «Lo hice hoy»: guarda la fecha y, si se repite, recalcula la próxima. */
+export function registrarSalud(cuidadoId: string, ahora: Date): void {
+  const e = obtenerApp();
+  const hoyClave = claveDia(ahora);
+  cambiar({
+    ...e,
+    cuidados: e.cuidados.map((c) => (c.id === cuidadoId ? { ...c, ultima: hoyClave, proxima: c.cada ? enDias(c.cada, ahora) : undefined } : c)),
+  });
+}
+
+/** «4 años y 2 meses» a partir de la fecha de nacimiento. */
+export function edadTexto(nacimiento: string | undefined, ahora: Date): string | null {
+  if (!nacimiento) return null;
+  const [a, m, d] = nacimiento.split('-').map(Number);
+  let meses = (ahora.getFullYear() - a) * 12 + (ahora.getMonth() + 1 - m);
+  if (ahora.getDate() < d) meses -= 1;
+  if (meses < 0) return null;
+  const anios = Math.floor(meses / 12);
+  const resto = meses % 12;
+  if (anios === 0) return resto === 1 ? '1 mes' : `${resto} meses`;
+  const aTxt = anios === 1 ? '1 año' : `${anios} años`;
+  return resto === 0 ? aTxt : `${aTxt} y ${resto} ${resto === 1 ? 'mes' : 'meses'}`;
 }

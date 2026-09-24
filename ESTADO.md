@@ -188,3 +188,8 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 ## App interna — pantalla «Hoy» (2026-09-24)
 - Construida en `/app` (components/app/Hoy.tsx + lib/app.ts, datos en localStorage `ldp-app-v1`, sembrada desde el onboarding o con ejemplo Toffee+Luna). Tres revisiones independientes: 29/40·13/20 → 28/40·13/20 → 29/40·14/20, NO LISTA (umbral 36/16). Corregido tras la 3.ª: píldoras sin partir, menú alineado, pista del anillo, copy corto, «Siguientes de hoy». Pendiente de gusto: identidad más allá del kit (campana del logo, hairline más visible), racha, transición entre pestañas (se construyen las otras pestañas).
 - Faltan: pestañas Perros (ficha + botiquín + vacunas/baños con fechas), Historial (quién hizo qué + filtros), Yo (tutores, avisos, plan, exportar); agregar/editar cuidados; error de guardado ya cubierto; modo demostración: no publicar sin auth + RLS.
+
+## App interna — pestaña «Perros» (2026-09-24)
+- `/app/perros` (components/app/Perros.tsx + Hoja.tsx): lista de perros (con límite de plan: Esencial 2, Familia 5 → hoja «Tu plan llegó a su límite» con enlace a /paywall) → ficha (datos, notas, «Salud»: vacunas/antiparasitarios/baños/controles con última vez y próxima fecha coloreada; «Botiquín»: medicamentos/suplementos/alimento con hora y reposición) → hojas para agregar/editar perro y cuidado (validación por campo, «Lo hice hoy» recalcula la próxima fecha si se repite, borrar en dos pasos). Lo agregado aparece en «Hoy».
+- Sin revisor-visual (pantalla secundaria: medición 375/360 sin desborde + checklist). Pendiente: subir foto del perro, transiciones entre pestañas, Historial y Yo.
+- Modelo ampliado: Perro(nacimiento, pesoKg, raza, notas), Cuidado(ultima, cada), EstadoApp.plan.
