@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { AlertTriangle, CalendarClock, FileSearch, Package, PackageX, Users } from 'lucide-react';
 import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
+import { featuresPlan, PLANES } from '@/lib/planes';
 import { Hero } from './Hero';
 import { Problema } from './Problema';
 import { Agitacion } from './Agitacion';
@@ -30,41 +31,13 @@ const DIAS_PRUEBA = CONDICIONES.prueba.dias;
 const DIAS_GARANTIA = CONDICIONES.garantia.dias;
 
 // Mismo destino en hero, mid-page, oferta, CTA final y sticky.
-// Provisional: /empezar hasta que existan el onboarding y el checkout de Hotmart.
-const CTA_HREF = '/empezar';
+// Modelo 2 (onboarding-first): la landing vende el registro; el onboarding vende el pago.
+const CTA_HREF = '/onboarding';
 const CTA_LABEL = PRUEBA ? `Empezar mis ${DIAS_PRUEBA} días gratis` : 'Quiero mi Panel de Hoy';
 const SOPORTE_EMAIL = CONDICIONES.contacto;
 const MICROCOPY = PRUEBA ? `Prueba de ${DIAS_PRUEBA} días · cancela cuando quieras` : 'Cancela cuando quieras';
 
-// Planes por número de perros (decisión de precio en ESTADO.md, 2026-09-23). Mismas funciones; cambia el tope de perros.
-const PLANES = {
-  esencial: {
-    etiqueta: '1 o 2 perros',
-    nombre: 'Esencial',
-    dia: 'US$0,08',
-    mensual: 'US$2,99',
-    anualTotal: 'US$29',
-    anualMes: 'US$2,42',
-    perros: 'Hasta 2 perros',
-  },
-  familia: {
-    etiqueta: '3 a 5 perros',
-    nombre: 'Familia',
-    dia: 'US$0,13',
-    mensual: 'US$4,99',
-    anualTotal: 'US$49',
-    anualMes: 'US$4,08',
-    perros: 'Hasta 5 perros',
-  },
-} as const;
 type IdPlan = keyof typeof PLANES;
-
-const featuresPlan = (perros: string) => [
-  'Avisos de medicamentos, comida y vacunas',
-  perros,
-  'Hasta 3 tutores: quién hizo qué',
-  'Resumen para el veterinario y datos exportables',
-];
 
 // CTA repetido a mitad de scroll: mismo destino y mismo verbo que el hero (19).
 function CtaIntermedio() {
@@ -104,7 +77,7 @@ export default function LandingPage() {
       <Hero
         appName="La Doctora Perritos"
         logo={LOGO}
-        loginHref="/empezar"
+        loginHref="/login"
         h1Marked="Que cuidar a tu perro no dependa de tu [acento]memoria[/acento]"
         subtitleMarked="Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]"
         ctaLabel={CTA_LABEL}
