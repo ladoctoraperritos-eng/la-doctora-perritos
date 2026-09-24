@@ -277,15 +277,13 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
   );
 }
 
-export function Menu({ activa }: { activa: 'hoy' | 'perros' }) {
+export function Menu({ activa }: { activa: 'hoy' | 'perros' | 'historial' }) {
   const items = [
     { id: 'hoy', icono: Home, texto: 'Hoy', href: '/app' },
     { id: 'perros', icono: PawPrint, texto: 'Perros', href: '/app/perros' },
+    { id: 'historial', icono: ClipboardList, texto: 'Historial', href: '/app/historial' },
   ] as const;
-  const pronto = [
-    { icono: ClipboardList, texto: 'Historial' },
-    { icono: User, texto: 'Yo' },
-  ];
+  const pronto = [{ icono: User, texto: 'Yo' }];
   return (
     <nav aria-label="Secciones" className="sticky bottom-0 z-10 border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--surface)] px-2 pb-2 pt-1">
       <ul className="grid grid-cols-4">

@@ -194,3 +194,7 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Sin revisor-visual (pantalla secundaria: medición 375/360 sin desborde + checklist). Pendiente: subir foto del perro, transiciones entre pestañas, Historial y Yo.
 - Modelo ampliado: Perro(nacimiento, pesoKg, raza, notas), Cuidado(ultima, cada), EstadoApp.plan.
 - Ficha ampliada (2026-09-24, pedido del usuario): foto propia (se recorta cuadrada a 480 px y se guarda como imagen en el aparato; en servicios externos pasa a Supabase Storage con reglas por dueño), número de microchip (9-15 dígitos, con «copiar»), responsable, teléfono de contacto (con «llamar») y «Datos importantes» (alergias, cirugías, condiciones). ⚠️ Son datos personales: al conectar Supabase van con RLS y hay que actualizar /privacidad (menciona nombre, teléfono y foto) antes de vender.
+
+## App interna — pestaña «Historial» (2026-09-24)
+- `/app/historial` (components/app/Historial.tsx): resumen «Esta semana» por persona (barras: verde = tú, coral = las demás), filtros por perro / persona / tipo con «Quitar filtros», línea de tiempo agrupada por día (Hoy, Ayer, fecha) con quién y hora, «Ver más días» (7 por bloque), estados: cargando, sin registros (con enlace a Hoy), sin resultados con filtros. `registrarSalud` («Lo hice hoy») ahora también deja registro.
+- Sin revisor-visual (pantalla secundaria: medición 375/360 sin desborde + checklist). Falta solo «Yo» (tutores, avisos, plan, exportar datos).

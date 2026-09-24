@@ -107,6 +107,26 @@ function desdeOnboarding(r: Respuestas, ahora: Date): EstadoApp {
   return { plan: planRecomendado(r), perros: [perro], tutores, yo: 't1', cuidados, registros: [] };
 }
 
+/** Una semana de registros de ejemplo, repartidos entre dos personas (con algún día sin marcar, como en la vida real). */
+function historialEjemplo(ahora: Date): Registro[] {
+  const diarios: { id: string; hora: string }[] = [
+    { id: 'c1', hora: '08:00' },
+    { id: 'c3', hora: '13:00' },
+    { id: 'c4', hora: '19:00' },
+    { id: 'c2', hora: '20:00' },
+  ];
+  const filas: Registro[] = [];
+  for (let d = 1; d <= 6; d++) {
+    diarios.forEach((c, i) => {
+      if ((d * 7 + i) % 9 === 0) return;
+      const min = ((d * 13 + i * 17) % 25) + 2;
+      const h = Number(c.hora.slice(0, 2));
+      filas.push({ id: `h-${d}-${c.id}`, cuidadoId: c.id, dia: enDias(-d, ahora), quien: (d + i) % 3 === 0 ? 'Diego' : 'Camila', hora: `${dos(h)}:${dos(min)}` });
+    });
+  }
+  return filas;
+}
+
 /** Ejemplo completo para quien entra sin haber hecho el onboarding (y para las capturas). */
 function ejemplo(ahora: Date): EstadoApp {
   const hoy = claveDia(ahora);
@@ -133,7 +153,7 @@ function ejemplo(ahora: Date): EstadoApp {
       { id: 'c9', perroId: 'p1', tipo: 'bano', nombre: 'Baño', detalle: 'Shampoo hipoalergénico', proxima: enDias(9, ahora), ultima: enDias(-21, ahora), cada: 30 },
       { id: 'c10', perroId: 'p2', tipo: 'control', nombre: 'Control veterinario', detalle: 'Chequeo senior', proxima: enDias(40, ahora), ultima: enDias(-140, ahora), cada: 180 },
     ],
-    registros: [{ id: 'r1', cuidadoId: 'c1', dia: hoy, quien: 'Diego', hora: '08:12' }],
+    registros: [{ id: 'r1', cuidadoId: 'c1', dia: hoy, quien: 'Diego', hora: '08:12' }, ...historialEjemplo(ahora)],
   };
 }
 
@@ -286,9 +306,11 @@ export function eliminarCuidado(id: string): void {
 export function registrarSalud(cuidadoId: string, ahora: Date): void {
   const e = obtenerApp();
   const hoyClave = claveDia(ahora);
+  const quien = e.tutores.find((t) => t.id === e.yo)?.nombre ?? 'Tú';
   cambiar({
     ...e,
     cuidados: e.cuidados.map((c) => (c.id === cuidadoId ? { ...c, ultima: hoyClave, proxima: c.cada ? enDias(c.cada, ahora) : undefined } : c)),
+    registros: [...e.registros, { id: `r-${ahora.getTime()}-${cuidadoId}`, cuidadoId, dia: hoyClave, quien, hora: horaTexto(ahora) }],
   });
 }
 
