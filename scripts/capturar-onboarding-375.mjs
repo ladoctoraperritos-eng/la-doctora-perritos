@@ -33,7 +33,7 @@ await p.waitForSelector('text=Todo listo para', { timeout: 15000 });
 await p.waitForTimeout(600);
 await p.getByRole('button', { name: /Apoquel/ }).click(); await foto('9-resultado');
 await p.screenshot({ path: 'docs/revisiones/onboarding-9b-resultado-completo.png', fullPage: true });
-await p.getByRole('link', { name: /Ver planes para Toffee/ }).click();
+await p.getByRole('link', { name: /Probar gratis con Toffee/ }).click();
 await p.waitForURL('**/paywall'); await p.waitForTimeout(700);
 await p.screenshot({ path: 'docs/revisiones/paywall-375.png' });
 await p.screenshot({ path: 'docs/revisiones/paywall-completo.png', fullPage: true });

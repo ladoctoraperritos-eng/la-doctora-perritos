@@ -1,0 +1,11 @@
+# VEREDICTO revisor-visual — onboarding
+Fecha: 2026-09-24 15:00
+Screenshot: docs/revisiones/onboarding-375.png
+Usabilidad: 28/40
+Craft: 14/20
+Copy (si vende): 14/20
+Fidelidad (si hubo referencia): N-A
+Veredicto: NO LISTA
+Top defectos: 1) Paso "olvidos", subtítulo (Onboarding.tsx l.447): la frase «Ese ¿le di la pastilla? que se repite.» está DUPLICADA, visible en onboarding-2-olvidos-limite.png; borrar la repetición. 2) Paso "olvidos": el CTA sticky con hueco min-h-12 reservado para el error recorta la rejilla (las tarjetas 5-6 se cortan a media altura sobre un vacío) y el titular de 3 líneas sigue empujando; reducir el titular a 2 líneas, mover el aviso de límite al flujo (no dentro del footer) y quitar el fondo sólido que corta las tarjetas o dar fade. 3) Copy de oferta: «7 días gratis · Garantía de 15 días» sin nombre ni precio, y CTA «Ver planes para Toffee» (no es beneficio en 1ª persona); nombrar la garantía y usar «Empezar mis 7 días gratis con Toffee». 4) Movimiento/identidad: no hay conteo del número héroe ni anillo, el resultado reutiliza la misma foto duotone del paso 1 y el resto es tarjeta blanca con borde; añadir conteo en "Armado con tus N respuestas" y un tratamiento firma propio en las tarjetas del Panel. 5) Encaje/copy: «Estar lista ante una emergencia» hardcodea género femenino; el paso "armando" solo muestra 2 líneas de 3 y la 2ª rompe a 2 líneas sin alinear con el check; usar «Estar preparado/a» y acortar la línea.
+Resueltos de la ronda anterior: (1) límite visible y 6 opciones: RESUELTO (aviso aparece con el 4º toque). (2) escena del dolor: PARCIAL (aparece «¿le di la pastilla?» pero duplicada) y oferta/garantía junto al CTA: RESUELTO. (3) regionalismo "pille": RESUELTO (no aparece). (4) coral en cuidador secundario y duotone en resultado: RESUELTO; identidad aún tibia. (5) CTA de altura fija: RESUELTO (h-14 y hueco reservado); la lista de "armando" y el contraste de la línea pálida: PARCIAL.
+Verificaciones de código: h3 Volver en cada paso y saltar en pasos opcionales (sin undo, aceptable); h7 solo Enter en nombre y defaults, sin más atajos; aria-live presente; MotionConfig reducedMotion="user" presente. lib/onboarding.ts no fue auditado línea a línea.

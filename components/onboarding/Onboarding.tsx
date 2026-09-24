@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MotionConfig, motion, useReducedMotion } from 'motion/react';
+import { MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
 import {
   AlertCircle,
   ArrowLeft,
@@ -442,7 +442,7 @@ export default function Onboarding() {
             )}
             {actual === 'olvidos' && (
               <>
-                <h1 tabIndex={-1} className={titulo}>¿Qué te gustaría dejar de tener que recordar?</h1>
+                <h1 tabIndex={-1} className="text-balance text-2xl font-bold leading-tight outline-none">¿Qué te gustaría dejar de tener que recordar?</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">
                   Ese «¿le di la pastilla?» que se repite. Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
                 </p>
@@ -530,9 +530,9 @@ export default function Onboarding() {
               </>
             )}
 
-            <div className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-2 bg-[var(--bg)] px-6 pb-4 pt-4">
+            <div className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-2 bg-gradient-to-t from-[var(--bg)] from-75% to-transparent px-6 pb-4 pt-8">
               {(
-                <div id="ayuda" role="status" aria-live="polite" className="min-h-12">
+                <div id="ayuda" role="status" aria-live="polite">
                   {error && error !== LIMITE && (
                     <p className="flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
                       <AlertCircle size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
@@ -659,9 +659,20 @@ function FilaInfo({ it }: { it: ItemPanel }) {
         <span className="block text-base font-semibold">{it.titulo}</span>
         <span className="block text-sm text-[var(--text-secondary)]">{it.detalle}</span>
       </span>
-      {it.etiqueta && <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.etiqueta}</span>}
+      {it.etiqueta && <span className="rounded-full bg-[var(--chip-bg)] px-3 py-1 text-base font-bold tabular-nums text-[var(--accent)]">{it.etiqueta}</span>}
     </li>
   );
+}
+
+function ContadorAnimado({ n }: { n: number }) {
+  const reduce = useReducedMotion();
+  const [v, setV] = useState(reduce ? n : 0);
+  useEffect(() => {
+    if (reduce) return;
+    const c = animate(0, n, { duration: 0.8, ease: 'easeOut', onUpdate: (x) => setV(Math.round(x)) });
+    return () => c.stop();
+  }, [n, reduce]);
+  return <span className="font-bold tabular-nums text-[var(--text-primary)]">{reduce ? n : v}</span>;
 }
 
 function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entrada: object }) {
@@ -704,7 +715,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
                   type="button"
                   aria-pressed={hecho}
                   onClick={() => marcar(it.id)}
-                  className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] active:scale-[0.98] [touch-action:manipulation]"
+                  className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-l-4 border-[var(--border-ui)] border-l-[var(--accent)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-2)] active:scale-[0.98] [touch-action:manipulation]"
                 >
                   <motion.span
                     aria-hidden="true"
@@ -765,16 +776,16 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
       </Seccion>
 
       <p className="mt-6 text-lg font-semibold">Ya no tienes que llevar todo esto en la cabeza.</p>
-      <p className="mt-1 text-sm text-[var(--text-secondary)]">Armado con tus {n} respuestas. Las fechas exactas las ajustas dentro.</p>
+      <p className="mt-1 text-sm text-[var(--text-secondary)]">Armado con tus <ContadorAnimado n={n} /> respuestas. Las fechas exactas las ajustas dentro.</p>
 
       <div className="mt-auto flex flex-col gap-2 pt-8">
         {hayPrueba() && (
           <p className="text-center text-base font-semibold">
-            {CONDICIONES.prueba.dias} días gratis{hayGarantia() ? ' · Garantía de ' + CONDICIONES.garantia.dias + ' días' : ''}
+            {CONDICIONES.prueba.dias} días gratis{hayGarantia() ? ' · Garantía de ' + CONDICIONES.garantia.dias + ' días sobre tu primer pago' : ''}
           </p>
         )}
         <Link href="/paywall" className={botonPrimario}>
-          Ver planes para {nombre}
+          {hayPrueba() ? 'Probar gratis con ' + nombre : 'Ver planes para ' + nombre}
         </Link>
       </div>
     </motion.main>
