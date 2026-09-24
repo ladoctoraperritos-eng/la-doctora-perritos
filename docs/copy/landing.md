@@ -38,10 +38,10 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 
 ## 6. Oferta  (precio decidido en ESTADO.md: US$3,99/mes · US$35/año · 7 días gratis)
 - Título: Empieza gratis. Sigue por [acento]US$0,10 al día[/acento]  (≤8 palabras; «menos de» va en la card)
-- Sin stack de valor tachado (el ebook salió de la oferta y no se inventa un valor para el chat).
+- Regalo del plan anual: ebook «Primeros Auxilios Caninos» (valor real US$9). Sin stack tachado inventado.
 - Anual: US$2,92/mes · Se cobra US$35/año · 3 meses gratis · menos de US$0,10 al día
 - Mensual: US$3,99/mes
-- Features (IGUALES en mensual y anual; solo cambia el precio): Avisos de medicamentos, comida y vacunas · Hasta 3 tutores: quién hizo qué · Hasta 4 perros, un solo precio · Chat de emergencias de La Doctora Perritos (IA) · Resumen para el veterinario y datos exportables · Garantía de 15 días sobre tu primer pago
+- Features (IGUALES en mensual y anual; solo cambia el precio): Avisos de medicamentos, comida y vacunas · Hasta 3 tutores: quién hizo qué · Hasta 4 perros, un solo precio · Resumen para el veterinario y datos exportables · Garantía de 15 días sobre tu primer pago
 
 ## 7. Garantía
 - Nombre: la Garantía del Primer Aviso
@@ -54,7 +54,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 3. ¿Tendré que llenar una ficha enorme? — No. Empiezas con un solo medicamento o comida, en [b]un minuto[/b]. El resto lo agregas cuando quieras.
 4. ¿Y si el aviso no me llega? — Te avisamos por la app y por correo de respaldo. En iPhone, te guiamos para instalarla en tu pantalla de inicio.
 5. ¿Qué pasa con mis datos si dejo de pagar? — Siguen siendo tuyos: puedes descargarlos siempre y [b]nunca los borramos de golpe[/b].
-6. ¿Reemplaza a mi veterinario? — No. Organiza, recuerda y, en una emergencia, el chat te guía [b]mientras llegas al veterinario[/b]. No diagnostica ni receta.
+6. ¿Reemplaza a mi veterinario? — No. Organiza y recuerda; [b]no diagnostica ni receta[/b]. Ante una duda de salud, consulta a tu veterinario.
 
 ## 9. CTA final
 - H2: Imagina abrir la app y [acento]tener todo claro[/acento]
@@ -63,5 +63,5 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - PS: PS: Empiezas con 7 días gratis y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos tu primer pago.
 
 ## 10. Footer legal
-- Enlaces: Privacidad · Términos y Condiciones · Reembolsos · Aviso de IA  (páginas borrador existentes, pendientes de revisión con 47)
+- Enlaces: Privacidad · Términos y Condiciones · Reembolsos  (páginas borrador existentes, pendientes de revisión con 47)
 - Aviso visible: «La Doctora Perritos no es un servicio veterinario ni reemplaza a tu veterinario.»

@@ -17,11 +17,6 @@ export default function Terminos() {
       <p className="mt-2">
         Empiezas con 7 días gratis. Te avisamos antes de cobrarte y puedes cancelar cuando quieras.
       </p>
-      <h2 className="mt-6 text-lg font-semibold">Chat de emergencias</h2>
-      <p className="mt-2">
-        El chat de La Doctora Perritos usa inteligencia artificial para orientarte con pasos generales mientras buscas
-        atención veterinaria. No sustituye a un veterinario. Ver el aviso de IA.
-      </p>
       <h2 className="mt-6 text-lg font-semibold">Avisos</h2>
       <p className="mt-2">
         Hacemos lo posible para que los avisos lleguen a tiempo, pero pueden fallar por factores del teléfono o la

@@ -141,7 +141,6 @@ export default function LandingPage() {
             'Avisos de medicamentos, comida y vacunas',
             'Hasta 3 tutores: quién hizo qué',
             'Hasta 4 perros, un solo precio',
-            'Chat de emergencias de La Doctora Perritos (IA)',
             'Resumen para el veterinario y datos exportables',
             'Garantía de 15 días sobre tu primer pago',
           ],
@@ -155,7 +154,6 @@ export default function LandingPage() {
             'Avisos de medicamentos, comida y vacunas',
             'Hasta 3 tutores: quién hizo qué',
             'Hasta 4 perros, un solo precio',
-            'Chat de emergencias de La Doctora Perritos (IA)',
             'Resumen para el veterinario y datos exportables',
             'Garantía de 15 días sobre tu primer pago',
           ],
@@ -200,7 +198,7 @@ export default function LandingPage() {
           },
           {
             pregunta: '¿Reemplaza a mi veterinario?',
-            respuestaMarked: 'No. Organiza, recuerda y, en una emergencia, el chat te guía [b]mientras llegas al veterinario[/b]. No diagnostica ni receta.',
+            respuestaMarked: 'No. Organiza y recuerda; [b]no diagnostica ni receta[/b]. Ante una duda de salud, consulta a tu veterinario.',
           },
         ]}
       />
@@ -222,7 +220,6 @@ export default function LandingPage() {
           { label: 'Privacidad', href: '/privacidad' },
           { label: 'Términos y Condiciones', href: '/terminos' },
           { label: 'Reembolsos', href: '/reembolsos' },
-          { label: 'Aviso de IA', href: '/aviso-ia' },
         ]}
       />
       <div className="mx-auto mb-16 max-w-6xl px-6">

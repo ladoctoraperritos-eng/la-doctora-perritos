@@ -116,3 +116,8 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Logo propuesto (3 perritos) en public/brand y como favicon; en el header/footer de la landing. Pendiente OK.
 - Logo (2026-09-23): la creadora prefiere su propia imagen de los tres perros (public/brand/logo-base.webp) y quiere cambiar el símbolo del corazón con cruz (connota servicio médico). Se compusieron 4 variantes con badge teal: campana, reloj, pastilla, calendario (public/brand/logo-*.png, script scripts/logo-simbolos.mjs). Pendiente su elección; el logo vectorial provisional (logo-trio.svg) queda hasta entonces. La imagen base es generada por IA (la aportó la creadora): para producción conviene vectorizarla o rehacerla en vector y anotar la autoría/derechos.
 - Logo APROBADO (2026-09-23): campana. Aplicado en header/footer/regalo de la landing y como favicon (app/icon.png). Scripts: scripts/logo-simbolos.mjs y scripts/logo-final.mjs. Pendiente a futuro: vectorizar el logo para tamaños chicos.
+
+## Chat de emergencias RETIRADO de la landing (2026-09-23)
+- La creadora pide sacar el chat de IA porque aún no está implementado (claim sin capacidad). Eliminado de features, FAQ, footer y términos; borrada la página /aviso-ia. El chat queda como idea futura (base de conocimiento: su ebook). Los pendientes de IA (costo, guardrails, evals) se reactivan solo si se decide construirlo.
+## Propuesta de precios en revisión (2026-09-23)
+- Propuesta de la creadora: Esencial (1 perro, hasta 2 tutores) US$2,99/mes o US$29/año · Familia (hasta 5 perros, hasta 3 tutores) US$4,99/mes o US$49/año. Reemplazaría al plan único US$3,99/US$35 (4 perros, 3 tutores). Pendiente de decisión.
