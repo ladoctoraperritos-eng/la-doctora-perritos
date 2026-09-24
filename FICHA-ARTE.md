@@ -7,7 +7,7 @@
 ## Identidad derivada (ruta: propuesta propia, protocolo A/B/C)
 - Líderes/mundo: apps de salud y medicación (Medisafe, Bitpet, DogLog) + calma clínica cálida. Combinación tipográfica: fila "Bienestar" de 29 (DM Sans una familia) · validada contra líderes: SÍ (Headspace/Calm patrón una familia)
 - Arquetipo: Cuidador · Mundo del sujeto: pastillero, cartilla de vacunas, saco de comida, recetas del veterinario
-- Dirección del banco 54: "Clínica humana" (#5) · Dispositivo ownable: duotone de marca en la foto del perro
+- Dirección del banco 54: "Clínica humana" (#5) · Dispositivo ownable: duotone de marca en la foto del perro (2026-09-24, por decisión del usuario las fotos van a COLOR NATURAL; el dispositivo pasa a ser el marco con hairline degradado en la foto + la campana del logo)
 
 ## Personalidad compilada
 - Adjetivos: cálida, competente, tranquila

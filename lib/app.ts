@@ -135,12 +135,21 @@ function cargar(): EstadoApp {
   const respuestas = leerRespuestas();
   return respuestas.nombre.trim() ? desdeOnboarding(respuestas, ahora) : ejemplo(ahora);
 }
+let falloGuardado = false;
 function guardar(e: EstadoApp): void {
   try {
     window.localStorage.setItem(CLAVE, JSON.stringify(e));
+    falloGuardado = false;
   } catch {
-    // Navegación privada: sigue en memoria durante la sesión.
+    // Navegación privada o sin espacio: sigue en memoria y se avisa a la persona.
+    falloGuardado = true;
   }
+}
+export const huboFalloGuardado = (): boolean => falloGuardado;
+/** Vuelve a intentar guardar lo que hay en pantalla. */
+export function reintentarGuardado(): void {
+  guardar(obtenerApp());
+  avisar();
 }
 
 export const obtenerApp = (): EstadoApp => (estado ??= cargar());

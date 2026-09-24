@@ -10,7 +10,7 @@
 //   estados: cargando (esqueleto) · vacío · al día (éxito) · sin conexión · deshabilitado (menú «Pronto»)
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
 import {
   Bug,
   Check,
@@ -31,10 +31,12 @@ import {
 import {
   deshacer,
   hoy,
+  huboFalloGuardado,
   manana,
   marcarHecho,
   obtenerApp,
   proximos,
+  reintentarGuardado,
   suscribirApp,
   type EstadoApp,
   type FilaHoy,
@@ -70,7 +72,7 @@ const suscribirRed = (avisar: () => void) => {
 };
 
 const fechaLarga = (d: Date) => {
-  const t = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long' }).format(d);
+  const t = new Intl.DateTimeFormat('es', { weekday: 'short', day: 'numeric', month: 'short' }).format(d).replace(/\.|,/g, '');
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 
@@ -107,8 +109,8 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hechos, reduce]);
   return (
-    <div className="relative size-20 shrink-0" role="img" aria-label={`${hechos} de ${total} cuidados hechos hoy`}>
-      <svg viewBox="0 0 96 96" className="size-20 -rotate-90">
+    <div className="relative size-16 shrink-0" role="img" aria-label={`${hechos} de ${total} cuidados hechos hoy`}>
+      <svg viewBox="0 0 96 96" className="size-16 -rotate-90">
         <circle cx="48" cy="48" r="40" fill="none" strokeWidth="8" className="stroke-[var(--surface-2)]" />
         <motion.circle
           cx="48"
@@ -124,8 +126,8 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold tabular-nums leading-none">{reduce ? hechos : visto}</span>
-        <span className="text-sm text-[var(--text-secondary)]">de {total}</span>
+        <span className="text-xl font-bold tabular-nums leading-none">{reduce ? hechos : visto}</span>
+        <span className="text-sm text-[var(--text-secondary)]">/{total}</span>
       </div>
     </div>
   );
@@ -213,10 +215,10 @@ function FilaPendiente({ fila, varios, onHecho, i }: { fila: FilaHoy; varios: bo
             {varios ? `${fila.perro.nombre} · ` : ''}
             {fila.cuidado.detalle}
           </span>
-        </span>
-        <span className="flex shrink-0 flex-col items-end gap-1">
-          <span className="text-base font-bold tabular-nums text-[var(--accent)]">{fila.cuidado.hora}</span>
-          {t !== 'normal' && <span className={`rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>}
+          <span className="mt-1 flex items-center gap-2">
+            <span className="text-base font-bold tabular-nums text-[var(--accent)]">{fila.cuidado.hora}</span>
+            {t !== 'normal' && <span className={`rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>}
+          </span>
         </span>
         <span aria-hidden="true" className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)]" />
       </button>
@@ -267,8 +269,8 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
           {varios ? `${fila.perro.nombre} · ` : ''}
           {fila.cuidado.detalle}
         </span>
+        <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>
       </span>
-      <span className={`shrink-0 rounded-full px-3 py-1 text-sm font-semibold ${tono[t]}`}>{texto}</span>
     </motion.li>
   );
 }
@@ -290,7 +292,7 @@ function Menu() {
         </li>
         {pronto.map(({ icono: Icono, texto }) => (
           <li key={texto}>
-            <span aria-disabled="true" className="flex min-h-14 flex-col items-center justify-center gap-1 text-sm text-[var(--text-secondary)] opacity-60">
+            <span aria-disabled="true" className="flex min-h-14 flex-col items-center justify-center gap-1 text-sm text-[var(--text-tertiary)]">
               <Icono size={22} aria-hidden="true" />
               {texto}
               <span className="rounded-full bg-[var(--surface-2)] px-2 text-sm font-semibold">Pronto</span>
@@ -331,6 +333,7 @@ export default function Hoy() {
   const e = useSyncExternalStore(suscribirApp, obtenerApp, () => null);
   const minuto = useSyncExternalStore(suscribirReloj, minutoActual, () => null);
   const conexion = useSyncExternalStore(suscribirRed, enLinea, () => true);
+  const fallo = useSyncExternalStore(suscribirApp, huboFalloGuardado, () => false);
   const [perroId, setPerroId] = useState<string | null>(null);
   const [ultimo, setUltimo] = useState<{ id: string; texto: string } | null>(null);
   useEffect(() => {
@@ -364,6 +367,14 @@ export default function Hoy() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
+        {fallo && (
+          <div role="alert" className="flex items-center justify-between gap-2 bg-[color-mix(in_oklab,var(--danger)_14%,var(--surface))] px-6 py-2 text-[var(--danger)]">
+            <p className="text-sm font-semibold">No pudimos guardar en este aparato. Lo ves ahora, pero puede perderse al cerrar.</p>
+            <button type="button" onClick={reintentarGuardado} className="inline-flex min-h-11 shrink-0 items-center px-3 text-base font-bold underline underline-offset-4 [touch-action:manipulation]">
+              Reintentar
+            </button>
+          </div>
+        )}
         {!conexion && (
           <p role="status" className="flex items-center justify-center gap-2 bg-[var(--surface-2)] px-6 py-2 text-sm font-medium">
             <WifiOff size={16} aria-hidden="true" />
@@ -379,8 +390,16 @@ export default function Hoy() {
                 <h1 className="mt-1 text-2xl font-bold leading-tight">{titulo}</h1>
               </div>
             </div>
-            {total > 0 && <Anillo hechos={hechos.length} total={total} />}
           </header>
+
+          {total > 0 && (
+            <div className="flex items-center gap-4">
+              <Anillo hechos={hechos.length} total={total} />
+              <p className="text-base font-semibold">
+                {hechos.length === total ? 'Todos los cuidados de hoy están hechos' : `${total - hechos.length} por hacer hoy`}
+              </p>
+            </div>
+          )}
 
           {e.perros.length > 1 && <Selector e={e} activo={perroId} onElegir={setPerroId} />}
 
@@ -391,7 +410,7 @@ export default function Hoy() {
               <motion.span
                 initial={{ scale: 0.6 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                 className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]"
               >
                 <Check size={26} color="var(--bg)" strokeWidth={3} aria-hidden="true" />
@@ -453,8 +472,16 @@ export default function Hoy() {
             </section>
           )}
         </main>
+        <AnimatePresence>
         {ultimo && (
-          <div role="status" className="sticky bottom-20 z-20 mx-6 mb-2 flex items-center justify-between gap-2 rounded-[var(--radius-card)] bg-[var(--text-primary)] py-2 pl-4 pr-2 text-[var(--bg)] shadow-[var(--shadow-2)]">
+          <motion.div
+            key="toast"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            role="status"
+            className="sticky bottom-20 z-20 mx-6 mb-2 flex items-center justify-between gap-2 rounded-[var(--radius-card)] bg-[var(--text-primary)] py-2 pl-4 pr-2 text-[var(--bg)] shadow-[var(--shadow-2)]">
             <span className="text-base font-semibold">{ultimo.texto}: hecho</span>
             <button
               type="button"
@@ -467,8 +494,9 @@ export default function Hoy() {
               <Undo2 size={18} aria-hidden="true" />
               Deshacer
             </button>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
         <Menu />
       </div>
     </MotionConfig>
