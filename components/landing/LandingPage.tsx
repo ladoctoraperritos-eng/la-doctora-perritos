@@ -4,6 +4,7 @@
 // TODO el copy sale de docs/copy/landing.md (trazado a FICHA-AVATAR.md).
 
 import { useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { AlertTriangle, Brain, FileSearch, Layers, Package, Pill, Users } from 'lucide-react';
 import { Hero } from './Hero';
 import { Problema } from './Problema';
@@ -79,6 +80,7 @@ const LOGO = (
 export default function LandingPage() {
   const [plan, setPlan] = useState<IdPlan>('esencial');
   const P = PLANES[plan];
+  const reduce = useReducedMotion();
   return (
     <div className="min-h-dvh bg-[var(--bg)] text-[var(--text-primary)] [font-family:var(--font-body)]">
       <Hero
@@ -91,15 +93,27 @@ export default function LandingPage() {
         ctaHref={CTA_HREF}
         socialProof={<span className="text-base font-medium">Sin cobro hoy · cancela cuando quieras · garantía de 15 días</span>}
         visual={
-          <div className="flex justify-center bg-[var(--surface-2)] px-6 pt-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/screens/hoy.png"
-              alt="Pantalla Hoy con Toffee: medicamento de las 19:00, alimento para 8 días y quién dio el Omega-3"
-              width={310}
-              height={640}
-              className="h-auto w-full max-w-xs rounded-t-[32px] shadow-[var(--shadow-2)]"
-            />
+          <div className="bg-[var(--surface-2)]">
+            <div className="foto-duotone aspect-video">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/perros-hero.jpg"
+                alt="Dos de los perros de La Doctora Perritos, un dorado y un border collie, mirando a la cámara"
+                width={1200}
+                height={675}
+                fetchPriority="high"
+              />
+            </div>
+            <div className="-mt-16 flex justify-center px-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/screens/hoy.png"
+                alt="Pantalla Hoy con Toffee: medicamento de las 19:00, alimento para 8 días y quién dio el Omega-3"
+                width={310}
+                height={640}
+                className="relative h-auto w-full max-w-xs rounded-t-[32px] shadow-[var(--shadow-2)]"
+              />
+            </div>
           </div>
         }
         visualPlaceholderSugerencia="captura de «Hoy con Toffee»: medicamento de las 19:00, alimento para ~8 días y quién dio el Omega-3"
@@ -169,6 +183,12 @@ export default function LandingPage() {
         opciones={(Object.keys(PLANES) as IdPlan[]).map((id) => ({ id, etiqueta: PLANES[id].etiqueta, nombre: PLANES[id].nombre }))}
       />
 
+      <motion.div
+        key={plan}
+        initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      >
       <Oferta
         tituloMarked={P.titulo}
         trialDias={7}
@@ -191,6 +211,7 @@ export default function LandingPage() {
           features: ['Todas las funciones del plan anual', P.perros, 'Garantía de 15 días sobre tu primer pago', 'Cancelas cuando quieras'],
         }}
       />
+      </motion.div>
 
       <RegaloEbook
                 tituloMarked="Ebook «Primeros Auxilios Caninos»"
