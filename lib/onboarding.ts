@@ -79,6 +79,7 @@ export interface ItemHoy {
   id: string;
   titulo: string;
   detalle: string;
+  /** Etiqueta a la derecha de la fila: hora del aviso o cuánto falta. */
   hora?: string;
   tipo: 'medicamento' | 'suplemento' | 'comida' | 'control';
 }
@@ -94,11 +95,11 @@ export function armarPanel(r: Respuestas): ItemHoy[] {
     items.push({ id: 'sup', titulo: 'Suplemento', detalle: 'Con su comida', hora, tipo: 'suplemento' });
   }
   if (r.cuidados.includes('comida')) {
-    items.push({ id: 'com', titulo: 'Alimento', detalle: 'Te avisamos antes de que se acabe', tipo: 'comida' });
+    items.push({ id: 'com', titulo: 'Alimento', detalle: 'Quedan ~8 días de ejemplo', hora: '8 días', tipo: 'comida' });
   }
   const controlEtapa =
     r.etapa === 'cachorro' ? 'Vacunas del primer año' : r.etapa === 'senior' ? 'Control veterinario de rutina' : 'Antiparasitario y vacunas';
-  items.push({ id: 'ctl', titulo: controlEtapa, detalle: 'Con fecha y aviso anticipado', tipo: 'control' });
+  items.push({ id: 'ctl', titulo: controlEtapa, detalle: 'Con fecha y aviso anticipado', hora: '12 días', tipo: 'control' });
   return items;
 }
 

@@ -1,7 +1,8 @@
 'use client';
 
 // Onboarding: una pregunta por pantalla, cada respuesta cambia algo real del Panel de Hoy (02B).
-// Orden: preguntas → reconocimiento → «armando tu panel» → resultado con primera victoria → /paywall.
+// Orden: preguntas → reconocimiento (con resumen editable) → «armando tu panel» → resultado con
+// primera victoria → /paywall.
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
@@ -11,17 +12,19 @@ import {
   ArrowLeft,
   Check,
   Clock,
+  Footprints,
+  Heart,
   Home,
   Leaf,
   Moon,
   PawPrint,
+  Pencil,
   Pill,
   ShieldCheck,
   Sprout,
   Sun,
   Sunrise,
   User,
-  Users,
   Utensils,
   type LucideIcon,
 } from 'lucide-react';
@@ -77,10 +80,8 @@ function Opciones<T extends string>({
             role={multiple ? 'checkbox' : 'radio'}
             aria-checked={on}
             onClick={() => onElegir(o.valor)}
-            className={`flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors active:scale-[0.98] [touch-action:manipulation] ${
-              on
-                ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))]'
-                : 'border-[color-mix(in_oklab,var(--text-tertiary)_60%,transparent)] bg-[var(--surface)]'
+            className={`flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
+              on ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))]' : 'border-[var(--border-ui)] bg-[var(--surface)]'
             }`}
           >
             <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
@@ -92,8 +93,8 @@ function Opciones<T extends string>({
             </span>
             <span
               aria-hidden="true"
-              className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                on ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[color-mix(in_oklab,var(--text-tertiary)_80%,transparent)]'
+              className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+                on ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'
               }`}
             >
               {on && <Check size={14} color="var(--bg)" strokeWidth={3} />}
@@ -118,14 +119,14 @@ const ETAPA: Opcion<Etapa>[] = [
 const CUIDADOS: Opcion<Cuidado>[] = [
   { valor: 'medicamento', titulo: 'Medicamento', detalle: 'Con dosis y hora', icono: Pill },
   { valor: 'suplemento', titulo: 'Suplemento', detalle: 'Omega-3, condroitina…', icono: Leaf },
-  { valor: 'comida', titulo: 'Comida', detalle: 'Te avisamos antes de que se acabe', icono: Utensils },
-  { valor: 'solo_controles', titulo: 'Solo vacunas y controles', detalle: 'Sin tratamiento por ahora', icono: ShieldCheck },
+  { valor: 'comida', titulo: 'Comida', detalle: 'Aviso antes de que se acabe', icono: Utensils },
+  { valor: 'solo_controles', titulo: 'Solo controles', detalle: 'Vacunas y citas, sin tratamiento', icono: ShieldCheck },
 ];
 const CUIDADORES: Opcion<Cuidadores>[] = [
   { valor: 'solo_yo', titulo: 'Solo yo', icono: User },
-  { valor: 'pareja', titulo: 'Mi pareja y yo', icono: Users },
+  { valor: 'pareja', titulo: 'Mi pareja y yo', icono: Heart },
   { valor: 'familia', titulo: 'Mi familia', detalle: 'Hasta 3 tutores', icono: Home },
-  { valor: 'cuidador', titulo: 'Un cuidador o paseador', icono: Users },
+  { valor: 'cuidador', titulo: 'Un cuidador o paseador', icono: Footprints },
 ];
 const MOMENTO: Opcion<Momento>[] = [
   { valor: 'manana', titulo: 'En la mañana', detalle: 'Alrededor de las 8:00', icono: Sunrise },
@@ -138,7 +139,18 @@ type Paso = 'nombre' | 'cantidad' | 'etapa' | 'cuidados' | 'cuidadores' | 'momen
 const PASOS: Paso[] = ['nombre', 'cantidad', 'etapa', 'cuidados', 'cuidadores', 'momento'];
 /** Solo estos se pueden saltar (no rompen el Panel). */
 const SALTABLES: Paso[] = ['etapa', 'cuidadores'];
+/** Las de una sola elección avanzan solas, con un respiro para ver la selección. */
+const AUTOAVANZAN: Paso[] = ['cantidad', 'etapa', 'cuidadores', 'momento'];
 type Fase = 'preguntas' | 'reconocimiento' | 'armando' | 'resultado';
+
+const AYUDA: Record<Paso, string> = {
+  nombre: 'Escribe su nombre para seguir.',
+  cantidad: 'Elige cuántos perros tienes para seguir.',
+  etapa: 'Elige una etapa o salta esta pregunta.',
+  cuidados: 'Elige al menos una opción para seguir.',
+  cuidadores: 'Elige una opción o salta esta pregunta.',
+  momento: 'Elige un momento para seguir.',
+};
 
 function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
   return (
@@ -160,10 +172,12 @@ function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
         className="flex flex-1 gap-2"
       >
         {PASOS.map((p, i) => (
-          <span
-            key={p}
-            className={`h-2 flex-1 rounded-full ${i <= paso ? 'bg-[var(--accent)]' : 'bg-[color-mix(in_oklab,var(--accent)_28%,var(--surface-2))]'}`}
-          />
+          <span key={p} className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--accent)_28%,var(--surface-2))]">
+            <span
+              className="absolute inset-y-0 left-0 rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
+              style={{ width: i <= paso ? '100%' : '0%' }}
+            />
+          </span>
         ))}
       </div>
     </header>
@@ -171,7 +185,7 @@ function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
 }
 
 const botonPrimario =
-  'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-colors active:scale-[0.98] disabled:bg-[var(--surface-2)] disabled:text-[var(--text-secondary)] disabled:shadow-none [touch-action:manipulation]';
+  'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-colors active:scale-[0.98] [touch-action:manipulation]';
 
 export default function Onboarding() {
   const r = useRespuestas();
@@ -179,13 +193,20 @@ export default function Onboarding() {
   const reduce = useReducedMotion();
   const [fase, setFase] = useState<Fase>('preguntas');
   const [paso, setPaso] = useState(0);
+  const [intento, setIntento] = useState(false);
   const irAlResultado = useCallback(() => setFase('resultado'), []);
   const raiz = useRef<HTMLDivElement>(null);
+  const campoNombre = useRef<HTMLInputElement>(null);
+  const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     // Al cambiar de pantalla el foco pasa al título (lectores de pantalla y teclado).
     if (fase === 'preguntas' && paso === 0) return;
     raiz.current?.querySelector<HTMLElement>('h1')?.focus();
   }, [paso, fase]);
+  useEffect(() => () => {
+    if (temporizador.current) clearTimeout(temporizador.current);
+  }, []);
 
   const nombre = r.nombre.trim() || 'tu perro';
   const actual = PASOS[paso];
@@ -199,17 +220,41 @@ export default function Onboarding() {
     momento: r.momento !== null,
   };
 
+  const irAlPaso = (i: number) => {
+    setIntento(false);
+    setPaso(i);
+  };
   const siguiente = () => {
-    if (paso < PASOS.length - 1) setPaso(paso + 1);
+    if (paso < PASOS.length - 1) irAlPaso(paso + 1);
     else setFase('reconocimiento');
   };
-  const atras = () => {
-    if (fase !== 'preguntas') {
-      setPaso(PASOS.length - 1);
-      return setFase('preguntas');
+  const continuar = () => {
+    if (valido[actual]) return siguiente();
+    // El botón nunca está «muerto»: si falta algo, lo dice y lleva el foco donde corresponde.
+    setIntento(true);
+    if (actual === 'nombre') campoNombre.current?.focus();
+  };
+  const elegir = (parcial: Partial<Respuestas>) => {
+    actualizar(parcial);
+    setIntento(false);
+    if (AUTOAVANZAN.includes(actual) && !reduce) {
+      if (temporizador.current) clearTimeout(temporizador.current);
+      temporizador.current = setTimeout(siguiente, 320);
     }
-    if (paso > 0) setPaso(paso - 1);
+  };
+  const atras = () => {
+    if (fase === 'reconocimiento') {
+      irAlPaso(PASOS.length - 1);
+      setFase('preguntas');
+      return;
+    }
+    if (fase !== 'preguntas') return setFase('reconocimiento');
+    if (paso > 0) irAlPaso(paso - 1);
     else router.push('/');
+  };
+  const editar = (i: number) => {
+    irAlPaso(i);
+    setFase('preguntas');
   };
 
   const entrada = {
@@ -229,7 +274,7 @@ export default function Onboarding() {
         <button
           type="button"
           onClick={atras}
-          aria-label="Volver a las preguntas"
+          aria-label="Volver"
           className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
         >
           <ArrowLeft size={22} aria-hidden="true" />
@@ -240,41 +285,46 @@ export default function Onboarding() {
         <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-8">
           {actual === 'nombre' && (
             <>
-              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Cómo se llama tu perro?</h1>
+              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Cómo se llama tu perro?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Así armamos su Panel de Hoy.</p>
               <label htmlFor="nombre" className="sr-only">
                 Nombre de tu perro
               </label>
               <input
                 id="nombre"
+                ref={campoNombre}
                 autoFocus
                 value={r.nombre}
                 maxLength={30}
                 autoComplete="off"
                 placeholder="Por ejemplo, Toffee"
-                onChange={(e) => actualizar({ nombre: e.target.value })}
-                onKeyDown={(e) => e.key === 'Enter' && valido.nombre && siguiente()}
-                className="mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_70%,transparent)] bg-[var(--surface)] px-4 text-xl font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
+                aria-describedby="ayuda"
+                onChange={(e) => {
+                  actualizar({ nombre: e.target.value });
+                  setIntento(false);
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && continuar()}
+                className="mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-xl font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
               />
             </>
           )}
           {actual === 'cantidad' && (
             <>
-              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Cuántos perros tienes?</h1>
+              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Cuántos perros tienes?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos con {nombre}; los demás los agregas después.</p>
-              <Opciones nombreGrupo="Cuántos perros tienes" opciones={CANTIDAD} seleccion={r.cantidad} onElegir={(v) => actualizar({ cantidad: v })} />
+              <Opciones nombreGrupo="Cuántos perros tienes" opciones={CANTIDAD} seleccion={r.cantidad} onElegir={(v) => elegir({ cantidad: v })} />
             </>
           )}
           {actual === 'etapa' && (
             <>
-              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿En qué etapa está {nombre}?</h1>
+              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿En qué etapa está {nombre}?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Cambia qué controles y vacunas le mostramos.</p>
-              <Opciones nombreGrupo="Etapa de tu perro" opciones={ETAPA} seleccion={r.etapa} onElegir={(v) => actualizar({ etapa: v })} />
+              <Opciones nombreGrupo="Etapa de tu perro" opciones={ETAPA} seleccion={r.etapa} onElegir={(v) => elegir({ etapa: v })} />
             </>
           )}
           {actual === 'cuidados' && (
             <>
-              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Qué necesita {nombre} cada día?</h1>
+              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Qué necesita {nombre} cada día?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Elige lo que quieras. El resto lo agregas después.</p>
               <Opciones
                 nombreGrupo="Qué necesita cada día"
@@ -284,36 +334,39 @@ export default function Onboarding() {
                 onElegir={(v) => {
                   const ya = r.cuidados.includes(v);
                   const base = ya ? r.cuidados.filter((c) => c !== v) : [...r.cuidados, v];
-                  // «Solo vacunas y controles» es excluyente con lo demás.
-                  actualizar({ cuidados: v === 'solo_controles' && !ya ? ['solo_controles'] : base.filter((c) => c !== 'solo_controles' || v === 'solo_controles') });
+                  // «Solo controles» es excluyente con lo demás.
+                  elegir({ cuidados: v === 'solo_controles' && !ya ? ['solo_controles'] : base.filter((c) => c !== 'solo_controles' || v === 'solo_controles') });
                 }}
               />
             </>
           )}
           {actual === 'cuidadores' && (
             <>
-              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Quién más cuida a {nombre}?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Así todos ven qué se hizo y nadie duda.</p>
-              <Opciones nombreGrupo="Quién más lo cuida" opciones={CUIDADORES} seleccion={r.cuidadores} onElegir={(v) => actualizar({ cuidadores: v })} />
+              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Quién más cuida a {nombre}?</h1>
+              <p className="mt-2 text-base text-[var(--text-secondary)]">Así todos verán qué se hizo y nadie dudará.</p>
+              <Opciones nombreGrupo="Quién más lo cuida" opciones={CUIDADORES} seleccion={r.cuidadores} onElegir={(v) => elegir({ cuidadores: v })} />
             </>
           )}
           {actual === 'momento' && (
             <>
-              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Cuándo le das lo importante?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Ahí pondremos su aviso principal.</p>
-              <Opciones nombreGrupo="Cuándo le das lo importante" opciones={MOMENTO} seleccion={r.momento} onElegir={(v) => actualizar({ momento: v })} />
+              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿A qué hora le das su cuidado principal?</h1>
+              <p className="mt-2 text-base text-[var(--text-secondary)]">Ahí pondremos su aviso más importante.</p>
+              <Opciones nombreGrupo="Hora del cuidado principal" opciones={MOMENTO} seleccion={r.momento} onElegir={(v) => elegir({ momento: v })} />
             </>
           )}
 
           <div className="mt-auto flex flex-col gap-2 pt-8">
-            <button type="button" className={botonPrimario} disabled={!valido[actual]} onClick={siguiente}>
+            <p id="ayuda" role="status" aria-live="polite" className="min-h-6 text-center text-base font-semibold text-[var(--text-primary)]">
+              {intento && !valido[actual] ? AYUDA[actual] : ''}
+            </p>
+            <button type="button" className={botonPrimario} onClick={continuar}>
               Continuar
             </button>
             {SALTABLES.includes(actual) && (
               <button
                 type="button"
                 onClick={siguiente}
-                className="h-12 text-base font-medium text-[var(--text-secondary)] [touch-action:manipulation]"
+                className="h-12 rounded-[var(--radius-button)] text-base font-medium text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--accent)] [touch-action:manipulation]"
               >
                 Saltar por ahora
               </button>
@@ -322,43 +375,72 @@ export default function Onboarding() {
         </motion.main>
       )}
 
-      {fase === 'reconocimiento' && (
-        <Reconocimiento nombre={nombre} entrada={entrada} onAtras={atras} onSeguir={() => setFase('armando')} />
-      )}
+      {fase === 'reconocimiento' && <Reconocimiento nombre={nombre} r={r} entrada={entrada} onEditar={editar} onSeguir={() => setFase('armando')} />}
       {fase === 'armando' && <Armando nombre={nombre} r={r} onListo={irAlResultado} />}
       {fase === 'resultado' && <Resultado nombre={nombre} r={r} entrada={entrada} />}
     </div>
   );
 }
 
+function resumen(r: Respuestas): { etiqueta: string; valor: string }[] {
+  const nombreOpc = <T extends string>(ops: Opcion<T>[], v: T | null) => ops.find((o) => o.valor === v)?.titulo ?? 'Sin responder';
+  return [
+    { etiqueta: 'Nombre', valor: r.nombre.trim() || 'Sin responder' },
+    { etiqueta: 'Perros', valor: nombreOpc(CANTIDAD, r.cantidad) },
+    { etiqueta: 'Etapa', valor: nombreOpc(ETAPA, r.etapa) },
+    { etiqueta: 'Cada día', valor: r.cuidados.length ? r.cuidados.map((c) => nombreOpc(CUIDADOS, c)).join(', ') : 'Sin responder' },
+    { etiqueta: 'Lo cuidan', valor: nombreOpc(CUIDADORES, r.cuidadores) },
+    { etiqueta: 'Aviso principal', valor: r.momento ? `${nombreOpc(MOMENTO, r.momento)} · ${HORA_POR_MOMENTO[r.momento]}` : 'Sin responder' },
+  ];
+}
+
 function Reconocimiento({
   nombre,
+  r,
   entrada,
-  onAtras,
+  onEditar,
   onSeguir,
 }: {
   nombre: string;
+  r: Respuestas;
   entrada: object;
-  onAtras: () => void;
+  onEditar: (i: number) => void;
   onSeguir: () => void;
 }) {
   return (
-    <motion.main {...entrada} className="flex flex-1 flex-col justify-center gap-6 text-center">
-      <span className="mx-auto inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)]">
-        <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
-      </span>
-      <h1 tabIndex={-1} className="outline-none text-balance text-3xl font-bold leading-tight">
+    <motion.main {...entrada} className="flex flex-1 flex-col gap-5 pt-4">
+      {/* Dispositivo de marca: duotone de sus perros */}
+      <div className="foto-duotone aspect-video rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={506} />
+      </div>
+      <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">
         {nombre} tiene a alguien que quiere hacerlo <span className="text-[var(--accent)]">bien</span>
       </h1>
-      <p className="text-lg text-[var(--text-secondary)]">
-        Y no tienes que acordarte de todo tú solo: el Panel de Hoy lo hace contigo.
-      </p>
-      <div className="flex flex-col gap-2 pt-4">
+      <p className="text-lg text-[var(--text-secondary)]">Y no tienes que acordarte de todo tú solo: el Panel de Hoy lo hace contigo.</p>
+
+      <ul aria-label="Tus respuestas" className="flex flex-col divide-y divide-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4 shadow-[var(--shadow-1)]">
+        {resumen(r).map((fila, i) => (
+          <li key={fila.etiqueta} className="flex items-center gap-3 py-2">
+            <span className="flex-1">
+              <span className="block text-sm text-[var(--text-secondary)]">{fila.etiqueta}</span>
+              <span className="block text-base font-semibold">{fila.valor}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => onEditar(i)}
+              aria-label={`Cambiar: ${fila.etiqueta}`}
+              className="inline-flex size-11 items-center justify-center rounded-full text-[var(--accent)] [touch-action:manipulation]"
+            >
+              <Pencil size={18} aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-auto pt-2">
         <button type="button" className={botonPrimario} onClick={onSeguir}>
           Armar el Panel de {nombre}
-        </button>
-        <button type="button" onClick={onAtras} className="h-12 text-base font-medium text-[var(--text-secondary)]">
-          Cambiar una respuesta
         </button>
       </div>
     </motion.main>
@@ -368,30 +450,43 @@ function Reconocimiento({
 function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onListo: () => void }) {
   const reduce = useReducedMotion();
   const hora = r.momento ? HORA_POR_MOMENTO[r.momento] : '08:00';
-  const lineas = [
-    `Ordenando lo que necesita ${nombre}…`,
-    `Poniendo su aviso principal a las ${hora}…`,
-    'Preparando quién hizo qué…',
-  ];
-  const [visibles, setVisibles] = useState(1);
+  const lineas = [`Ordenando lo que necesita ${nombre}…`, `Poniendo su aviso principal a las ${hora}…`, 'Preparando quién hizo qué…'];
+  const [visibles, setVisibles] = useState(0);
   useEffect(() => {
-    const t1 = setTimeout(() => setVisibles(2), 1300);
-    const t2 = setTimeout(() => setVisibles(3), 2600);
-    const t3 = setTimeout(onListo, 4000);
-    return () => [t1, t2, t3].forEach(clearTimeout);
+    const t = [
+      setTimeout(() => setVisibles(1), 400),
+      setTimeout(() => setVisibles(2), 1900),
+      setTimeout(() => setVisibles(3), 3400),
+      setTimeout(onListo, 5000),
+    ];
+    return () => t.forEach(clearTimeout);
   }, [onListo]);
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 text-center" aria-live="polite">
-      <span className={`inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)] ${reduce ? '' : 'animate-pulse'}`}>
+    <main className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+      <span className={`inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)] ${reduce ? '' : 'motion-safe:animate-pulse'}`}>
         <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
       </span>
-      <h1 tabIndex={-1} className="outline-none text-2xl font-bold">Armando el Panel de Hoy de {nombre}</h1>
-      <ul className="flex flex-col gap-3 text-left">
+      <h1 tabIndex={-1} className="text-2xl font-bold outline-none">Armando el Panel de Hoy de {nombre}</h1>
+      <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--accent)_28%,var(--surface-2))]" aria-hidden="true">
+        <motion.div
+          className="h-full rounded-full bg-[var(--accent)]"
+          initial={{ width: reduce ? '100%' : '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: reduce ? 0 : 5, ease: 'easeInOut' }}
+        />
+      </div>
+      <ul className="flex min-h-24 flex-col gap-3 text-left" aria-live="polite">
         {lineas.slice(0, visibles).map((l) => (
-          <li key={l} className="flex items-center gap-3 text-base text-[var(--text-secondary)]">
+          <motion.li
+            key={l}
+            initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="flex items-center gap-3 text-base text-[var(--text-secondary)]"
+          >
             <Check size={18} color="var(--accent)" aria-hidden="true" />
             {l}
-          </li>
+          </motion.li>
         ))}
       </ul>
     </main>
@@ -399,6 +494,7 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
 }
 
 function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entrada: object }) {
+  const reduce = useReducedMotion();
   const items = armarPanel(r);
   const [hechos, setHechos] = useState<string[]>([]);
   const marcar = (id: string) => {
@@ -408,9 +504,9 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
   const n = contarRespuestas(r);
   const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
   return (
-    <motion.main {...entrada} className="flex flex-1 flex-col pt-6">
+    <motion.main {...entrada} className="flex flex-1 flex-col pt-4">
       <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Tu Panel de Hoy</p>
-      <h1 tabIndex={-1} className="outline-none mt-1 text-3xl font-bold leading-tight">Hoy con {nombre}</h1>
+      <h1 tabIndex={-1} className="mt-1 text-3xl font-bold leading-tight outline-none">Hoy con {nombre}</h1>
       <p className="mt-2 text-base text-[var(--text-secondary)]">Toca un cuidado para marcarlo como hecho. Así se siente.</p>
 
       <ul className="mt-6 flex flex-col gap-3">
@@ -422,21 +518,23 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
                 type="button"
                 aria-pressed={hecho}
                 onClick={() => marcar(it.id)}
-                className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--text-tertiary)_25%,transparent)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] [touch-action:manipulation]"
+                className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] active:scale-[0.98] [touch-action:manipulation]"
               >
-                <span
+                <motion.span
                   aria-hidden="true"
+                  animate={{ scale: hecho && !reduce ? [1, 1.15, 1] : 1 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
                   className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 ${
-                    hecho ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[color-mix(in_oklab,var(--text-tertiary)_80%,transparent)]'
+                    hecho ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'
                   }`}
                 >
                   {hecho && <Check size={18} color="var(--bg)" strokeWidth={3} />}
-                </span>
+                </motion.span>
                 <span className="flex-1">
-                  <span className={`block text-base font-semibold ${hecho ? 'text-[var(--text-secondary)] line-through' : ''}`}>
-                    {it.titulo}
+                  <span className={`block text-base font-semibold ${hecho ? 'text-[var(--text-secondary)] line-through' : ''}`}>{it.titulo}</span>
+                  <span className="block text-sm text-[var(--text-secondary)]">
+                    {hecho ? (comparte ? 'Listo · así lo verán los demás tutores' : 'Listo · así queda registrado con la hora') : it.detalle}
                   </span>
-                  <span className="block text-sm text-[var(--text-secondary)]">{hecho ? (comparte ? 'Listo · así lo verán los demás tutores' : 'Listo · así queda registrado con la hora') : it.detalle}</span>
                 </span>
                 {it.hora && <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.hora}</span>}
               </button>
@@ -448,7 +546,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
 
       <div className="mt-auto flex flex-col gap-2 pt-8">
         <Link href="/paywall" className={botonPrimario}>
-          Seguir con {nombre}
+          Ver planes para {nombre}
         </Link>
       </div>
     </motion.main>

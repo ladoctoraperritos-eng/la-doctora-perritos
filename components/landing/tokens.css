@@ -21,6 +21,7 @@
   --bg: #f4f7f6;              /* ← reemplazar con FICHA-ARTE — fondo base (jamás #FFF/#000 puros) */
   --surface: #fdfefd;         /* ← reemplazar con FICHA-ARTE — secciones elevadas y cards */
   --surface-2: #e6eeec;
+  --border-ui: #74847f;        /* borde de controles (opciones, campos): ≥3:1 sobre --bg y --surface (WCAG 1.4.11) */
   --elevated: color-mix(in oklab, var(--surface-2) 60%, var(--bg)); /* fondo de secciones elevadas: separa el ritmo entre bloques */       /* ← reemplazar con FICHA-ARTE — hundido: wells, frames placeholder */
 
   /* ── TEXTO (casi-negro CON tinte, familia única de neutros) ── */
