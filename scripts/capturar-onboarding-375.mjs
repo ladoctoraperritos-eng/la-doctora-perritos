@@ -37,6 +37,8 @@ await p.getByRole('link', { name: /Probar gratis con Toffee/ }).click();
 await p.waitForURL('**/paywall'); await p.waitForTimeout(700);
 await p.screenshot({ path: 'docs/revisiones/paywall-375.png' });
 await p.screenshot({ path: 'docs/revisiones/paywall-completo.png', fullPage: true });
+await p.getByRole('button', { name: /Empezar mis 7 días/ }).click(); await p.waitForTimeout(700); await p.screenshot({ path: 'docs/revisiones/paywall-correo-error.png' });
+await p.fill('#correo', 'carolina@correo.com'); await p.getByRole('button', { name: /Empezar mis 7 días/ }).click(); await p.waitForTimeout(500); await p.screenshot({ path: 'docs/revisiones/paywall-correo-guardado.png' });
 await p.goto('http://localhost:3000/login', { waitUntil: 'load' });
 await p.fill('#correo', 'ana@correo.com'); await p.getByRole('button', { name: /Enviarme/ }).click(); await p.waitForTimeout(700);
 await p.screenshot({ path: 'docs/revisiones/login-375.png' });

@@ -5,14 +5,15 @@
 // prueba (hoy → aviso → cobro, con fechas reales) → garantía y pago seguro. El botón (fijo abajo) lleva
 // al checkout de Hotmart de ese plan y periodo (lib/hotmart.ts).
 
-import { useState, useSyncExternalStore } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'motion/react';
 import { ArrowLeft, Bell, Check, CreditCard, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { addDays, CONDICIONES, formatFecha, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { urlCheckout, type PeriodoPago } from '@/lib/hotmart';
-import { armarPanel, contarRespuestas, obtener, planRecomendado, suscribir, VACIAS, type IdPlan, type Respuestas } from '@/lib/onboarding';
+import { actualizar, armarPanel, contarRespuestas, obtener, planRecomendado, suscribir, VACIAS, type IdPlan, type Respuestas } from '@/lib/onboarding';
 import { PLANES } from '@/lib/planes';
+import { correoValido } from '@/lib/auth';
 import Marca from './Marca';
 
 const boton =
@@ -182,7 +183,26 @@ export default function Paywall() {
   const n = contarRespuestas(r);
   const importe = periodo === 'anio' ? P.anualTotal : P.mensual;
   const unidad = periodo === 'anio' ? '/año' : '/mes';
-  const checkout = urlCheckout(plan, periodo);
+  const [correo, setCorreo] = useState<string | null>(null);
+  const [intento, setIntento] = useState(false);
+  const [guardado, setGuardado] = useState(false);
+  const campoCorreo = useRef<HTMLInputElement>(null);
+  const correoActual = correo ?? r.correo;
+  const correoOk = correoValido(correoActual);
+  const empezar = () => {
+    setGuardado(false);
+    if (!correoOk) {
+      // El botón nunca queda «muerto»: dice qué falta y lleva al campo.
+      setIntento(true);
+      campoCorreo.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      campoCorreo.current?.focus();
+      return;
+    }
+    actualizar({ correo: correoActual.trim() });
+    const destino = urlCheckout(plan, periodo, correoActual);
+    if (destino) window.location.assign(destino);
+    else setGuardado(true);
+  };
   const etiquetaBoton = hayPrueba() ? `Empezar mis ${CONDICIONES.prueba.dias} días gratis` : 'Empezar ahora';
 
   // Sin respuestas no hay Panel que proteger: se le lleva a armarlo primero.
@@ -265,6 +285,35 @@ export default function Paywall() {
           </div>
         </section>
 
+        <section aria-label="Tu correo de acceso" className="mt-8">
+          <h2 className="text-lg font-bold">¿A qué correo te enviamos tu acceso?</h2>
+          <p className="mt-1 text-base text-[var(--text-secondary)]">Con este correo entras al Panel de {nombre || 'tu perro'}. Sin contraseñas: te mandamos un enlace.</p>
+          <label htmlFor="correo" className="sr-only">
+            Tu correo
+          </label>
+          <input
+            id="correo"
+            ref={campoCorreo}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={correoActual}
+            placeholder="tucorreo@ejemplo.com"
+            aria-describedby="ayuda-correo"
+            aria-invalid={intento && !correoOk}
+            onChange={(e) => {
+              setCorreo(e.target.value);
+              setIntento(false);
+            }}
+            className={`mt-3 h-14 w-full rounded-[var(--radius-card)] border-2 bg-[var(--surface)] px-4 text-lg font-semibold outline-none placeholder:font-normal placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)] ${
+              intento && !correoOk ? 'border-[var(--accent)] ring-4 ring-[color-mix(in_oklab,var(--accent)_25%,transparent)]' : 'border-[var(--border-ui)]'
+            }`}
+          />
+          <p id="ayuda-correo" role="status" aria-live="polite" className={`mt-2 text-sm ${intento && !correoOk ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+            {intento && !correoOk ? 'Escribe un correo válido, por ejemplo nombre@correo.com.' : 'Solo lo usamos para tu acceso y los avisos de tu prueba.'}
+          </p>
+        </section>
+
         {hayPrueba() && <LineaTiempo importe={importe} unidad={unidad} />}
 
         <section aria-label="Tu tranquilidad" className="borde-degradado mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
@@ -305,14 +354,13 @@ export default function Paywall() {
           {hayPrueba() ? 'Hoy US$0' : `Hoy ${importe}`} · Luego {importe}
           {unidad} 
         </p>
-        {checkout ? (
-          <a href={checkout} className={boton}>
-            {etiquetaBoton}
-          </a>
-        ) : (
-          <button type="button" disabled className={boton}>
-            {etiquetaBoton}
-          </button>
+        <button type="button" onClick={empezar} className={boton}>
+          {etiquetaBoton}
+        </button>
+        {guardado && (
+          <p role="status" className="text-center text-sm font-semibold">
+            Guardamos tu correo. El pago se activa muy pronto.
+          </p>
         )}
       </div>
     </div>

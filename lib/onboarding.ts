@@ -32,6 +32,8 @@ export interface Respuestas {
   controlCuando: Cuando | null;
   cuidadores: Cuidadores | null;
   avisos: Avisos | null;
+  /** Correo con el que entrará a su Panel: se lleva prellenado al pago para que coincida. */
+  correo: string;
   /** Primera victoria: marcó como «dado» el primer cuidado de su Panel de Hoy. */
   primeraVictoria: boolean;
 }
@@ -49,6 +51,7 @@ export const VACIAS: Respuestas = {
   controlCuando: null,
   cuidadores: null,
   avisos: null,
+  correo: '',
   primeraVictoria: false,
 };
 

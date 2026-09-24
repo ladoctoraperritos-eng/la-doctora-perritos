@@ -16,7 +16,12 @@ const URLS: Record<IdPlan, Record<PeriodoPago, string | undefined>> = {
   },
 };
 
-export function urlCheckout(plan: IdPlan, periodo: PeriodoPago): string | null {
-  const url = URLS[plan][periodo];
-  return url && url.startsWith('https://') ? url : null;
+/** `correo` se lleva prellenado a la página de pago para que el correo de compra y el de acceso sean el mismo. */
+export function urlCheckout(plan: IdPlan, periodo: PeriodoPago, correo?: string): string | null {
+  const base = URLS[plan][periodo];
+  if (!base || !base.startsWith('https://')) return null;
+  if (!correo) return base;
+  const url = new URL(base);
+  url.searchParams.set('email', correo.trim());
+  return url.toString();
 }
