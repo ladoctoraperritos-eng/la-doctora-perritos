@@ -29,6 +29,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Marca from './Marca';
+import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
 import {
   actualizar,
   armarPanel,
@@ -214,19 +215,19 @@ const OLVIDOS: Opcion<Olvido>[] = [
 const CUIDADORES: Opcion<Cuidadores>[] = [
   { valor: 'solo_yo', titulo: 'Solo yo', icono: User },
   { valor: 'pareja', titulo: 'Mi pareja y yo', icono: Heart },
-  { valor: 'familia', titulo: 'Mi familia', detalle: 'Hasta 3 tutores', icono: Home },
+  { valor: 'familia', titulo: 'Mi familia', detalle: 'Hasta 3 personas', icono: Home },
   { valor: 'cuidador', titulo: 'Un cuidador o paseador', icono: Footprints },
   { valor: 'varias', titulo: 'Varias personas', icono: Users },
 ];
 const FRECUENCIA: { valor: Frecuencia; texto: string }[] = [
-  { valor: '1_dia', texto: '1 vez al día' },
-  { valor: '2_dia', texto: '2 veces al día' },
-  { valor: 'semana', texto: '1 vez por semana' },
+  { valor: '1_dia', texto: 'Diario' },
+  { valor: '2_dia', texto: '2 al día' },
+  { valor: 'semana', texto: 'Semanal' },
 ];
 const HORA: { valor: Momento; texto: string }[] = [
-  { valor: 'manana', texto: 'En la mañana' },
-  { valor: 'mediodia', texto: 'Al mediodía' },
-  { valor: 'noche', texto: 'En la noche' },
+  { valor: 'manana', texto: 'Mañana' },
+  { valor: 'mediodia', texto: 'Mediodía' },
+  { valor: 'noche', texto: 'Noche' },
 ];
 const DIAS: { valor: Dias; texto: string }[] = [
   { valor: '7', texto: '7 días' },
@@ -251,17 +252,17 @@ const CUANDO: { valor: Cuando; texto: string }[] = [
   { valor: 'no_se', texto: 'No lo sé' },
 ];
 
-/** Solo este paso se puede saltar sin romper el Panel. */
-const SALTABLES: Paso[] = ['cuidadores'];
+/** Estos pasos se pueden saltar: el Panel simplemente no muestra ese cuidado. */
+const SALTABLES: Paso[] = ['stock', 'control', 'cuidadores'];
 type Fase = 'preguntas' | 'armando' | 'resultado';
 
 const AYUDA: Record<Paso, string> = {
   nombre: 'Escribe su nombre para seguir.',
   olvidos: 'Elige al menos una opción para seguir.',
   med: 'Elige cada cuánto y en qué momento para seguir.',
-  stock: 'Elige una opción para seguir. Si no sabes, marca «No lo sé».',
+  stock: 'Elige una opción, marca «No lo sé» o salta esta pregunta.',
   comida: 'Elige los días y la anticipación para seguir.',
-  control: 'Elige cuál es y cuándo corresponde para seguir.',
+  control: 'Elige cuál es y cuándo corresponde, o salta esta pregunta.',
   cuidadores: 'Elige una opción o salta esta pregunta.',
   avisos: '',
 };
@@ -385,7 +386,6 @@ export default function Onboarding() {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] as const },
   };
-  const conMensaje = actual !== 'avisos';
 
   return (
     <MotionConfig reducedMotion="user">
@@ -444,7 +444,7 @@ export default function Onboarding() {
               <>
                 <h1 tabIndex={-1} className={titulo}>¿Qué te gustaría dejar de tener que recordar?</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">
-                  Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
+                  Ese «¿le di la pastilla?» que se repite. Ese «¿le di la pastilla?» que se repite. Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
                 </p>
                 {error === LIMITE && (
                   <p role="alert" className="mt-3 flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
@@ -471,7 +471,7 @@ export default function Onboarding() {
                   onChange={(e) => actualizar({ medNombre: e.target.value })}
                   className="mt-2 h-14 w-full rounded-[var(--radius-card)] border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-lg font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
                 />
-                <Fichas titulo="¿Cada cuánto lo toma?" opciones={FRECUENCIA} valor={r.medFrecuencia} onElegir={(v) => elegir({ medFrecuencia: v })} columnas={3} />
+                <Fichas titulo="¿Cada cuánto se lo das?" opciones={FRECUENCIA} valor={r.medFrecuencia} onElegir={(v) => elegir({ medFrecuencia: v })} columnas={3} />
                 <Fichas titulo="¿En qué momento se lo das?" opciones={HORA} valor={r.medHora} onElegir={(v) => elegir({ medHora: v })} columnas={3} />
               </>
             )}
@@ -531,9 +531,9 @@ export default function Onboarding() {
             )}
 
             <div className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-2 bg-[var(--bg)] px-6 pb-4 pt-4">
-              {conMensaje && error !== LIMITE && (
+              {(
                 <div id="ayuda" role="status" aria-live="polite" className="min-h-12">
-                  {error && (
+                  {error && error !== LIMITE && (
                     <p className="flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
                       <AlertCircle size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
                       {error}
@@ -555,10 +555,12 @@ export default function Onboarding() {
                   <button type="button" className={botonPrimario} onClick={continuar}>
                     Continuar
                   </button>
-                  {SALTABLES.includes(actual) && (
+                  {SALTABLES.includes(actual) ? (
                     <button type="button" onClick={siguiente} className={botonSecundario}>
                       Saltar por ahora
                     </button>
+                  ) : (
+                    <div aria-hidden="true" className="h-12" />
                   )}
                 </>
               )}
@@ -609,9 +611,9 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
           transition={{ duration: 0.4, ease: 'easeOut' }}
         />
       </div>
-      <ul className="flex min-h-24 flex-col gap-3 text-left" aria-live="polite">
+      <ul className="flex min-h-24 w-full max-w-xs flex-col gap-3 text-left" aria-live="polite">
         {lineas.slice(0, Math.min(visibles, 3)).map((l, i) => (
-          <motion.li key={l} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex items-center gap-3 text-base text-[var(--text-secondary)]">
+          <motion.li key={l} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex items-center gap-3 text-base font-medium text-[var(--text-primary)]">
             {i < visibles - 1 || visibles === 4 ? (
               <Check size={18} color="var(--accent)" aria-hidden="true" />
             ) : (
@@ -674,10 +676,11 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
   const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
   return (
     <motion.main {...entrada} className="flex flex-1 flex-col pt-4">
-      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--chip-bg)]">
-        <PawPrint size={26} color="var(--accent)" aria-hidden="true" />
-      </span>
-      <h1 tabIndex={-1} className="mt-3 text-3xl font-bold leading-tight outline-none">
+      <div className="foto-duotone aspect-[3/1] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={300} />
+      </div>
+      <h1 tabIndex={-1} className="mt-4 text-3xl font-bold leading-tight outline-none">
         Todo listo para <span className="text-[var(--accent)]">{nombre}</span>
       </h1>
       <p className="mt-2 text-base text-[var(--text-secondary)]">
@@ -714,7 +717,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
                   <span className="flex-1">
                     <span className="block text-base font-semibold">{it.titulo}</span>
                     <span className="block text-sm text-[var(--text-secondary)]">
-                      {hecho ? (comparte ? 'Listo · así lo verán los demás tutores' : 'Listo · así queda registrado con la hora') : it.detalle}
+                      {hecho ? (comparte ? 'Listo · así lo verán los demás' : 'Listo · así queda registrado con la hora') : it.detalle}
                     </span>
                   </span>
                   <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.etiqueta}</span>
@@ -749,9 +752,9 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
           <span className="flex-1 text-base font-semibold">Tú</span>
         </li>
         {comparte && r.cuidadores && (
-          <li className="flex min-h-14 items-center gap-4 rounded-[var(--radius-card)] border border-dashed border-[var(--border-ui)] p-3">
-            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
-              <Users size={20} color="var(--accent)" aria-hidden="true" />
+          <li className="flex min-h-14 items-center gap-4 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--accent-2)] p-3">
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--accent-2)_22%,var(--surface))]">
+              <Users size={20} color="var(--text-primary)" aria-hidden="true" />
             </span>
             <span className="flex-1">
               <span className="block text-base font-semibold">{TEXTO_CUIDADORES[r.cuidadores]}</span>
@@ -765,6 +768,11 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
       <p className="mt-1 text-sm text-[var(--text-secondary)]">Armado con tus {n} respuestas. Las fechas exactas las ajustas dentro.</p>
 
       <div className="mt-auto flex flex-col gap-2 pt-8">
+        {hayPrueba() && (
+          <p className="text-center text-base font-semibold">
+            {CONDICIONES.prueba.dias} días gratis{hayGarantia() ? ' · Garantía de ' + CONDICIONES.garantia.dias + ' días' : ''}
+          </p>
+        )}
         <Link href="/paywall" className={botonPrimario}>
           Ver planes para {nombre}
         </Link>

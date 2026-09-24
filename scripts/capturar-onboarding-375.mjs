@@ -19,8 +19,8 @@ await p.getByRole('checkbox', { name: /Documentos/ }).click(); await foto('2-olv
 await p.getByRole('checkbox', { name: /Documentos/ }).click(); await foto('2-olvidos');
 await seguir();
 await p.fill('#med', 'Apoquel');
-await p.getByRole('radio', { name: '1 vez al día' }).click();
-await p.getByRole('radio', { name: 'En la noche' }).click(); await foto('3-medicamento'); await seguir();
+await p.getByRole('radio', { name: 'Diario' }).click();
+await p.getByRole('radio', { name: 'Noche' }).click(); await foto('3-medicamento'); await seguir();
 await p.getByRole('radio', { name: '15 días', exact: true }).click(); await foto('4-stock'); await seguir();
 await p.getByRole('radio', { name: '7 días', exact: true }).first().click();
 await p.getByRole('radio', { name: '5 días', exact: true }).click(); await foto('5-comida'); await seguir();
