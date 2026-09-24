@@ -7,9 +7,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { CONDICIONES } from '@/lib/oferta';
+import Marca from './Marca';
 import { correoValido, enviarEnlaceDeAcceso } from '@/lib/auth';
 
-type Estado = { tipo: 'reposo' } | { tipo: 'enviando' } | { tipo: 'error'; texto: string } | { tipo: 'enviado' };
+type Estado =
+  | { tipo: 'reposo' }
+  | { tipo: 'enviando' }
+  | { tipo: 'correo_invalido'; texto: string }
+  | { tipo: 'sistema'; texto: string }
+  | { tipo: 'enviado' };
 
 export default function Login() {
   const [correo, setCorreo] = useState('');
@@ -18,27 +24,28 @@ export default function Login() {
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!correoValido(correo)) {
-      setEstado({ tipo: 'error', texto: 'Revisa el correo: parece que falta algo.' });
+      setEstado({ tipo: 'correo_invalido', texto: 'Revisa el correo: parece que falta algo.' });
       return;
     }
     setEstado({ tipo: 'enviando' });
     const r = await enviarEnlaceDeAcceso(correo);
     if (r.ok) setEstado({ tipo: 'enviado' });
     else
-      setEstado({
-        tipo: 'error',
-        texto:
-          r.motivo === 'no_configurado'
-            ? `El acceso a la app se activa pronto. Si ya pagaste, escríbenos a ${CONDICIONES.contacto} y te avisamos apenas esté listo.`
-            : 'Revisa el correo: parece que falta algo.',
-      });
+      setEstado(
+        r.motivo === 'no_configurado'
+          ? { tipo: 'sistema', texto: 'El acceso a la app se activa pronto. Todavía no podemos enviarte el enlace.' }
+          : { tipo: 'correo_invalido', texto: 'Revisa el correo: parece que falta algo.' },
+      );
   };
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
-      <Link href="/" className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)]" aria-label="Volver al inicio">
-        <ArrowLeft size={22} aria-hidden="true" />
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link href="/" className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)]" aria-label="Volver al inicio">
+          <ArrowLeft size={22} aria-hidden="true" />
+        </Link>
+        <Marca />
+      </div>
       <main className="flex flex-1 flex-col pt-8">
         <h1 className="text-3xl font-bold leading-tight">Entrar a tu cuenta</h1>
         <p className="mt-2 text-base text-[var(--text-secondary)]">Te enviamos un enlace al correo. Sin contraseñas que recordar.</p>
@@ -54,22 +61,33 @@ export default function Login() {
             autoComplete="email"
             value={correo}
             onChange={(e) => setCorreo(e.target.value)}
-            aria-invalid={estado.tipo === 'error'}
+            aria-invalid={estado.tipo === 'correo_invalido'}
             aria-describedby="mensaje"
             placeholder="nombre@correo.com"
-            className="h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_35%,transparent)] bg-[var(--surface)] px-4 text-lg outline-none focus:border-[var(--accent)]"
+            className="h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_70%,transparent)] bg-[var(--surface)] px-4 text-lg outline-none focus:border-[var(--accent)]"
           />
           <button
             type="submit"
             disabled={estado.tipo === 'enviando'}
-            className="mt-2 inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] disabled:opacity-40 [touch-action:manipulation]"
+            className="mt-2 inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] active:scale-[0.98] disabled:bg-[var(--surface-2)] disabled:text-[var(--text-secondary)] disabled:shadow-none [touch-action:manipulation]"
           >
             {estado.tipo === 'enviando' ? 'Enviando…' : 'Enviarme el enlace'}
           </button>
-          <p id="mensaje" role="status" className={`text-base ${estado.tipo === 'error' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
-            {estado.tipo === 'error' && estado.texto}
-            {estado.tipo === 'enviado' && 'Listo. Revisa tu correo y toca el enlace.'}
-          </p>
+          <div id="mensaje" role={estado.tipo === 'reposo' || estado.tipo === 'enviando' ? undefined : 'alert'} aria-live="polite">
+            {estado.tipo === 'correo_invalido' && (
+              <p className="rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] p-3 text-base font-semibold">{estado.texto}</p>
+            )}
+            {estado.tipo === 'sistema' && (
+              <p className="rounded-[var(--radius-button)] bg-[var(--surface-2)] p-3 text-base">
+                {estado.texto} Si ya pagaste, escríbenos a{' '}
+                <a href={`mailto:${CONDICIONES.contacto}`} className="font-semibold text-[var(--accent)] underline underline-offset-4">
+                  {CONDICIONES.contacto}
+                </a>
+                .
+              </p>
+            )}
+            {estado.tipo === 'enviado' && <p className="text-base text-[var(--text-secondary)]">Listo. Revisa tu correo y toca el enlace.</p>}
+          </div>
         </form>
 
         <p className="mt-auto pt-8 text-center text-base text-[var(--text-secondary)]">

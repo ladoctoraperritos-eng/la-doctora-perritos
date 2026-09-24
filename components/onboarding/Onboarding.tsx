@@ -3,7 +3,7 @@
 // Onboarding: una pregunta por pantalla, cada respuesta cambia algo real del Panel de Hoy (02B).
 // Orden: preguntas → reconocimiento → «armando tu panel» → resultado con primera victoria → /paywall.
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, useReducedMotion } from 'motion/react';
@@ -25,6 +25,7 @@ import {
   Utensils,
   type LucideIcon,
 } from 'lucide-react';
+import Marca from './Marca';
 import {
   actualizar,
   armarPanel,
@@ -51,11 +52,13 @@ interface Opcion<T extends string> {
 }
 
 function Opciones<T extends string>({
+  nombreGrupo,
   opciones,
   seleccion,
   multiple,
   onElegir,
 }: {
+  nombreGrupo: string;
   opciones: Opcion<T>[];
   seleccion: T | T[] | null;
   multiple?: boolean;
@@ -63,7 +66,7 @@ function Opciones<T extends string>({
 }) {
   const activa = (v: T) => (Array.isArray(seleccion) ? seleccion.includes(v) : seleccion === v);
   return (
-    <div role={multiple ? 'group' : 'radiogroup'} className="mt-6 flex flex-col gap-3">
+    <div role={multiple ? 'group' : 'radiogroup'} aria-label={nombreGrupo} className="mt-6 flex flex-col gap-3">
       {opciones.map((o) => {
         const Icono = o.icono;
         const on = activa(o.valor);
@@ -74,10 +77,10 @@ function Opciones<T extends string>({
             role={multiple ? 'checkbox' : 'radio'}
             aria-checked={on}
             onClick={() => onElegir(o.valor)}
-            className={`flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors [touch-action:manipulation] ${
+            className={`flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors active:scale-[0.98] [touch-action:manipulation] ${
               on
                 ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))]'
-                : 'border-[color-mix(in_oklab,var(--text-tertiary)_25%,transparent)] bg-[var(--surface)]'
+                : 'border-[color-mix(in_oklab,var(--text-tertiary)_60%,transparent)] bg-[var(--surface)]'
             }`}
           >
             <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
@@ -90,7 +93,7 @@ function Opciones<T extends string>({
             <span
               aria-hidden="true"
               className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                on ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[color-mix(in_oklab,var(--text-tertiary)_45%,transparent)]'
+                on ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[color-mix(in_oklab,var(--text-tertiary)_80%,transparent)]'
               }`}
             >
               {on && <Check size={14} color="var(--bg)" strokeWidth={3} />}
@@ -159,7 +162,7 @@ function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
         {PASOS.map((p, i) => (
           <span
             key={p}
-            className={`h-2 flex-1 rounded-full ${i <= paso ? 'bg-[var(--accent)]' : 'bg-[color-mix(in_oklab,var(--accent)_16%,transparent)]'}`}
+            className={`h-2 flex-1 rounded-full ${i <= paso ? 'bg-[var(--accent)]' : 'bg-[color-mix(in_oklab,var(--accent)_28%,var(--surface-2))]'}`}
           />
         ))}
       </div>
@@ -168,7 +171,7 @@ function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
 }
 
 const botonPrimario =
-  'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-opacity disabled:opacity-40 [touch-action:manipulation]';
+  'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-colors active:scale-[0.98] disabled:bg-[var(--surface-2)] disabled:text-[var(--text-secondary)] disabled:shadow-none [touch-action:manipulation]';
 
 export default function Onboarding() {
   const r = useRespuestas();
@@ -177,6 +180,11 @@ export default function Onboarding() {
   const [fase, setFase] = useState<Fase>('preguntas');
   const [paso, setPaso] = useState(0);
   const irAlResultado = useCallback(() => setFase('resultado'), []);
+  const raiz = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Al cambiar de pantalla el foco pasa al título (lectores de pantalla y teclado).
+    raiz.current?.querySelector<HTMLElement>('h1')?.focus();
+  }, [paso, fase]);
 
   const nombre = r.nombre.trim() || 'tu perro';
   const actual = PASOS[paso];
@@ -207,14 +215,17 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
+    <div ref={raiz} className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
+      <div className="-mt-2 mb-1">
+        <Marca />
+      </div>
       {fase === 'preguntas' && <Cabecera paso={paso} onAtras={atras} />}
 
       {fase === 'preguntas' && (
         <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-8">
           {actual === 'nombre' && (
             <>
-              <h1 className="text-3xl font-bold leading-tight">¿Cómo se llama tu perro?</h1>
+              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Cómo se llama tu perro?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Así armamos su Panel de Hoy.</p>
               <label htmlFor="nombre" className="sr-only">
                 Nombre de tu perro
@@ -228,29 +239,30 @@ export default function Onboarding() {
                 placeholder="Por ejemplo, Toffee"
                 onChange={(e) => actualizar({ nombre: e.target.value })}
                 onKeyDown={(e) => e.key === 'Enter' && valido.nombre && siguiente()}
-                className="mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_35%,transparent)] bg-[var(--surface)] px-4 text-xl font-semibold outline-none focus:border-[var(--accent)]"
+                className="mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_70%,transparent)] bg-[var(--surface)] px-4 text-xl font-semibold outline-none focus:border-[var(--accent)]"
               />
             </>
           )}
           {actual === 'cantidad' && (
             <>
-              <h1 className="text-3xl font-bold leading-tight">¿Cuántos perros tienes?</h1>
+              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Cuántos perros tienes?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos con {nombre}; los demás los agregas después.</p>
-              <Opciones opciones={CANTIDAD} seleccion={r.cantidad} onElegir={(v) => actualizar({ cantidad: v })} />
+              <Opciones nombreGrupo="Cuántos perros tienes" opciones={CANTIDAD} seleccion={r.cantidad} onElegir={(v) => actualizar({ cantidad: v })} />
             </>
           )}
           {actual === 'etapa' && (
             <>
-              <h1 className="text-3xl font-bold leading-tight">¿En qué etapa está {nombre}?</h1>
+              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿En qué etapa está {nombre}?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Cambia qué controles y vacunas le mostramos.</p>
-              <Opciones opciones={ETAPA} seleccion={r.etapa} onElegir={(v) => actualizar({ etapa: v })} />
+              <Opciones nombreGrupo="Etapa de tu perro" opciones={ETAPA} seleccion={r.etapa} onElegir={(v) => actualizar({ etapa: v })} />
             </>
           )}
           {actual === 'cuidados' && (
             <>
-              <h1 className="text-3xl font-bold leading-tight">¿Qué necesita {nombre} cada día?</h1>
+              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Qué necesita {nombre} cada día?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Elige lo que quieras. El resto lo agregas después.</p>
               <Opciones
+                nombreGrupo="Qué necesita cada día"
                 multiple
                 opciones={CUIDADOS}
                 seleccion={r.cuidados}
@@ -265,16 +277,16 @@ export default function Onboarding() {
           )}
           {actual === 'cuidadores' && (
             <>
-              <h1 className="text-3xl font-bold leading-tight">¿Quién más cuida a {nombre}?</h1>
+              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Quién más cuida a {nombre}?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Así todos ven qué se hizo y nadie duda.</p>
-              <Opciones opciones={CUIDADORES} seleccion={r.cuidadores} onElegir={(v) => actualizar({ cuidadores: v })} />
+              <Opciones nombreGrupo="Quién más lo cuida" opciones={CUIDADORES} seleccion={r.cuidadores} onElegir={(v) => actualizar({ cuidadores: v })} />
             </>
           )}
           {actual === 'momento' && (
             <>
-              <h1 className="text-3xl font-bold leading-tight">¿Cuándo le das lo importante?</h1>
+              <h1 tabIndex={-1} className="outline-none text-3xl font-bold leading-tight">¿Cuándo le das lo importante?</h1>
               <p className="mt-2 text-base text-[var(--text-secondary)]">Ahí pondremos su aviso principal.</p>
-              <Opciones opciones={MOMENTO} seleccion={r.momento} onElegir={(v) => actualizar({ momento: v })} />
+              <Opciones nombreGrupo="Cuándo le das lo importante" opciones={MOMENTO} seleccion={r.momento} onElegir={(v) => actualizar({ momento: v })} />
             </>
           )}
 
@@ -320,7 +332,7 @@ function Reconocimiento({
       <span className="mx-auto inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)]">
         <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
       </span>
-      <h1 className="text-balance text-3xl font-bold leading-tight">
+      <h1 tabIndex={-1} className="outline-none text-balance text-3xl font-bold leading-tight">
         {nombre} tiene a alguien que quiere hacerlo <span className="text-[var(--accent)]">bien</span>
       </h1>
       <p className="text-lg text-[var(--text-secondary)]">
@@ -357,7 +369,7 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
       <span className="inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--chip-bg)]">
         <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
       </span>
-      <h1 className="text-2xl font-bold">Armando el Panel de Hoy de {nombre}</h1>
+      <h1 tabIndex={-1} className="outline-none text-2xl font-bold">Armando el Panel de Hoy de {nombre}</h1>
       <ul className="flex flex-col gap-3 text-left">
         {lineas.slice(0, visibles).map((l) => (
           <li key={l} className="flex items-center gap-3 text-base text-[var(--text-secondary)]">
@@ -378,10 +390,11 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
     if (!r.primeraVictoria) actualizar({ primeraVictoria: true });
   };
   const n = contarRespuestas(r);
+  const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
   return (
     <motion.main {...entrada} className="flex flex-1 flex-col pt-6">
       <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Tu Panel de Hoy</p>
-      <h1 className="mt-1 text-3xl font-bold leading-tight">Hoy con {nombre}</h1>
+      <h1 tabIndex={-1} className="outline-none mt-1 text-3xl font-bold leading-tight">Hoy con {nombre}</h1>
       <p className="mt-2 text-base text-[var(--text-secondary)]">Toca un cuidado para marcarlo como hecho. Así se siente.</p>
 
       <ul className="mt-6 flex flex-col gap-3">
@@ -398,7 +411,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
                 <span
                   aria-hidden="true"
                   className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 ${
-                    hecho ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[color-mix(in_oklab,var(--text-tertiary)_45%,transparent)]'
+                    hecho ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[color-mix(in_oklab,var(--text-tertiary)_80%,transparent)]'
                   }`}
                 >
                   {hecho && <Check size={18} color="var(--bg)" strokeWidth={3} />}
@@ -407,7 +420,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
                   <span className={`block text-base font-semibold ${hecho ? 'text-[var(--text-secondary)] line-through' : ''}`}>
                     {it.titulo}
                   </span>
-                  <span className="block text-sm text-[var(--text-secondary)]">{hecho ? 'Listo · tu familia lo ve al instante' : it.detalle}</span>
+                  <span className="block text-sm text-[var(--text-secondary)]">{hecho ? (comparte ? 'Listo · los demás tutores lo ven al instante' : 'Listo · queda registrado con la hora') : it.detalle}</span>
                 </span>
                 {it.hora && <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.hora}</span>}
               </button>
