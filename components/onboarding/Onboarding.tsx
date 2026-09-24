@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, useReducedMotion } from 'motion/react';
+import { MotionConfig, motion, useReducedMotion } from 'motion/react';
 import {
   ArrowLeft,
   Check,
@@ -198,6 +198,11 @@ export default function Onboarding() {
   const raiz = useRef<HTMLDivElement>(null);
   const campoNombre = useRef<HTMLInputElement>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pasoRef = useRef(0);
+  const cancelarAvance = () => {
+    if (temporizador.current) clearTimeout(temporizador.current);
+    temporizador.current = null;
+  };
 
   useEffect(() => {
     // Al cambiar de pantalla el foco pasa al título (lectores de pantalla y teclado).
@@ -221,7 +226,9 @@ export default function Onboarding() {
   };
 
   const irAlPaso = (i: number) => {
+    cancelarAvance();
     setIntento(false);
+    pasoRef.current = i;
     setPaso(i);
   };
   const siguiente = () => {
@@ -238,8 +245,13 @@ export default function Onboarding() {
     actualizar(parcial);
     setIntento(false);
     if (AUTOAVANZAN.includes(actual) && !reduce) {
-      if (temporizador.current) clearTimeout(temporizador.current);
-      temporizador.current = setTimeout(siguiente, 320);
+      cancelarAvance();
+      const desde = pasoRef.current;
+      temporizador.current = setTimeout(() => {
+        if (pasoRef.current !== desde) return;
+        if (desde < PASOS.length - 1) irAlPaso(desde + 1);
+        else setFase('reconocimiento');
+      }, 320);
     }
   };
   const atras = () => {
@@ -248,28 +260,35 @@ export default function Onboarding() {
       setFase('preguntas');
       return;
     }
+    cancelarAvance();
     if (fase !== 'preguntas') return setFase('reconocimiento');
     if (paso > 0) irAlPaso(paso - 1);
     else router.push('/');
   };
   const editar = (i: number) => {
+    cancelarAvance();
     irAlPaso(i);
     setFase('preguntas');
   };
 
   const entrada = {
-    initial: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 },
+    initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] as const },
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div ref={raiz} className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
-      <div className="-mt-2 mb-1">
+      <div className="-mt-2 mb-1 flex items-center justify-between">
         <Marca />
+        <span className="foto-duotone size-11 rounded-full border-2 border-[var(--surface)] shadow-[var(--shadow-1)]" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/perros-duotone.jpg" alt="" width={88} height={88} className="object-[70%_40%]" />
+        </span>
       </div>
-      {fase === 'preguntas' ? (
-        <Cabecera paso={paso} onAtras={atras} />
+      {fase === 'preguntas' || fase === 'reconocimiento' ? (
+        <Cabecera paso={fase === 'preguntas' ? paso : PASOS.length - 1} onAtras={atras} />
       ) : (
         <button
           type="button"
@@ -299,12 +318,15 @@ export default function Onboarding() {
                 autoComplete="off"
                 placeholder="Por ejemplo, Toffee"
                 aria-describedby="ayuda"
+                aria-invalid={intento && !valido.nombre}
                 onChange={(e) => {
                   actualizar({ nombre: e.target.value });
                   setIntento(false);
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && continuar()}
-                className="mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-xl font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
+                className={`mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 bg-[var(--surface)] px-4 text-xl font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)] ${
+                  intento && !valido.nombre ? 'border-[var(--accent)] ring-4 ring-[color-mix(in_oklab,var(--accent)_25%,transparent)]' : 'border-[var(--border-ui)]'
+                }`}
               />
             </>
           )}
@@ -379,6 +401,7 @@ export default function Onboarding() {
       {fase === 'armando' && <Armando nombre={nombre} r={r} onListo={irAlResultado} />}
       {fase === 'resultado' && <Resultado nombre={nombre} r={r} entrada={entrada} />}
     </div>
+    </MotionConfig>
   );
 }
 
@@ -410,7 +433,7 @@ function Reconocimiento({
   return (
     <motion.main {...entrada} className="flex flex-1 flex-col gap-5 pt-4">
       {/* Dispositivo de marca: duotone de sus perros */}
-      <div className="foto-duotone aspect-video rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+      <div className="foto-duotone aspect-[2/1] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={506} />
       </div>
@@ -419,26 +442,26 @@ function Reconocimiento({
       </h1>
       <p className="text-lg text-[var(--text-secondary)]">Y no tienes que acordarte de todo tú solo: el Panel de Hoy lo hace contigo.</p>
 
-      <ul aria-label="Tus respuestas" className="flex flex-col divide-y divide-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4 shadow-[var(--shadow-1)]">
+      <ul aria-label="Tus respuestas" className="grid grid-cols-2 gap-2">
         {resumen(r).map((fila, i) => (
-          <li key={fila.etiqueta} className="flex items-center gap-3 py-2">
-            <span className="flex-1">
-              <span className="block text-sm text-[var(--text-secondary)]">{fila.etiqueta}</span>
-              <span className="block text-base font-semibold">{fila.valor}</span>
-            </span>
+          <li key={fila.etiqueta}>
             <button
               type="button"
               onClick={() => onEditar(i)}
-              aria-label={`Cambiar: ${fila.etiqueta}`}
-              className="inline-flex size-11 items-center justify-center rounded-full text-[var(--accent)] [touch-action:manipulation]"
+              aria-label={`Cambiar ${fila.etiqueta}: ${fila.valor}`}
+              className="flex min-h-14 w-full items-center gap-2 rounded-[var(--radius-button)] border border-[var(--border-ui)] bg-[var(--surface)] px-3 py-2 text-left active:scale-[0.98] [touch-action:manipulation]"
             >
-              <Pencil size={18} aria-hidden="true" />
+              <span className="flex-1">
+                <span className="block text-sm text-[var(--text-secondary)]">{fila.etiqueta}</span>
+                <span className="block text-base font-semibold leading-tight">{fila.valor}</span>
+              </span>
+              <Pencil size={16} color="var(--accent)" aria-hidden="true" />
             </button>
           </li>
         ))}
       </ul>
 
-      <div className="mt-auto pt-2">
+      <div className="sticky bottom-0 -mx-6 mt-auto border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--bg)] px-6 pb-4 pt-3">
         <button type="button" className={botonPrimario} onClick={onSeguir}>
           Armar el Panel de {nombre}
         </button>
@@ -448,7 +471,6 @@ function Reconocimiento({
 }
 
 function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onListo: () => void }) {
-  const reduce = useReducedMotion();
   const hora = r.momento ? HORA_POR_MOMENTO[r.momento] : '08:00';
   const lineas = [`Ordenando lo que necesita ${nombre}…`, `Poniendo su aviso principal a las ${hora}…`, 'Preparando quién hizo qué…'];
   const [visibles, setVisibles] = useState(0);
@@ -463,23 +485,30 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
   }, [onListo]);
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-      <span className={`inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)] ${reduce ? '' : 'motion-safe:animate-pulse'}`}>
+      <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)] motion-safe:animate-pulse">
         <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
       </span>
       <h1 tabIndex={-1} className="text-2xl font-bold outline-none">Armando el Panel de Hoy de {nombre}</h1>
       <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--accent)_28%,var(--surface-2))]" aria-hidden="true">
         <motion.div
           className="h-full rounded-full bg-[var(--accent)]"
-          initial={{ width: reduce ? '100%' : '0%' }}
+          initial={{ width: '0%' }}
           animate={{ width: '100%' }}
-          transition={{ duration: reduce ? 0 : 5, ease: 'easeInOut' }}
+          transition={{ duration: 5, ease: 'easeInOut' }}
         />
       </div>
+      <button
+        type="button"
+        onClick={onListo}
+        className="min-h-11 rounded-[var(--radius-button)] px-4 text-base font-medium text-[var(--text-secondary)] underline underline-offset-4"
+      >
+        Ver mi Panel ya
+      </button>
       <ul className="flex min-h-24 flex-col gap-3 text-left" aria-live="polite">
         {lineas.slice(0, visibles).map((l) => (
           <motion.li
             key={l}
-            initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 6 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
             className="flex items-center gap-3 text-base text-[var(--text-secondary)]"

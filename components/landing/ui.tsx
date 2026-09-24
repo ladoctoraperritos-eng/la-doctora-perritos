@@ -122,15 +122,16 @@ export function SectionShell({
 /* ── useReveal — variants de entrada whileInView con stagger, UNA sola vez,
    reduced-motion respetado (movimiento fuera, fade dentro — 55 T4). ── */
 export function useReveal(stagger = 0.07): { contenedor: Variants; item: Variants } {
-  const reduce = useReducedMotion();
+  // Valores fijos (mismo HTML en servidor y cliente); el <MotionConfig reducedMotion="user"> de la página
+  // quita el desplazamiento a quien prefiere menos movimiento.
   return {
     contenedor: {
       hidden: {},
-      visible: { transition: { staggerChildren: reduce ? 0 : stagger } },
+      visible: { transition: { staggerChildren: stagger } },
     },
     item: {
-      hidden: { opacity: 0, y: reduce ? 0 : 20 },
-      visible: { opacity: 1, y: 0, transition: { duration: reduce ? 0.2 : 0.45, ease: [0.16, 1, 0.3, 1] } },
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } },
     },
   };
 }

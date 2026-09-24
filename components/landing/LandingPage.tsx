@@ -6,7 +6,7 @@
 // si están verificadas en la pasarela.
 
 import { useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { MotionConfig, motion } from 'motion/react';
 import { AlertTriangle, CalendarClock, FileSearch, Package, PackageX, Users } from 'lucide-react';
 import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { featuresPlan, PLANES } from '@/lib/planes';
@@ -62,7 +62,6 @@ const garantiaDesde =
 export default function LandingPage() {
   const [plan, setPlan] = useState<IdPlan>('esencial');
   const P = PLANES[plan];
-  const reduce = useReducedMotion();
 
   const recap = [PRUEBA && `${DIAS_PRUEBA} días de prueba`, GARANTIA && 'Garantía del Primer Aviso', 'Cancela cuando quieras']
     .filter(Boolean)
@@ -73,6 +72,7 @@ export default function LandingPage() {
       : 'PS: La Doctora Perritos junta medicamentos, comida, vacunas y controles de tu perro en el Panel de Hoy, con quién hizo qué.';
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-dvh bg-[var(--bg)] text-[var(--text-primary)] [font-family:var(--font-body)]">
       <Hero
         appName="La Doctora Perritos"
@@ -168,7 +168,7 @@ export default function LandingPage() {
 
       <motion.div
         key={plan}
-        initial={{ opacity: reduce ? 1 : 0, y: reduce ? 0 : 12 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       >
@@ -287,5 +287,6 @@ export default function LandingPage() {
 
       <StickyCtaMobile labelComercial={CTA_LABEL} href={CTA_HREF} />
     </div>
+    </MotionConfig>
   );
 }
