@@ -6,7 +6,7 @@
 //   niveles: display 3xl (título) · title xl (cuidado) · body base · label sm
 //   acento_en: hora clave, botón principal, anillo de progreso, estado activo del menú
 //   baseline: entrada escalonada · anillo que se llena · conteo del progreso · tap con escala · celebración sobria
-//   dispositivo_ownable: foto del perro con marco duotone de marca en la cabecera del perro activo
+//   dispositivo_ownable: foto del perro a color con marco de hairline degradado en la cabecera (decisión del usuario 2026-09-24)
 //   estados: cargando (esqueleto) · vacío · al día (éxito) · sin conexión · deshabilitado (menú «Pronto»)
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
@@ -111,7 +111,7 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
   return (
     <div className="relative size-16 shrink-0" role="img" aria-label={`${hechos} de ${total} cuidados hechos hoy`}>
       <svg viewBox="0 0 96 96" className="size-16 -rotate-90">
-        <circle cx="48" cy="48" r="40" fill="none" strokeWidth="8" className="stroke-[var(--surface-2)]" />
+        <circle cx="48" cy="48" r="40" fill="none" strokeWidth="8" className="stroke-[color-mix(in_oklab,var(--border-ui)_40%,var(--surface-2))]" />
         <motion.circle
           cx="48"
           cy="48"
@@ -215,9 +215,9 @@ function FilaPendiente({ fila, varios, onHecho, i }: { fila: FilaHoy; varios: bo
             {varios ? `${fila.perro.nombre} · ` : ''}
             {fila.cuidado.detalle}
           </span>
-          <span className="mt-1 flex items-center gap-2">
+          <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-base font-bold tabular-nums text-[var(--accent)]">{fila.cuidado.hora}</span>
-            {t !== 'normal' && <span className={`rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>}
+            {t !== 'normal' && <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>}
           </span>
         </span>
         <span aria-hidden="true" className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)]" />
@@ -269,7 +269,7 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
           {varios ? `${fila.perro.nombre} · ` : ''}
           {fila.cuidado.detalle}
         </span>
-        <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>
+        <span className={`mt-1 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>
       </span>
     </motion.li>
   );
@@ -285,17 +285,17 @@ function Menu() {
     <nav aria-label="Secciones" className="sticky bottom-0 z-10 border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--surface)] px-2 pb-2 pt-1">
       <ul className="grid grid-cols-4">
         <li>
-          <span aria-current="page" className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-[var(--radius-button)] bg-[var(--chip-bg)] text-sm font-semibold text-[var(--accent)]">
+          <span aria-current="page" className="flex min-h-16 flex-col items-center justify-start gap-1 rounded-[var(--radius-button)] bg-[var(--chip-bg)] pt-2 text-sm font-semibold text-[var(--accent)]">
             <Home size={22} aria-hidden="true" />
             Hoy
           </span>
         </li>
         {pronto.map(({ icono: Icono, texto }) => (
           <li key={texto}>
-            <span aria-disabled="true" className="flex min-h-14 flex-col items-center justify-center gap-1 text-sm text-[var(--text-tertiary)]">
+            <span aria-disabled="true" className="flex min-h-16 flex-col items-center justify-start gap-1 pt-2 text-sm text-[var(--text-tertiary)]">
               <Icono size={22} aria-hidden="true" />
               {texto}
-              <span className="rounded-full bg-[var(--surface-2)] px-2 text-sm font-semibold">Pronto</span>
+              <span className="sr-only">Pronto</span>
             </span>
           </li>
         ))}
@@ -381,7 +381,7 @@ export default function Hoy() {
             Sin conexión: tus marcas se guardan en este aparato.
           </p>
         )}
-        <main className="flex flex-1 flex-col gap-6 px-6 pb-8 pt-6">
+        <main className="flex flex-1 flex-col gap-6 px-6 pb-24 pt-6">
           <header className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-4">
               <Avatar perro={activo ?? e.perros[0]} />
@@ -418,11 +418,11 @@ export default function Hoy() {
               <div>
                 <p className="text-xl font-bold leading-tight">Todo al día{activo ? ` con ${activo.nombre}` : ''}</p>
                 <p className="mt-1 text-base text-[var(--text-secondary)]">
-                  {mana.cuantos > 0 ? `Mañana te esperan ${mana.cuantos} cuidados, el primero a las ${mana.primera}.` : 'No queda nada por hoy.'}
+                  {mana.cuantos > 0 ? `Mañana: ${mana.cuantos} cuidados, desde las ${mana.primera}.` : 'No queda nada por hoy.'}
                 </p>
                 {futuros[0] && (
                   <p className="mt-1 text-base text-[var(--text-secondary)]">
-                    Y ojo con {futuros[0].cuidado.nombre.toLowerCase()}: {textoDias(futuros[0].dias).texto.toLowerCase()}.
+                    Ojo: {futuros[0].cuidado.nombre.toLowerCase()}, {textoDias(futuros[0].dias).texto.toLowerCase()}.
                   </p>
                 )}
               </div>
@@ -441,7 +441,7 @@ export default function Hoy() {
 
           {resto.length > 0 && (
             <section aria-label="Pendiente hoy">
-              <h2 className="mb-2 text-lg font-bold">Después hoy</h2>
+              <h2 className="mb-2 text-lg font-bold">Siguientes de hoy</h2>
               <ul className="flex flex-col gap-2">
                 {resto.map((f, i) => (
                   <FilaPendiente key={f.cuidado.id} fila={f} varios={varios} i={i + 2} onHecho={() => hacer(f.cuidado.id, f.cuidado.nombre)} />
