@@ -163,3 +163,4 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Hipótesis de activación: crea perro + configura ≥1 cuidado real + ve cuándo toca; señal de retención: vuelve y lo marca hecho.
 - Honestidad: el permiso real de notificaciones del navegador NO se pide aún (no hay push); se registra la intención y se dice «se encienden al crear tu cuenta». Pedirlo de verdad cuando exista push.
 - Almacén pasó a `ldp-onboarding-v2`. Servidor de dev es muy lento en esta carpeta (FS lento): capturas con `next build` + `next start`.
+- Revisión v2 (revisor-visual): 28/40 · 14/20 · copy 12/20, NO LISTA. Corregido después: 6 opciones (vacunas+controles unidos, reposición dentro de medicamentos), botón fijo abajo, mensaje de límite junto al contador, copy sin giro de España. Pendiente (no corregido): escena literal del dolor en el copy, coral de la ficha sin usar, identidad de pantallas 3-7. Sin nueva revisión tras estos ajustes.

@@ -6,9 +6,7 @@
 export type Olvido =
   | 'medicamentos'
   | 'vacunas'
-  | 'controles'
   | 'alimento'
-  | 'reposicion'
   | 'quien'
   | 'documentos'
   | 'emergencia';
@@ -117,9 +115,9 @@ export function pasosPara(r: Respuestas): Paso[] {
   const o = r.olvidos;
   const pasos: Paso[] = ['nombre', 'olvidos'];
   if (o.includes('medicamentos')) pasos.push('med');
-  if (o.includes('medicamentos') || o.includes('reposicion')) pasos.push('stock');
+  if (o.includes('medicamentos')) pasos.push('stock');
   if (o.includes('alimento')) pasos.push('comida');
-  if (o.includes('vacunas') || o.includes('controles')) pasos.push('control');
+  if (o.includes('vacunas')) pasos.push('control');
   if (o.includes('quien')) pasos.push('cuidadores');
   pasos.push('avisos');
   return pasos;
@@ -186,15 +184,15 @@ export function armarPanel(r: Respuestas): Panel {
       etiqueta: diasTexto(r.comidaDias),
     });
   }
-  if ((o.includes('medicamentos') || o.includes('reposicion')) && r.stockDias) {
+  if (o.includes('medicamentos') && r.stockDias) {
     panel.proximo.push({
       id: 'rep',
-      titulo: o.includes('medicamentos') ? `Reponer ${med}` : 'Reponer medicamento o suplemento',
+      titulo: `Reponer ${med}`,
       detalle: 'Aviso antes de que se acabe',
       etiqueta: diasTexto(r.stockDias),
     });
   }
-  if ((o.includes('vacunas') || o.includes('controles')) && r.controlTipo && r.controlCuando) {
+  if (o.includes('vacunas') && r.controlTipo && r.controlCuando) {
     panel.proximo.push({
       id: 'ctl',
       titulo: TEXTO_CONTROL[r.controlTipo],

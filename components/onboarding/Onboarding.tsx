@@ -22,7 +22,6 @@ import {
   Pill,
   ShieldPlus,
   Siren,
-  Stethoscope,
   Syringe,
   User,
   Users,
@@ -206,10 +205,8 @@ function Fichas<T extends string>({
 
 const OLVIDOS: Opcion<Olvido>[] = [
   { valor: 'medicamentos', titulo: 'Sus medicamentos', icono: Pill },
-  { valor: 'vacunas', titulo: 'Vacunas y antiparasitarios', icono: Syringe },
-  { valor: 'controles', titulo: 'Controles veterinarios', icono: Stethoscope },
+  { valor: 'vacunas', titulo: 'Vacunas, antiparasitarios y controles', icono: Syringe },
   { valor: 'alimento', titulo: 'Cuándo comprar alimento', icono: Utensils },
-  { valor: 'reposicion', titulo: 'Reponer medicamentos', icono: PackageOpen },
   { valor: 'quien', titulo: 'Quién ya hizo cada cuidado', icono: Users },
   { valor: 'documentos', titulo: 'Documentos e historial', icono: FileText },
   { valor: 'emergencia', titulo: 'Estar lista ante una emergencia', icono: Siren },
@@ -449,6 +446,12 @@ export default function Onboarding() {
                 <p className="mt-2 text-base text-[var(--text-secondary)]">
                   Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
                 </p>
+                {error === LIMITE && (
+                  <p role="alert" className="mt-3 flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
+                    <AlertCircle size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+                    {LIMITE}
+                  </p>
+                )}
                 <Rejilla nombreGrupo="Qué te gustaría dejar de recordar" opciones={OLVIDOS} seleccion={r.olvidos} onElegir={alternarOlvido} />
               </>
             )}
@@ -474,14 +477,14 @@ export default function Onboarding() {
             )}
             {actual === 'stock' && (
               <>
-                <h1 tabIndex={-1} className={titulo}>¿Para cuántos días le queda {r.olvidos.includes('medicamentos') ? medicamento : 'su medicamento o suplemento'}?</h1>
+                <h1 tabIndex={-1} className={titulo}>¿Para cuántos días le queda {medicamento}?</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">Un cálculo a ojo basta. Te avisamos antes de que se acabe.</p>
                 <Fichas titulo="Días aproximados" opciones={DIAS} valor={r.stockDias} onElegir={(v) => elegir({ stockDias: v })} columnas={2} />
               </>
             )}
             {actual === 'comida' && (
               <>
-                <h1 tabIndex={-1} className={titulo}>Que el alimento de {nombre} no te pille por sorpresa</h1>
+                <h1 tabIndex={-1} className={titulo}>Que el alimento de {nombre} nunca se acabe sin que lo notes</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">Sin marcas ni gramos: eso viene después.</p>
                 <Fichas titulo="¿Para cuántos días crees que queda?" opciones={DIAS} valor={r.comidaDias} onElegir={(v) => elegir({ comidaDias: v })} columnas={2} />
                 <Fichas titulo="¿Con cuánta anticipación te avisamos?" opciones={ANTICIPACION} valor={r.comidaAviso} onElegir={(v) => elegir({ comidaAviso: v })} columnas={3} />
@@ -527,8 +530,8 @@ export default function Onboarding() {
               </>
             )}
 
-            <div className="mt-auto flex flex-col gap-2 pt-8">
-              {conMensaje && (
+            <div className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-2 bg-[var(--bg)] px-6 pb-4 pt-4">
+              {conMensaje && error !== LIMITE && (
                 <div id="ayuda" role="status" aria-live="polite" className="min-h-12">
                   {error && (
                     <p className="flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
