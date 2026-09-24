@@ -104,7 +104,7 @@ export default function LandingPage() {
                 fetchPriority="high"
               />
             </div>
-            <div className="-mt-16 flex justify-center px-6">
+            <div className="mt-6 flex max-h-[32rem] justify-center overflow-hidden px-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/screens/hoy.png"
