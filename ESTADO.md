@@ -109,3 +109,8 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Valor mostrado: US$9 = precio real de venta (no se infla; un valor mayor solo es válido si el ebook se vende de verdad a ese precio en Hotmart). Su landing del ebook usa un «Antes US$97» tachado: ancla inflada, revisar (47/policies de ads).
 - El ebook es la base de conocimiento natural para el chat de emergencias (Sesión 6, RAG 33): fuente propia, con derechos de la creadora.
 - ⚠️ Portada: muestra a una mujer con uniforme quirúrgico y estetoscopio y tres perros; parece imagen generada por IA. La creadora NO es veterinaria: usar esa figura como cara de la marca sugiere profesión veterinaria. Se usa solo como miniatura del producto; pendiente aclarar si es foto real y decidir el hero (foto real de su perro o ilustración).
+
+## Anonimato de la creadora y logo (2026-09-23)
+- La creadora confirma que las fotos de la portada del ebook (mujer con uniforme y perros) están generadas con IA y que quiere permanecer ANÓNIMA. Decisión: la marca no lleva rostro humano ni figura de «doctora». Se retiró la portada del ebook de la landing (mostraba una persona con uniforme y estetoscopio que no existe) y se reemplazó por una portada de marca con el logo.
+- ⚠️ Riesgo a resolver: el ebook y su landing usan una persona generada con IA vestida de profesional médico, y la marca dice «Doctora». Recomendación: declarar en el ebook y en la app que la marca es una guía educativa (no un veterinario) y cambiar la portada por el logo. Anotar en 47.
+- Logo propuesto (3 perritos) en public/brand y como favicon; en el header/footer de la landing. Pendiente OK.

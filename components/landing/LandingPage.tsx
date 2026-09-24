@@ -3,7 +3,7 @@
 // Landing de La Doctora Perritos — compone las 10 secciones canónicas de 19 desde el kit.
 // TODO el copy sale de docs/copy/landing.md (trazado a FICHA-AVATAR.md).
 
-import { AlertTriangle, Brain, FileSearch, Layers, Package, PawPrint, Pill, Users } from 'lucide-react';
+import { AlertTriangle, Brain, FileSearch, Layers, Package, Pill, Users } from 'lucide-react';
 import { Hero } from './Hero';
 import { Problema } from './Problema';
 import { Agitacion } from './Agitacion';
@@ -37,9 +37,8 @@ function CtaIntermedio() {
 }
 
 const LOGO = (
-  <span aria-hidden="true" className="inline-flex size-8 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)]">
-    <PawPrint size={18} color="var(--bg)" />
-  </span>
+  // eslint-disable-next-line @next/next/no-img-element
+  <img src="/brand/logo-trio.svg" alt="" width={56} height={40} className="h-10 w-auto" />
 );
 
 export default function LandingPage() {
@@ -164,9 +163,7 @@ export default function LandingPage() {
       />
 
       <RegaloEbook
-        portadaSrc="/brand/portada-ebook.jpg"
-        portadaAlt="Portada del ebook Primeros Auxilios Caninos de La Doctora Perritos"
-        tituloMarked="Ebook «Primeros Auxilios Caninos»"
+                tituloMarked="Ebook «Primeros Auxilios Caninos»"
         detalleMarked="La guía de la Doctora Perritos para [b]saber qué hacer en una emergencia[/b]."
         valor="US$9"
       />

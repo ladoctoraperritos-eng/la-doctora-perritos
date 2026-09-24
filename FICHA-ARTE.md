@@ -26,3 +26,7 @@
 - Registro anti-repetición: DM Sans + teal #0B5F5A vetados para el próximo proyecto del SO
 
 ## Idioma UI: español neutro con tuteo · Aprobada por el usuario: SÍ
+
+## Logo (2026-09-23)
+- Marca: los tres perritos de la creadora (dorado, border collie, tricolor), dibujados como vector propio a partir de sus fotos: public/brand/logo-trio.svg · ícono/favicon app/icon.svg (cuadrado teal #0B5F5A). Sin fotografía de personas (la creadora quiere permanecer anónima).
+- Tipografía del nombre: DM Sans 700 (la de la ficha). Estado: propuesta pendiente de OK del usuario.

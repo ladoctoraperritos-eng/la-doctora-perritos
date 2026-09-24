@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 170" role="img" aria-label="Tres perritos: dorado, border collie y tricolor">
+  <!-- Perro dorado (izquierda, atrás) -->
+  <g>
+    <ellipse cx="34" cy="92" rx="15" ry="27" fill="#c98f4a" transform="rotate(14 34 92)"/>
+    <ellipse cx="84" cy="92" rx="15" ry="27" fill="#c98f4a" transform="rotate(-14 84 92)"/>
+    <ellipse cx="59" cy="92" rx="30" ry="33" fill="#e2b26e"/>
+    <ellipse cx="59" cy="110" rx="17" ry="13" fill="#f3dcae"/>
+    <ellipse cx="59" cy="103" rx="7" ry="5" fill="#2a2320"/>
+    <circle cx="48" cy="86" r="3.6" fill="#2a2320"/><circle cx="70" cy="86" r="3.6" fill="#2a2320"/>
+    <circle cx="49" cy="85" r="1.1" fill="#fff"/><circle cx="71" cy="85" r="1.1" fill="#fff"/>
+  </g>
+  <!-- Perro tricolor (derecha, atrás) -->
+  <g>
+    <ellipse cx="156" cy="92" rx="15" ry="27" fill="#a9622c" transform="rotate(14 156 92)"/>
+    <ellipse cx="206" cy="92" rx="15" ry="27" fill="#a9622c" transform="rotate(-14 206 92)"/>
+    <ellipse cx="181" cy="92" rx="30" ry="33" fill="#fbf6ee"/>
+    <path d="M160 82 q10 -12 22 -6 q-2 14 -12 16 q-10 0 -10 -10z" fill="#c98243"/>
+    <ellipse cx="181" cy="110" rx="17" ry="13" fill="#fffaf2"/>
+    <ellipse cx="181" cy="103" rx="7" ry="5" fill="#2a2320"/>
+    <circle cx="170" cy="86" r="3.6" fill="#2a2320"/><circle cx="192" cy="86" r="3.6" fill="#2a2320"/>
+    <circle cx="171" cy="85" r="1.1" fill="#fff"/><circle cx="193" cy="85" r="1.1" fill="#fff"/>
+  </g>
+  <!-- Border collie (centro, adelante) -->
+  <g>
+    <path d="M86 64 Q72 40 82 26 Q90 22 96 32 Q104 30 112 50Z" fill="#1c2927"/>
+    <path d="M154 64 Q168 40 158 26 Q150 22 144 32 Q136 30 128 50Z" fill="#1c2927"/>
+    <path d="M88 56 Q81 42 86 33 Q93 33 98 40 Q103 42 106 50Z" fill="#33413e"/>
+    <path d="M152 56 Q159 42 154 33 Q147 33 142 40 Q137 42 134 50Z" fill="#33413e"/>
+    <ellipse cx="120" cy="88" rx="38" ry="42" fill="#1c2927"/>
+    <path d="M113 48 Q120 44 127 48 L130 84 Q120 96 110 84Z" fill="#fbf6ee"/>
+    <ellipse cx="120" cy="112" rx="22" ry="17" fill="#fbf6ee"/>
+    <ellipse cx="120" cy="103" rx="9" ry="6.5" fill="#1c2927"/>
+    <circle cx="103" cy="84" r="4.4" fill="#b8763a"/><circle cx="137" cy="84" r="4.4" fill="#b8763a"/>
+    <circle cx="103" cy="84" r="2.2" fill="#1c2927"/><circle cx="137" cy="84" r="2.2" fill="#1c2927"/>
+    <circle cx="104.4" cy="82.6" r="1.2" fill="#fff"/><circle cx="138.4" cy="82.6" r="1.2" fill="#fff"/>
+    <path d="M113 116 q7 8 14 0" fill="none" stroke="#1c2927" stroke-width="2.4" stroke-linecap="round"/>
+  </g>
+</svg>

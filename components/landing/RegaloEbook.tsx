@@ -9,16 +9,13 @@ import { Hairline, IconChip, SectionShell, useReveal, VIEWPORT_ONCE } from './ui
 import { MarkedCopy } from './MarkedCopy';
 
 export interface RegaloEbookProps {
-  /** Ruta de la portada real del ebook. */
-  portadaSrc: string;
-  portadaAlt: string;
   tituloMarked: string;
   detalleMarked: string;
   /** Precio real de venta del ebook ("US$9"). */
   valor: string;
 }
 
-export function RegaloEbook({ portadaSrc, portadaAlt, tituloMarked, detalleMarked, valor }: RegaloEbookProps) {
+export function RegaloEbook({ tituloMarked, detalleMarked, valor }: RegaloEbookProps) {
   const { contenedor, item } = useReveal();
   return (
     <SectionShell elevacion="elevada" compacta ariaLabel="Regalo del plan anual">
@@ -38,15 +35,17 @@ export function RegaloEbook({ portadaSrc, portadaAlt, tituloMarked, detalleMarke
               </p>
             </div>
             <div className="mt-4 flex items-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={portadaSrc}
-                alt={portadaAlt}
-                width={112}
-                height={175}
-                loading="lazy"
-                className="h-auto w-28 shrink-0 rounded-[var(--radius-button)] shadow-[var(--shadow-2)]"
-              />
+              {/* Portada de marca (sin persona): logo de los tres perritos sobre el acento */}
+              <div
+                aria-hidden="true"
+                className="flex h-40 w-28 shrink-0 flex-col items-center justify-between rounded-[var(--radius-button)] bg-[var(--accent)] px-2 py-4 shadow-[var(--shadow-2)]"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/logo-trio.svg" alt="" width={80} height={56} className="h-auto w-20" />
+                <span className="text-center text-xs font-bold uppercase leading-tight tracking-wide text-[var(--bg)]">
+                  Primeros auxilios caninos
+                </span>
+              </div>
               <div>
                 <h3 className="text-xl font-bold leading-snug text-[var(--text-primary)] [font-family:var(--font-display)]">
                   <MarkedCopy text={tituloMarked} />
