@@ -137,6 +137,11 @@ export default function Paywall() {
             <span className="text-4xl font-bold tabular-nums">{importe}</span>
             <span className="text-base text-[var(--text-secondary)]">{periodo === 'anio' ? 'al año' : 'al mes'}</span>
           </p>
+          {periodo === 'anio' && (
+            <p className="mt-1 text-base font-semibold">
+              Equivale a {P.anualMes} al mes <span className="font-normal text-[var(--text-secondary)]">(mensual: {P.mensual})</span>
+            </p>
+          )}
           <ul className="mt-4 flex flex-col gap-2">
             {featuresPlan(P.perros).map((f) => (
               <li key={f} className="flex items-start gap-3 text-base">
@@ -185,6 +190,15 @@ export default function Paywall() {
         </div>
         <p className="text-center text-sm text-[var(--text-secondary)]">El pago lo procesa Hotmart. Cancela cuando quieras.</p>
 
+        {!checkout && (
+          <p role="status" className="mt-4 rounded-[var(--radius-button)] bg-[var(--surface-2)] p-3 text-center text-sm text-[var(--text-secondary)]">
+            El pago se está conectando. Escríbenos a{' '}
+            <a href={`mailto:${CONDICIONES.contacto}`} className="font-semibold text-[var(--accent)] underline underline-offset-4">
+              {CONDICIONES.contacto}
+            </a>
+            .
+          </p>
+        )}
         {/* Espacio para que la barra fija no tape el final */}
         <div className="h-4" />
       </main>
@@ -196,23 +210,19 @@ export default function Paywall() {
             Garantía del Primer Aviso · {CONDICIONES.garantia.dias} días sobre tu primer pago
           </p>
         )}
+        <ResumenCobro
+          compacto
+          periodo={periodo === 'anio' ? 'anio' : 'mes'}
+          importe={importe}
+        />
         {checkout ? (
           <a href={checkout} className={boton}>
             {etiquetaBoton}
           </a>
         ) : (
-          <>
-            <button type="button" disabled className={boton}>
-              {etiquetaBoton}
-            </button>
-            <p role="status" className="text-center text-sm text-[var(--text-secondary)]">
-              El pago se está conectando. Escríbenos a{' '}
-              <a href={`mailto:${CONDICIONES.contacto}`} className="font-semibold text-[var(--accent)] underline underline-offset-4">
-                {CONDICIONES.contacto}
-              </a>
-              .
-            </p>
-          </>
+          <button type="button" disabled className={boton}>
+            {etiquetaBoton}
+          </button>
         )}
       </div>
     </div>

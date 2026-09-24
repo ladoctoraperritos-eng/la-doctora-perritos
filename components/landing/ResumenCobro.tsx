@@ -17,10 +17,13 @@ export function ResumenCobro({
   periodo,
   importe,
   equivalente,
+  compacto = false,
 }: {
   periodo: Periodo;
   importe: string;
   equivalente?: string;
+  /** Una sola línea (para la barra del botón): qué pagas hoy y cuándo es el primer cobro. */
+  compacto?: boolean;
 }) {
   // Minuto actual en el navegador; en el servidor es null (así no hay desajuste de hidratación).
   const minuto = useSyncExternalStore(suscribirse, minutoActual, () => null);
@@ -28,6 +31,7 @@ export function ResumenCobro({
 
   if (!inicio) {
     // Antes de hidratar: sin fecha, pero con el importe y la frecuencia ya correctos.
+    if (compacto) return <p className="text-center text-sm text-[var(--text-secondary)]">{hayPrueba() ? 'Hoy pagas: US$0' : `Hoy pagas: ${importe}`}</p>;
     return (
       <div className="rounded-[var(--radius-button)] bg-[var(--surface-2)] p-4 text-sm text-[var(--text-secondary)]">
         <p className="text-base font-semibold text-[var(--text-primary)]">
@@ -42,6 +46,15 @@ export function ResumenCobro({
   }
 
   const r = resumenCobro({ inicio, periodo, importe, equivalente });
+  if (compacto) {
+    const hoy = r.lineas[0];
+    const siguiente = r.lineas[1];
+    return (
+      <p className="text-center text-sm text-[var(--text-secondary)]">
+        <strong className="font-semibold text-[var(--text-primary)]">{hoy.etiqueta}: {hoy.valor}</strong> · {siguiente.etiqueta}: {siguiente.valor}
+      </p>
+    );
+  }
   return (
     <div className="rounded-[var(--radius-button)] bg-[var(--surface-2)] p-4 text-sm text-[var(--text-secondary)]">
       <dl className="flex flex-col gap-1">

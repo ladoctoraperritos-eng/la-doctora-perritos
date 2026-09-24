@@ -25,7 +25,7 @@ await p.getByRole('button', { name: 'Continuar' }).click(); await p.waitForTimeo
 await foto('7-reconocimiento');
 await p.getByRole('button', { name: /Armar el Panel/ }).click(); await p.waitForTimeout(1500);
 await foto('8-armando');
-await p.waitForSelector('text=Hoy con Toffee', { timeout: 8000 });
+await p.waitForSelector('text=Hoy con Toffee', { timeout: 12000 });
 await p.waitForTimeout(400);
 await p.getByRole('button', { name: /Medicamento/ }).first().click(); await p.waitForTimeout(300);
 await foto('9-resultado');

@@ -79,14 +79,14 @@ export default function Login() {
             )}
             {estado.tipo === 'sistema' && (
               <p className="rounded-[var(--radius-button)] bg-[var(--surface-2)] p-3 text-base">
-                {estado.texto} Si ya pagaste, escríbenos a{' '}
+                {estado.texto} Para cualquier duda escríbenos a{' '}
                 <a href={`mailto:${CONDICIONES.contacto}`} className="font-semibold text-[var(--accent)] underline underline-offset-4">
                   {CONDICIONES.contacto}
                 </a>
                 .
               </p>
             )}
-            {estado.tipo === 'enviado' && <p className="text-base text-[var(--text-secondary)]">Listo. Revisa tu correo y toca el enlace.</p>}
+            {estado.tipo === 'enviado' && <p className="text-base text-[var(--text-secondary)]">Listo. Revisa tu correo y toca el enlace. Si no lo ves, mira en spam.</p>}
           </div>
         </form>
 

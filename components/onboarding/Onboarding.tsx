@@ -183,6 +183,7 @@ export default function Onboarding() {
   const raiz = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // Al cambiar de pantalla el foco pasa al título (lectores de pantalla y teclado).
+    if (fase === 'preguntas' && paso === 0) return;
     raiz.current?.querySelector<HTMLElement>('h1')?.focus();
   }, [paso, fase]);
 
@@ -203,7 +204,10 @@ export default function Onboarding() {
     else setFase('reconocimiento');
   };
   const atras = () => {
-    if (fase !== 'preguntas') return setFase('preguntas');
+    if (fase !== 'preguntas') {
+      setPaso(PASOS.length - 1);
+      return setFase('preguntas');
+    }
     if (paso > 0) setPaso(paso - 1);
     else router.push('/');
   };
@@ -219,7 +223,18 @@ export default function Onboarding() {
       <div className="-mt-2 mb-1">
         <Marca />
       </div>
-      {fase === 'preguntas' && <Cabecera paso={paso} onAtras={atras} />}
+      {fase === 'preguntas' ? (
+        <Cabecera paso={paso} onAtras={atras} />
+      ) : (
+        <button
+          type="button"
+          onClick={atras}
+          aria-label="Volver a las preguntas"
+          className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
+        >
+          <ArrowLeft size={22} aria-hidden="true" />
+        </button>
+      )}
 
       {fase === 'preguntas' && (
         <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-8">
@@ -239,7 +254,7 @@ export default function Onboarding() {
                 placeholder="Por ejemplo, Toffee"
                 onChange={(e) => actualizar({ nombre: e.target.value })}
                 onKeyDown={(e) => e.key === 'Enter' && valido.nombre && siguiente()}
-                className="mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_70%,transparent)] bg-[var(--surface)] px-4 text-xl font-semibold outline-none focus:border-[var(--accent)]"
+                className="mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_70%,transparent)] bg-[var(--surface)] px-4 text-xl font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
               />
             </>
           )}
@@ -351,6 +366,7 @@ function Reconocimiento({
 }
 
 function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onListo: () => void }) {
+  const reduce = useReducedMotion();
   const hora = r.momento ? HORA_POR_MOMENTO[r.momento] : '08:00';
   const lineas = [
     `Ordenando lo que necesita ${nombre}…`,
@@ -359,14 +375,14 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
   ];
   const [visibles, setVisibles] = useState(1);
   useEffect(() => {
-    const t1 = setTimeout(() => setVisibles(2), 900);
-    const t2 = setTimeout(() => setVisibles(3), 1800);
-    const t3 = setTimeout(onListo, 2700);
+    const t1 = setTimeout(() => setVisibles(2), 1300);
+    const t2 = setTimeout(() => setVisibles(3), 2600);
+    const t3 = setTimeout(onListo, 4000);
     return () => [t1, t2, t3].forEach(clearTimeout);
   }, [onListo]);
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 text-center" aria-live="polite">
-      <span className="inline-flex size-16 animate-pulse items-center justify-center rounded-full bg-[var(--chip-bg)]">
+      <span className={`inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)] ${reduce ? '' : 'animate-pulse'}`}>
         <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
       </span>
       <h1 tabIndex={-1} className="outline-none text-2xl font-bold">Armando el Panel de Hoy de {nombre}</h1>
@@ -420,7 +436,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
                   <span className={`block text-base font-semibold ${hecho ? 'text-[var(--text-secondary)] line-through' : ''}`}>
                     {it.titulo}
                   </span>
-                  <span className="block text-sm text-[var(--text-secondary)]">{hecho ? (comparte ? 'Listo · los demás tutores lo ven al instante' : 'Listo · queda registrado con la hora') : it.detalle}</span>
+                  <span className="block text-sm text-[var(--text-secondary)]">{hecho ? (comparte ? 'Listo · así lo verán los demás tutores' : 'Listo · así queda registrado con la hora') : it.detalle}</span>
                 </span>
                 {it.hora && <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.hora}</span>}
               </button>
