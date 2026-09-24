@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { ArrowLeft, Check, ShieldCheck } from 'lucide-react';
 import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { urlCheckout, type PeriodoPago } from '@/lib/hotmart';
-import { contarRespuestas, HORA_POR_MOMENTO, obtener, planRecomendado, suscribir, VACIAS, type IdPlan } from '@/lib/onboarding';
+import { armarPanel, contarRespuestas, obtener, planRecomendado, suscribir, VACIAS, type IdPlan } from '@/lib/onboarding';
 import { featuresPlan, PLANES } from '@/lib/planes';
 import { ResumenCobro } from '@/components/landing/ResumenCobro';
 import Marca from './Marca';
@@ -72,7 +72,7 @@ export default function Paywall() {
         <Marca />
         <main className="flex flex-1 flex-col justify-center gap-4">
           <h1 className="text-3xl font-bold leading-tight">Primero cuéntanos de tu perro</h1>
-          <p className="text-base text-[var(--text-secondary)]">Son 6 preguntas rápidas y armamos su Panel de Hoy.</p>
+          <p className="text-base text-[var(--text-secondary)]">Unas preguntas rápidas y armamos su Panel de Hoy.</p>
           <Link href="/onboarding" className={boton}>
             Armar el Panel de mi perro
           </Link>
@@ -81,12 +81,24 @@ export default function Paywall() {
     );
   }
 
-  const cuidadosDiarios = r.cuidados.filter((c) => c !== 'solo_controles').length;
+  const panel = armarPanel(r);
+  const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
   const armado = [
-    r.momento ? `Aviso principal a las ${HORA_POR_MOMENTO[r.momento]}` : null,
-    cuidadosDiarios > 0 ? (cuidadosDiarios === 1 ? '1 cuidado diario' : `${cuidadosDiarios} cuidados diarios`) : null,
-    'Controles con fecha',
-  ].filter((x): x is string => x !== null);
+    ...panel.hoy.map((i) => `${i.titulo} a las ${i.etiqueta}, con aviso`),
+    ...panel.proximo.map((i) => `${i.titulo}: ${i.etiqueta.toLowerCase()}`),
+    comparte ? 'Cuidado compartido: quién hizo qué' : null,
+    ...panel.siempre.map((i) => i.titulo),
+  ]
+    .filter((x): x is string => x !== null)
+    .slice(0, 5);
+  // El mensaje sigue lo que más le pesa a esta persona (lo que dijo en el onboarding).
+  const promesa = r.olvidos.includes('medicamentos') ? (
+    <>Mantén los medicamentos de {nombre || 'tu perro'} <strong className="font-semibold text-[var(--text-primary)]">bajo control</strong>.</>
+  ) : comparte ? (
+    <>Que todos sepan <strong className="font-semibold text-[var(--text-primary)]">qué ya se hizo</strong> y qué falta.</>
+  ) : (
+    <>Para que su cuidado <strong className="font-semibold text-[var(--text-primary)]">no dependa de tu memoria</strong>.</>
+  );
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
@@ -101,9 +113,7 @@ export default function Paywall() {
         <h1 className="text-balance text-3xl font-bold leading-tight">
           El Panel de Hoy de <span className="text-[var(--accent)]">{nombre || 'tu perro'}</span> está listo
         </h1>
-        <p className="mt-2 text-lg text-[var(--text-secondary)]">
-          Para que su cuidado <strong className="font-semibold text-[var(--text-primary)]">no dependa de tu memoria</strong>.
-        </p>
+        <p className="mt-2 text-lg text-[var(--text-secondary)]">{promesa}</p>
         <ul className="mt-4 flex flex-col gap-2" aria-label="Lo que ya armaste">
           {armado.map((a) => (
             <li key={a} className="flex items-center gap-3 text-base">

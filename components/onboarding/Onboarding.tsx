@@ -1,8 +1,8 @@
 'use client';
 
-// Onboarding: una pregunta por pantalla, cada respuesta cambia algo real del Panel de Hoy (02B).
-// Orden: preguntas → reconocimiento (con resumen editable) → «armando tu panel» → resultado con
-// primera victoria → /paywall.
+// Onboarding: nombre → «qué te gustaría dejar de tener que recordar» → una mini-configuración REAL por cada
+// elección → aviso pedido en contexto → Panel armado con sus datos → /paywall (02B). El momento de activación
+// es configurar al menos un cuidado real y ver cuándo toca actuar; lo demás (raza, peso, historial) va al perfil.
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
@@ -11,21 +11,21 @@ import { MotionConfig, motion, useReducedMotion } from 'motion/react';
 import {
   AlertCircle,
   ArrowLeft,
+  Bell,
   Check,
-  Clock,
+  FileText,
   Footprints,
   Heart,
   Home,
-  Leaf,
-  Moon,
+  PackageOpen,
   PawPrint,
-  Pencil,
   Pill,
-  ShieldCheck,
-  Sprout,
-  Sun,
-  Sunrise,
+  ShieldPlus,
+  Siren,
+  Stethoscope,
+  Syringe,
   User,
+  Users,
   Utensils,
   type LucideIcon,
 } from 'lucide-react';
@@ -34,19 +34,46 @@ import {
   actualizar,
   armarPanel,
   contarRespuestas,
-  HORA_POR_MOMENTO,
+  MAX_OLVIDOS,
   obtener,
+  pasosPara,
   suscribir,
+  TEXTO_CONTROL,
+  TEXTO_CUIDADORES,
   VACIAS,
-  type CantidadPerros,
-  type Cuidado,
+  type Anticipacion,
+  type Cuando,
   type Cuidadores,
-  type Etapa,
+  type Dias,
+  type Frecuencia,
+  type ItemPanel,
   type Momento,
+  type Olvido,
+  type Paso,
   type Respuestas,
+  type TipoControl,
 } from '@/lib/onboarding';
 
 const useRespuestas = (): Respuestas => useSyncExternalStore(suscribir, obtener, () => VACIAS);
+
+const base =
+  'flex w-full text-left border-2 transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] rounded-[var(--radius-card)]';
+const estiloOpcion = (on: boolean) =>
+  on ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))]' : 'border-[var(--border-ui)] bg-[var(--surface)]';
+
+function Marcador({ on, tam = 24 }: { on: boolean; tam?: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{ width: tam, height: tam }}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+        on ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'
+      }`}
+    >
+      {on && <Check size={14} color="var(--bg)" strokeWidth={3} />}
+    </span>
+  );
+}
 
 interface Opcion<T extends string> {
   valor: T;
@@ -55,52 +82,41 @@ interface Opcion<T extends string> {
   icono: LucideIcon;
 }
 
-function Opciones<T extends string>({
+const entradaEscalonada = (i: number) => ({
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.25, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] as const },
+});
+
+/** Lista vertical con ícono: una sola elección. */
+function Lista<T extends string>({
   nombreGrupo,
   opciones,
   seleccion,
-  multiple,
   onElegir,
 }: {
   nombreGrupo: string;
   opciones: Opcion<T>[];
-  seleccion: T | T[] | null;
-  multiple?: boolean;
+  seleccion: T | null;
   onElegir: (v: T) => void;
 }) {
-  const activa = (v: T) => (Array.isArray(seleccion) ? seleccion.includes(v) : seleccion === v);
   return (
-    <div role={multiple ? 'group' : 'radiogroup'} aria-label={nombreGrupo} className="mt-6 flex flex-col gap-3">
-      {opciones.map((o) => {
+    <div role="radiogroup" aria-label={nombreGrupo} className="mt-6 flex flex-col gap-2">
+      {opciones.map((o, i) => {
         const Icono = o.icono;
-        const on = activa(o.valor);
+        const on = seleccion === o.valor;
         return (
-          <motion.div key={o.valor} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: 0.05 * opciones.indexOf(o), ease: [0.16, 1, 0.3, 1] }}>
-          <button
-            type="button"
-            role={multiple ? 'checkbox' : 'radio'}
-            aria-checked={on}
-            onClick={() => onElegir(o.valor)}
-            className={`flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
-              on ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))]' : 'border-[var(--border-ui)] bg-[var(--surface)]'
-            }`}
-          >
-            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
-              <Icono size={22} color="var(--accent)" aria-hidden="true" />
-            </span>
-            <span className="flex-1">
-              <span className="block text-base font-semibold text-[var(--text-primary)]">{o.titulo}</span>
-              {o.detalle && <span className="block text-sm text-[var(--text-secondary)]">{o.detalle}</span>}
-            </span>
-            <span
-              aria-hidden="true"
-              className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
-                on ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'
-              }`}
-            >
-              {on && <Check size={14} color="var(--bg)" strokeWidth={3} />}
-            </span>
-          </button>
+          <motion.div key={o.valor} {...entradaEscalonada(i)}>
+            <button type="button" role="radio" aria-checked={on} onClick={() => onElegir(o.valor)} className={`${base} min-h-14 items-center gap-4 p-3 ${estiloOpcion(on)}`}>
+              <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+                <Icono size={22} color="var(--accent)" aria-hidden="true" />
+              </span>
+              <span className="flex-1">
+                <span className="block text-base font-semibold text-[var(--text-primary)]">{o.titulo}</span>
+                {o.detalle && <span className="block text-sm text-[var(--text-secondary)]">{o.detalle}</span>}
+              </span>
+              <Marcador on={on} />
+            </button>
           </motion.div>
         );
       })}
@@ -108,51 +124,153 @@ function Opciones<T extends string>({
   );
 }
 
-const CANTIDAD: Opcion<CantidadPerros>[] = [
-  { valor: '1', titulo: '1 perro', icono: PawPrint },
-  { valor: '2', titulo: '2 perros', icono: PawPrint },
-  { valor: '3_o_mas', titulo: '3 o más', detalle: 'Hasta 5 perros', icono: PawPrint },
-];
-const ETAPA: Opcion<Etapa>[] = [
-  { valor: 'cachorro', titulo: 'Cachorro', detalle: 'Hasta 1 año', icono: Sprout },
-  { valor: 'adulto', titulo: 'Adulto', detalle: 'De 1 a 7 años', icono: PawPrint },
-  { valor: 'senior', titulo: 'Senior', detalle: '8 años o más', icono: Clock },
-];
-const CUIDADOS: Opcion<Cuidado>[] = [
-  { valor: 'medicamento', titulo: 'Medicamento', detalle: 'Con dosis y hora', icono: Pill },
-  { valor: 'suplemento', titulo: 'Suplemento', detalle: 'Omega-3, condroitina…', icono: Leaf },
-  { valor: 'comida', titulo: 'Comida', detalle: 'Aviso antes de que se acabe', icono: Utensils },
-  { valor: 'solo_controles', titulo: 'Solo controles', detalle: 'Vacunas y citas, sin tratamiento', icono: ShieldCheck },
+/** Rejilla de 2 columnas con ícono: varias elecciones (hasta el límite). */
+function Rejilla({
+  nombreGrupo,
+  opciones,
+  seleccion,
+  onElegir,
+}: {
+  nombreGrupo: string;
+  opciones: Opcion<Olvido>[];
+  seleccion: Olvido[];
+  onElegir: (v: Olvido) => void;
+}) {
+  return (
+    <div role="group" aria-label={nombreGrupo} className="mt-5 grid grid-cols-2 gap-2">
+      {opciones.map((o, i) => {
+        const Icono = o.icono;
+        const on = seleccion.includes(o.valor);
+        return (
+          <motion.div key={o.valor} {...entradaEscalonada(i)}>
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={on}
+              onClick={() => onElegir(o.valor)}
+              className={`${base} min-h-[6.5rem] flex-col justify-between gap-2 p-3 ${estiloOpcion(on)}`}
+            >
+              <span className="flex w-full items-start justify-between">
+                <span className="inline-flex size-10 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+                  <Icono size={22} color="var(--accent)" aria-hidden="true" />
+                </span>
+                <Marcador on={on} tam={22} />
+              </span>
+              <span className="block text-base font-semibold leading-tight text-[var(--text-primary)]">{o.titulo}</span>
+            </button>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Fichas de texto para una elección corta dentro de una mini-configuración. */
+function Fichas<T extends string>({
+  titulo,
+  opciones,
+  valor,
+  onElegir,
+  columnas,
+}: {
+  titulo: string;
+  opciones: { valor: T; texto: string }[];
+  valor: T | null;
+  onElegir: (v: T) => void;
+  columnas: 1 | 2 | 3;
+}) {
+  const cols = columnas === 1 ? 'grid-cols-1' : columnas === 2 ? 'grid-cols-2' : 'grid-cols-3';
+  return (
+    <div role="radiogroup" aria-label={titulo} className="mt-6">
+      <p className="mb-2 text-base font-semibold">{titulo}</p>
+      <div className={`grid gap-2 ${cols}`}>
+        {opciones.map((o) => {
+          const on = valor === o.valor;
+          return (
+            <button
+              key={o.valor}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => onElegir(o.valor)}
+              className={`${base} min-h-14 items-center justify-center px-2 py-2 text-center text-base font-semibold ${estiloOpcion(on)}`}
+            >
+              {o.texto}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const OLVIDOS: Opcion<Olvido>[] = [
+  { valor: 'medicamentos', titulo: 'Sus medicamentos', icono: Pill },
+  { valor: 'vacunas', titulo: 'Vacunas y antiparasitarios', icono: Syringe },
+  { valor: 'controles', titulo: 'Controles veterinarios', icono: Stethoscope },
+  { valor: 'alimento', titulo: 'Cuándo comprar alimento', icono: Utensils },
+  { valor: 'reposicion', titulo: 'Reponer medicamentos', icono: PackageOpen },
+  { valor: 'quien', titulo: 'Quién ya hizo cada cuidado', icono: Users },
+  { valor: 'documentos', titulo: 'Documentos e historial', icono: FileText },
+  { valor: 'emergencia', titulo: 'Estar lista ante una emergencia', icono: Siren },
 ];
 const CUIDADORES: Opcion<Cuidadores>[] = [
   { valor: 'solo_yo', titulo: 'Solo yo', icono: User },
   { valor: 'pareja', titulo: 'Mi pareja y yo', icono: Heart },
   { valor: 'familia', titulo: 'Mi familia', detalle: 'Hasta 3 tutores', icono: Home },
   { valor: 'cuidador', titulo: 'Un cuidador o paseador', icono: Footprints },
+  { valor: 'varias', titulo: 'Varias personas', icono: Users },
 ];
-const MOMENTO: Opcion<Momento>[] = [
-  { valor: 'manana', titulo: 'En la mañana', detalle: 'Alrededor de las 8:00', icono: Sunrise },
-  { valor: 'mediodia', titulo: 'Al mediodía', detalle: 'Alrededor de las 13:00', icono: Sun },
-  { valor: 'noche', titulo: 'En la noche', detalle: 'Alrededor de las 19:00', icono: Moon },
-  { valor: 'varias', titulo: 'Varias veces al día', icono: Clock },
+const FRECUENCIA: { valor: Frecuencia; texto: string }[] = [
+  { valor: '1_dia', texto: '1 vez al día' },
+  { valor: '2_dia', texto: '2 veces al día' },
+  { valor: 'semana', texto: '1 vez por semana' },
+];
+const HORA: { valor: Momento; texto: string }[] = [
+  { valor: 'manana', texto: 'En la mañana' },
+  { valor: 'mediodia', texto: 'Al mediodía' },
+  { valor: 'noche', texto: 'En la noche' },
+];
+const DIAS: { valor: Dias; texto: string }[] = [
+  { valor: '7', texto: '7 días' },
+  { valor: '15', texto: '15 días' },
+  { valor: '30', texto: '30 días' },
+  { valor: 'no_se', texto: 'No lo sé' },
+];
+const ANTICIPACION: { valor: Anticipacion; texto: string }[] = [
+  { valor: '3', texto: '3 días' },
+  { valor: '5', texto: '5 días' },
+  { valor: '7', texto: '7 días' },
+];
+const TIPO_CONTROL: { valor: TipoControl; texto: string }[] = [
+  { valor: 'vacuna', texto: TEXTO_CONTROL.vacuna },
+  { valor: 'antiparasitario', texto: TEXTO_CONTROL.antiparasitario },
+  { valor: 'veterinario', texto: TEXTO_CONTROL.veterinario },
+];
+const CUANDO: { valor: Cuando; texto: string }[] = [
+  { valor: 'semana', texto: 'Esta semana' },
+  { valor: 'mes', texto: 'Este mes' },
+  { valor: 'meses', texto: 'En 2-3 meses' },
+  { valor: 'no_se', texto: 'No lo sé' },
 ];
 
-type Paso = 'nombre' | 'cantidad' | 'etapa' | 'cuidados' | 'cuidadores' | 'momento';
-const PASOS: Paso[] = ['nombre', 'cantidad', 'etapa', 'cuidados', 'cuidadores', 'momento'];
-/** Solo estos se pueden saltar (no rompen el Panel). */
-const SALTABLES: Paso[] = ['etapa', 'cuidadores'];
-type Fase = 'preguntas' | 'reconocimiento' | 'armando' | 'resultado';
+/** Solo este paso se puede saltar sin romper el Panel. */
+const SALTABLES: Paso[] = ['cuidadores'];
+type Fase = 'preguntas' | 'armando' | 'resultado';
 
 const AYUDA: Record<Paso, string> = {
   nombre: 'Escribe su nombre para seguir.',
-  cantidad: 'Elige cuántos perros tienes para seguir.',
-  etapa: 'Elige una etapa o salta esta pregunta.',
-  cuidados: 'Elige al menos una opción para seguir.',
+  olvidos: 'Elige al menos una opción para seguir.',
+  med: 'Elige cada cuánto y en qué momento para seguir.',
+  stock: 'Elige una opción para seguir. Si no sabes, marca «No lo sé».',
+  comida: 'Elige los días y la anticipación para seguir.',
+  control: 'Elige cuál es y cuándo corresponde para seguir.',
   cuidadores: 'Elige una opción o salta esta pregunta.',
-  momento: 'Elige un momento para seguir.',
+  avisos: '',
 };
+const LIMITE = `Puedes elegir hasta ${MAX_OLVIDOS} por ahora. El resto lo agregas después.`;
 
-function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
+function Cabecera({ paso, total, onAtras }: { paso: number; total: number; onAtras: () => void }) {
   return (
     <header className="flex items-center gap-4">
       <button
@@ -166,19 +284,15 @@ function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
       <div
         role="progressbar"
         aria-valuemin={0}
-        aria-valuemax={PASOS.length}
+        aria-valuemax={total}
         aria-valuenow={paso + 1}
-        aria-label={`Pregunta ${paso + 1} de ${PASOS.length}`}
-        className="flex flex-1 gap-2"
+        aria-label={`Paso ${paso + 1} de ${total}`}
+        className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_55%,var(--surface-2))]"
       >
-        {PASOS.map((p, i) => (
-          <span key={p} className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_55%,var(--surface-2))]">
-            <span
-              className="absolute inset-y-0 left-0 rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
-              style={{ width: i <= paso ? '100%' : '0%' }}
-            />
-          </span>
-        ))}
+        <span
+          className="absolute inset-y-0 left-0 rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
+          style={{ width: `${((paso + 1) / total) * 100}%` }}
+        />
       </div>
     </header>
   );
@@ -186,79 +300,87 @@ function Cabecera({ paso, onAtras }: { paso: number; onAtras: () => void }) {
 
 const botonPrimario =
   'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-colors active:scale-[0.98] [touch-action:manipulation]';
+const botonSecundario =
+  'h-12 rounded-[var(--radius-button)] text-base font-medium text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--accent)] [touch-action:manipulation]';
+const titulo = 'text-3xl font-bold leading-tight outline-none';
+
+/** Texto de la notificación de ejemplo: usa lo primero que la persona configuró. */
+function avisoEjemplo(r: Respuestas, nombre: string): string {
+  const panel = armarPanel(r);
+  const med = panel.hoy[0];
+  if (med) return `Es hora de ${med.titulo} de ${nombre} · ${med.etiqueta}`;
+  if (r.comidaAviso) return `Al alimento de ${nombre} le quedan ${r.comidaAviso} días`;
+  const ctl = panel.proximo.find((p) => p.id === 'ctl');
+  if (ctl) return `${ctl.titulo} de ${nombre}: ya toca agendarlo`;
+  return `Hoy toca cuidar a ${nombre}`;
+}
 
 export default function Onboarding() {
   const r = useRespuestas();
   const router = useRouter();
   const [fase, setFase] = useState<Fase>('preguntas');
   const [paso, setPaso] = useState(0);
-  const [intento, setIntento] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const irAlResultado = useCallback(() => setFase('resultado'), []);
   const raiz = useRef<HTMLDivElement>(null);
   const campoNombre = useRef<HTMLInputElement>(null);
-  const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pasoRef = useRef(0);
-  const cancelarAvance = () => {
-    if (temporizador.current) clearTimeout(temporizador.current);
-    temporizador.current = null;
-  };
 
   useEffect(() => {
     // Al cambiar de pantalla el foco pasa al título (lectores de pantalla y teclado).
     if (fase === 'preguntas' && paso === 0) return;
     raiz.current?.querySelector<HTMLElement>('h1')?.focus();
   }, [paso, fase]);
-  useEffect(() => () => {
-    if (temporizador.current) clearTimeout(temporizador.current);
-  }, []);
 
   const nombre = r.nombre.trim() || 'tu perro';
-  const actual = PASOS[paso];
+  const pasos = pasosPara(r);
+  const actual = pasos[Math.min(paso, pasos.length - 1)];
+  const medicamento = r.medNombre.trim() || 'su medicamento';
 
   const valido: Record<Paso, boolean> = {
     nombre: r.nombre.trim().length > 0,
-    cantidad: r.cantidad !== null,
-    etapa: r.etapa !== null,
-    cuidados: r.cuidados.length > 0,
+    olvidos: r.olvidos.length > 0,
+    med: r.medFrecuencia !== null && r.medHora !== null,
+    stock: r.stockDias !== null,
+    comida: r.comidaDias !== null && r.comidaAviso !== null,
+    control: r.controlTipo !== null && r.controlCuando !== null,
     cuidadores: r.cuidadores !== null,
-    momento: r.momento !== null,
+    avisos: true,
   };
 
   const irAlPaso = (i: number) => {
-    cancelarAvance();
-    setIntento(false);
-    pasoRef.current = i;
+    setError(null);
     setPaso(i);
   };
   const siguiente = () => {
-    if (paso < PASOS.length - 1) irAlPaso(paso + 1);
-    else setFase('reconocimiento');
+    if (paso < pasos.length - 1) irAlPaso(paso + 1);
   };
   const continuar = () => {
     if (valido[actual]) return siguiente();
     // El botón nunca está «muerto»: si falta algo, lo dice y lleva el foco donde corresponde.
-    setIntento(true);
+    setError(AYUDA[actual]);
     if (actual === 'nombre') campoNombre.current?.focus();
   };
   const elegir = (parcial: Partial<Respuestas>) => {
     actualizar(parcial);
-    setIntento(false);
+    setError(null);
+  };
+  const alternarOlvido = (v: Olvido) => {
+    const ya = r.olvidos.includes(v);
+    if (!ya && r.olvidos.length >= MAX_OLVIDOS) return setError(LIMITE);
+    elegir({ olvidos: ya ? r.olvidos.filter((o) => o !== v) : [...r.olvidos, v] });
+  };
+  const decidirAvisos = (v: 'si' | 'no') => {
+    actualizar({ avisos: v });
+    setFase('armando');
   };
   const atras = () => {
-    if (fase === 'reconocimiento') {
-      irAlPaso(PASOS.length - 1);
+    if (fase !== 'preguntas') {
+      irAlPaso(pasos.length - 1);
       setFase('preguntas');
       return;
     }
-    cancelarAvance();
-    if (fase !== 'preguntas') return setFase('reconocimiento');
     if (paso > 0) irAlPaso(paso - 1);
     else router.push('/');
-  };
-  const editar = (i: number) => {
-    cancelarAvance();
-    irAlPaso(i);
-    setFase('preguntas');
   };
 
   const entrada = {
@@ -266,225 +388,216 @@ export default function Onboarding() {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] as const },
   };
+  const conMensaje = actual !== 'avisos';
 
   return (
     <MotionConfig reducedMotion="user">
-    <div ref={raiz} className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
-      <div className="-mt-2 mb-1 flex items-center justify-between">
-        <Marca />
-      </div>
-      {fase === 'preguntas' || fase === 'reconocimiento' ? (
-        <Cabecera paso={fase === 'preguntas' ? paso : PASOS.length - 1} onAtras={atras} />
-      ) : (
-        <button
-          type="button"
-          onClick={atras}
-          aria-label="Volver"
-          className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
-        >
-          <ArrowLeft size={22} aria-hidden="true" />
-        </button>
-      )}
+      <div ref={raiz} className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
+        <div className="-mt-2 mb-1 flex items-center justify-between">
+          <Marca />
+        </div>
+        {fase === 'preguntas' ? (
+          <Cabecera paso={paso} total={pasos.length} onAtras={atras} />
+        ) : (
+          <button
+            type="button"
+            onClick={atras}
+            aria-label="Volver"
+            className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
+          >
+            <ArrowLeft size={22} aria-hidden="true" />
+          </button>
+        )}
 
-      {fase === 'preguntas' && (
-        <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-8">
-          {actual === 'nombre' && (
-            <>
-              <div className="foto-duotone mb-6 aspect-[5/2] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={360} />
-              </div>
-              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Cómo se llama tu perro?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Así armamos su Panel de Hoy.</p>
-              <label htmlFor="nombre" className="sr-only">
-                Nombre de tu perro
-              </label>
-              <input
-                id="nombre"
-                ref={campoNombre}
-                autoFocus
-                value={r.nombre}
-                maxLength={30}
-                autoComplete="off"
-                placeholder="Por ejemplo, Toffee"
-                aria-describedby="ayuda"
-                aria-invalid={intento && !valido.nombre}
-                onChange={(e) => {
-                  actualizar({ nombre: e.target.value });
-                  setIntento(false);
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && continuar()}
-                className={`mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 bg-[var(--surface)] px-4 text-xl font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)] ${
-                  intento && !valido.nombre ? 'border-[var(--accent)] ring-4 ring-[color-mix(in_oklab,var(--accent)_25%,transparent)]' : 'border-[var(--border-ui)]'
-                }`}
-              />
-            </>
-          )}
-          {actual === 'cantidad' && (
-            <>
-              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Cuántos perros tienes?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos con {nombre}; los demás los agregas después.</p>
-              <Opciones nombreGrupo="Cuántos perros tienes" opciones={CANTIDAD} seleccion={r.cantidad} onElegir={(v) => elegir({ cantidad: v })} />
-            </>
-          )}
-          {actual === 'etapa' && (
-            <>
-              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿En qué etapa está {nombre}?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Cambia qué controles y vacunas le mostramos.</p>
-              <Opciones nombreGrupo="Etapa de tu perro" opciones={ETAPA} seleccion={r.etapa} onElegir={(v) => elegir({ etapa: v })} />
-            </>
-          )}
-          {actual === 'cuidados' && (
-            <>
-              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Qué necesita {nombre} cada día?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Elige lo que quieras. El resto lo agregas después.</p>
-              <Opciones
-                nombreGrupo="Qué necesita cada día"
-                multiple
-                opciones={CUIDADOS}
-                seleccion={r.cuidados}
-                onElegir={(v) => {
-                  const ya = r.cuidados.includes(v);
-                  const base = ya ? r.cuidados.filter((c) => c !== v) : [...r.cuidados, v];
-                  // «Solo controles» es excluyente con lo demás.
-                  elegir({ cuidados: v === 'solo_controles' && !ya ? ['solo_controles'] : base.filter((c) => c !== 'solo_controles' || v === 'solo_controles') });
-                }}
-              />
-            </>
-          )}
-          {actual === 'cuidadores' && (
-            <>
-              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿Quién más cuida a {nombre}?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Así todos verán qué se hizo y nadie dudará.</p>
-              <Opciones nombreGrupo="Quién más lo cuida" opciones={CUIDADORES} seleccion={r.cuidadores} onElegir={(v) => elegir({ cuidadores: v })} />
-            </>
-          )}
-          {actual === 'momento' && (
-            <>
-              <h1 tabIndex={-1} className="text-3xl font-bold leading-tight outline-none">¿A qué hora le das su cuidado principal?</h1>
-              <p className="mt-2 text-base text-[var(--text-secondary)]">Ahí pondremos su aviso más importante.</p>
-              <Opciones nombreGrupo="Hora del cuidado principal" opciones={MOMENTO} seleccion={r.momento} onElegir={(v) => elegir({ momento: v })} />
-            </>
-          )}
-
-          <div className="mt-auto flex flex-col gap-2 pt-8">
-            <div id="ayuda" role="status" aria-live="polite" className="min-h-12">
-              {intento && !valido[actual] && (
-                <p className="flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
-                  <AlertCircle size={20} color="var(--accent)" aria-hidden="true" />
-                  {AYUDA[actual]}
+        {fase === 'preguntas' && (
+          <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-6">
+            {actual === 'nombre' && (
+              <>
+                <div className="foto-duotone mb-6 aspect-[5/2] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={360} />
+                </div>
+                <h1 tabIndex={-1} className={titulo}>¿Cómo se llama tu perro?</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos con uno; los demás los agregas después.</p>
+                <label htmlFor="nombre" className="sr-only">
+                  Nombre de tu perro
+                </label>
+                <input
+                  id="nombre"
+                  ref={campoNombre}
+                  autoFocus
+                  value={r.nombre}
+                  maxLength={30}
+                  autoComplete="off"
+                  placeholder="Por ejemplo, Toffee"
+                  aria-describedby="ayuda"
+                  aria-invalid={error !== null && !valido.nombre}
+                  onChange={(e) => {
+                    actualizar({ nombre: e.target.value });
+                    setError(null);
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && continuar()}
+                  className={`mt-6 h-14 w-full rounded-[var(--radius-card)] border-2 bg-[var(--surface)] px-4 text-xl font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)] ${
+                    error !== null && !valido.nombre ? 'border-[var(--accent)] ring-4 ring-[color-mix(in_oklab,var(--accent)_25%,transparent)]' : 'border-[var(--border-ui)]'
+                  }`}
+                />
+              </>
+            )}
+            {actual === 'olvidos' && (
+              <>
+                <h1 tabIndex={-1} className={titulo}>¿Qué te gustaría dejar de tener que recordar?</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">
+                  Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
                 </p>
+                <Rejilla nombreGrupo="Qué te gustaría dejar de recordar" opciones={OLVIDOS} seleccion={r.olvidos} onElegir={alternarOlvido} />
+              </>
+            )}
+            {actual === 'med' && (
+              <>
+                <h1 tabIndex={-1} className={titulo}>Dejemos bajo control el medicamento de {nombre}</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Solo lo esencial. La dosis exacta la ajustas dentro.</p>
+                <label htmlFor="med" className="mt-6 block text-base font-semibold">
+                  ¿Cómo se llama? <span className="font-normal text-[var(--text-secondary)]">(opcional)</span>
+                </label>
+                <input
+                  id="med"
+                  value={r.medNombre}
+                  maxLength={40}
+                  autoComplete="off"
+                  placeholder="Por ejemplo, Apoquel"
+                  onChange={(e) => actualizar({ medNombre: e.target.value })}
+                  className="mt-2 h-14 w-full rounded-[var(--radius-card)] border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-lg font-semibold outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
+                />
+                <Fichas titulo="¿Cada cuánto lo toma?" opciones={FRECUENCIA} valor={r.medFrecuencia} onElegir={(v) => elegir({ medFrecuencia: v })} columnas={3} />
+                <Fichas titulo="¿En qué momento se lo das?" opciones={HORA} valor={r.medHora} onElegir={(v) => elegir({ medHora: v })} columnas={3} />
+              </>
+            )}
+            {actual === 'stock' && (
+              <>
+                <h1 tabIndex={-1} className={titulo}>¿Para cuántos días le queda {r.olvidos.includes('medicamentos') ? medicamento : 'su medicamento o suplemento'}?</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Un cálculo a ojo basta. Te avisamos antes de que se acabe.</p>
+                <Fichas titulo="Días aproximados" opciones={DIAS} valor={r.stockDias} onElegir={(v) => elegir({ stockDias: v })} columnas={2} />
+              </>
+            )}
+            {actual === 'comida' && (
+              <>
+                <h1 tabIndex={-1} className={titulo}>Que el alimento de {nombre} no te pille por sorpresa</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Sin marcas ni gramos: eso viene después.</p>
+                <Fichas titulo="¿Para cuántos días crees que queda?" opciones={DIAS} valor={r.comidaDias} onElegir={(v) => elegir({ comidaDias: v })} columnas={2} />
+                <Fichas titulo="¿Con cuánta anticipación te avisamos?" opciones={ANTICIPACION} valor={r.comidaAviso} onElegir={(v) => elegir({ comidaAviso: v })} columnas={3} />
+              </>
+            )}
+            {actual === 'control' && (
+              <>
+                <h1 tabIndex={-1} className={titulo}>¿Cuál es el próximo cuidado de {nombre}?</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Con eso basta. El historial completo lo cargas cuando quieras.</p>
+                <Fichas titulo="¿Qué es?" opciones={TIPO_CONTROL} valor={r.controlTipo} onElegir={(v) => elegir({ controlTipo: v })} columnas={1} />
+                <Fichas titulo="¿Cuándo corresponde?" opciones={CUANDO} valor={r.controlCuando} onElegir={(v) => elegir({ controlCuando: v })} columnas={2} />
+              </>
+            )}
+            {actual === 'cuidadores' && (
+              <>
+                <h1 tabIndex={-1} className={titulo}>¿Quién cuida a {nombre} contigo?</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Así todos verán qué ya se hizo y nadie dudará.</p>
+                <Lista nombreGrupo="Quién cuida contigo" opciones={CUIDADORES} seleccion={r.cuidadores} onElegir={(v) => elegir({ cuidadores: v })} />
+              </>
+            )}
+            {actual === 'avisos' && (
+              <>
+                <span className="inline-flex size-14 items-center justify-center rounded-full bg-[var(--chip-bg)]">
+                  <Bell size={28} color="var(--accent)" aria-hidden="true" />
+                </span>
+                <h1 tabIndex={-1} className={`${titulo} mt-5`}>Déjanos recordar por ti</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">
+                  Activa los avisos para que te digamos antes del próximo medicamento, control o reposición de {nombre}.
+                </p>
+                <div
+                  aria-label="Ejemplo de aviso"
+                  className="mt-6 flex items-start gap-3 rounded-[var(--radius-card)] border-2 border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]"
+                >
+                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)]">
+                    <PawPrint size={20} color="var(--bg)" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block text-sm text-[var(--text-secondary)]">La Doctora Perritos · ejemplo</span>
+                    <span className="block text-base font-semibold">{avisoEjemplo(r, nombre)}</span>
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-[var(--text-secondary)]">Se encienden al crear tu cuenta. Puedes cambiarlo cuando quieras.</p>
+              </>
+            )}
+
+            <div className="mt-auto flex flex-col gap-2 pt-8">
+              {conMensaje && (
+                <div id="ayuda" role="status" aria-live="polite" className="min-h-12">
+                  {error && (
+                    <p className="flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
+                      <AlertCircle size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+                      {error}
+                    </p>
+                  )}
+                </div>
+              )}
+              {actual === 'avisos' ? (
+                <>
+                  <button type="button" className={botonPrimario} onClick={() => decidirAvisos('si')}>
+                    Activar recordatorios
+                  </button>
+                  <button type="button" className={botonSecundario} onClick={() => decidirAvisos('no')}>
+                    Ahora no
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button type="button" className={botonPrimario} onClick={continuar}>
+                    Continuar
+                  </button>
+                  {SALTABLES.includes(actual) && (
+                    <button type="button" onClick={siguiente} className={botonSecundario}>
+                      Saltar por ahora
+                    </button>
+                  )}
+                </>
               )}
             </div>
-            <button type="button" className={botonPrimario} onClick={continuar}>
-              Continuar
-            </button>
-            {SALTABLES.includes(actual) && (
-              <button
-                type="button"
-                onClick={siguiente}
-                className="h-12 rounded-[var(--radius-button)] text-base font-medium text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--accent)] [touch-action:manipulation]"
-              >
-                Saltar por ahora
-              </button>
-            )}
-          </div>
-        </motion.main>
-      )}
+          </motion.main>
+        )}
 
-      {fase === 'reconocimiento' && <Reconocimiento nombre={nombre} r={r} entrada={entrada} onEditar={editar} onSeguir={() => setFase('armando')} />}
-      {fase === 'armando' && <Armando nombre={nombre} r={r} onListo={irAlResultado} />}
-      {fase === 'resultado' && <Resultado nombre={nombre} r={r} entrada={entrada} />}
-    </div>
+        {fase === 'armando' && <Armando nombre={nombre} r={r} onListo={irAlResultado} />}
+        {fase === 'resultado' && <Resultado nombre={nombre} r={r} entrada={entrada} />}
+      </div>
     </MotionConfig>
   );
 }
 
-function resumen(r: Respuestas): { etiqueta: string; valor: string }[] {
-  const nombreOpc = <T extends string>(ops: Opcion<T>[], v: T | null) => ops.find((o) => o.valor === v)?.titulo ?? 'Sin responder';
-  return [
-    { etiqueta: 'Nombre', valor: r.nombre.trim() || 'Sin responder' },
-    { etiqueta: 'Perros', valor: nombreOpc(CANTIDAD, r.cantidad) },
-    { etiqueta: 'Etapa', valor: nombreOpc(ETAPA, r.etapa) },
-    { etiqueta: 'Cada día', valor: r.cuidados.length ? (r.cuidados.length === 1 ? nombreOpc(CUIDADOS, r.cuidados[0]) : `${r.cuidados.length} cuidados`) : 'Sin responder' },
-    { etiqueta: 'Lo cuidan', valor: nombreOpc(CUIDADORES, r.cuidadores) },
-    { etiqueta: 'Aviso principal', valor: r.momento ? HORA_POR_MOMENTO[r.momento] : 'Sin responder' },
-  ];
-}
-
-function Reconocimiento({
-  nombre,
-  r,
-  entrada,
-  onEditar,
-  onSeguir,
-}: {
-  nombre: string;
-  r: Respuestas;
-  entrada: object;
-  onEditar: (i: number) => void;
-  onSeguir: () => void;
-}) {
-  return (
-    <motion.main {...entrada} className="flex flex-1 flex-col gap-5 pt-4">
-      {/* Dispositivo de marca: duotone de sus perros */}
-      <div className="foto-duotone aspect-[5/2] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={360} />
-      </div>
-      <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">
-        Cuidar a {nombre} no tiene que depender de tu <span className="text-[var(--accent)]">memoria</span>
-      </h1>
-      <p className="text-lg text-[var(--text-secondary)]">Tú lo quieres hacer bien. El Panel de Hoy se acuerda contigo.</p>
-
-      <ul aria-label="Tus respuestas" className="grid grid-cols-2 gap-2">
-        {resumen(r).map((fila, i) => (
-          <li key={fila.etiqueta}>
-            <button
-              type="button"
-              onClick={() => onEditar(i)}
-              aria-label={`Cambiar ${fila.etiqueta}: ${fila.valor}`}
-              className="flex min-h-14 w-full items-center gap-2 rounded-[var(--radius-button)] border border-[var(--border-ui)] bg-[var(--surface)] px-3 py-2 text-left active:scale-[0.98] [touch-action:manipulation]"
-            >
-              <span className="flex-1">
-                <span className="block text-sm text-[var(--text-secondary)]">{fila.etiqueta}</span>
-                <span className="block text-base font-semibold leading-tight">{fila.valor}</span>
-              </span>
-              <Pencil size={16} color="var(--accent)" aria-hidden="true" />
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-auto pt-5">
-        <button type="button" className={botonPrimario} onClick={onSeguir}>
-          Armar el Panel de {nombre}
-        </button>
-      </div>
-    </motion.main>
-  );
-}
-
 function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onListo: () => void }) {
-  const hora = r.momento ? HORA_POR_MOMENTO[r.momento] : '08:00';
-  const lineas = [`Ordenando lo que necesita ${nombre}…`, `Poniendo su aviso principal a las ${hora}…`, 'Preparando quién hizo qué…'];
+  const panel = armarPanel(r);
+  const primero = panel.hoy[0];
+  const lineas = [
+    `Ordenando lo que necesita ${nombre}…`,
+    primero ? `Poniendo el aviso de ${primero.titulo} a las ${primero.etiqueta}…` : 'Calculando cuándo toca cada cuidado…',
+    `Dejando todo listo para ${nombre}…`,
+  ];
   const [visibles, setVisibles] = useState(0);
   useEffect(() => {
     const t = [
       setTimeout(() => setVisibles(1), 300),
-      setTimeout(() => setVisibles(2), 1700),
-      setTimeout(() => setVisibles(3), 3100),
-      setTimeout(() => setVisibles(4), 4500),
-      setTimeout(onListo, 5300),
+      setTimeout(() => setVisibles(2), 1200),
+      setTimeout(() => setVisibles(3), 2100),
+      setTimeout(() => setVisibles(4), 3000),
+      setTimeout(onListo, 3600),
     ];
     return () => t.forEach(clearTimeout);
   }, [onListo]);
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+    <main className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
       <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)] motion-safe:animate-pulse">
         <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
       </span>
-      <h1 tabIndex={-1} className="text-2xl font-bold outline-none">Armando el Panel de Hoy de {nombre}</h1>
+      <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">
+        Cuidar a {nombre} no tiene que depender de tu <span className="text-[var(--accent)]">memoria</span>
+      </h1>
+      <p className="text-lg text-[var(--text-secondary)]">Estamos armando su Panel de Hoy.</p>
       <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_55%,var(--surface-2))]" aria-hidden="true">
         <motion.div
           className="h-full rounded-full bg-[var(--accent)]"
@@ -493,22 +606,9 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
           transition={{ duration: 0.4, ease: 'easeOut' }}
         />
       </div>
-      <button
-        type="button"
-        onClick={onListo}
-        className="min-h-11 rounded-[var(--radius-button)] px-4 text-base font-medium text-[var(--text-secondary)] underline underline-offset-4"
-      >
-        Ver mi Panel ya
-      </button>
       <ul className="flex min-h-24 flex-col gap-3 text-left" aria-live="polite">
         {lineas.slice(0, Math.min(visibles, 3)).map((l, i) => (
-          <motion.li
-            key={l}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
-            className="flex items-center gap-3 text-base text-[var(--text-secondary)]"
-          >
+          <motion.li key={l} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="flex items-center gap-3 text-base text-[var(--text-secondary)]">
             {i < visibles - 1 || visibles === 4 ? (
               <Check size={18} color="var(--accent)" aria-hidden="true" />
             ) : (
@@ -518,13 +618,50 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
           </motion.li>
         ))}
       </ul>
+      <button type="button" onClick={onListo} className="min-h-11 rounded-[var(--radius-button)] px-4 text-base font-medium text-[var(--text-secondary)] underline underline-offset-4">
+        Ver mi Panel ya
+      </button>
     </main>
+  );
+}
+
+const ICONO_ITEM: Record<string, LucideIcon> = {
+  med: Pill,
+  com: Utensils,
+  rep: PackageOpen,
+  ctl: ShieldPlus,
+  doc: FileText,
+  eme: Siren,
+};
+
+function Seccion({ nombre, children }: { nombre: string; children: React.ReactNode }) {
+  return (
+    <section aria-label={nombre} className="mt-6">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">{nombre}</h2>
+      <ul className="flex flex-col gap-2">{children}</ul>
+    </section>
+  );
+}
+
+function FilaInfo({ it }: { it: ItemPanel }) {
+  const Icono = ICONO_ITEM[it.id] ?? PawPrint;
+  return (
+    <li className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
+      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+        <Icono size={20} color="var(--accent)" aria-hidden="true" />
+      </span>
+      <span className="flex-1">
+        <span className="block text-base font-semibold">{it.titulo}</span>
+        <span className="block text-sm text-[var(--text-secondary)]">{it.detalle}</span>
+      </span>
+      {it.etiqueta && <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.etiqueta}</span>}
+    </li>
   );
 }
 
 function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entrada: object }) {
   const reduce = useReducedMotion();
-  const items = armarPanel(r);
+  const panel = armarPanel(r);
   const [hechos, setHechos] = useState<string[]>([]);
   const marcar = (id: string) => {
     setHechos((h) => (h.includes(id) ? h.filter((x) => x !== id) : [...h, id]));
@@ -534,9 +671,15 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
   const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
   return (
     <motion.main {...entrada} className="flex flex-1 flex-col pt-4">
-      <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Tu Panel de Hoy</p>
-      <h1 tabIndex={-1} className="mt-1 text-3xl font-bold leading-tight outline-none">Hoy con {nombre}</h1>
-      <p className="mt-2 text-base text-[var(--text-secondary)]">Toca un cuidado para marcarlo como hecho. Así se siente.</p>
+      <span className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--chip-bg)]">
+        <PawPrint size={26} color="var(--accent)" aria-hidden="true" />
+      </span>
+      <h1 tabIndex={-1} className="mt-3 text-3xl font-bold leading-tight outline-none">
+        Todo listo para <span className="text-[var(--accent)]">{nombre}</span>
+      </h1>
+      <p className="mt-2 text-base text-[var(--text-secondary)]">
+        {panel.hoy.length > 0 ? 'Toca lo de hoy para marcarlo como hecho. Así se siente.' : 'Nada urgente hoy. Te avisamos cuando toque algo.'}
+      </p>
       <div className="mt-3 min-h-14" role="status" aria-live="polite">
         {hechos.length > 0 && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-[var(--radius-button)] bg-[var(--chip-bg)] px-4 py-3 text-base font-semibold">
@@ -545,40 +688,78 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
         )}
       </div>
 
-      <ul className="mt-6 flex flex-col gap-3">
-        {items.map((it) => {
-          const hecho = hechos.includes(it.id);
-          return (
-            <li key={it.id}>
-              <button
-                type="button"
-                aria-pressed={hecho}
-                onClick={() => marcar(it.id)}
-                className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] active:scale-[0.98] [touch-action:manipulation]"
-              >
-                <motion.span
-                  aria-hidden="true"
-                  animate={{ scale: hecho && !reduce ? [1, 1.15, 1] : 1 }}
-                  transition={{ duration: 0.22, ease: 'easeOut' }}
-                  className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 ${
-                    hecho ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'
-                  }`}
+      {panel.hoy.length > 0 && (
+        <Seccion nombre="Hoy">
+          {panel.hoy.map((it) => {
+            const hecho = hechos.includes(it.id);
+            return (
+              <li key={it.id}>
+                <button
+                  type="button"
+                  aria-pressed={hecho}
+                  onClick={() => marcar(it.id)}
+                  className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] active:scale-[0.98] [touch-action:manipulation]"
                 >
-                  {hecho && <Check size={18} color="var(--bg)" strokeWidth={3} />}
-                </motion.span>
-                <span className="flex-1">
-                  <span className={`block text-base font-semibold ${hecho ? 'text-[var(--text-primary)]' : ''}`}>{it.titulo}</span>
-                  <span className="block text-sm text-[var(--text-secondary)]">
-                    {hecho ? (comparte ? 'Listo · así lo verán los demás tutores' : 'Listo · así queda registrado con la hora') : it.detalle}
+                  <motion.span
+                    aria-hidden="true"
+                    animate={{ scale: hecho && !reduce ? [1, 1.15, 1] : 1 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                    className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 ${hecho ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'}`}
+                  >
+                    {hecho && <Check size={18} color="var(--bg)" strokeWidth={3} />}
+                  </motion.span>
+                  <span className="flex-1">
+                    <span className="block text-base font-semibold">{it.titulo}</span>
+                    <span className="block text-sm text-[var(--text-secondary)]">
+                      {hecho ? (comparte ? 'Listo · así lo verán los demás tutores' : 'Listo · así queda registrado con la hora') : it.detalle}
+                    </span>
                   </span>
-                </span>
-                {it.hora && <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.hora}</span>}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-4 text-sm text-[var(--text-secondary)]">Ejemplo armado con tus {n} respuestas. Tú pones los nombres y las dosis reales.</p>
+                  <span className="text-base font-bold tabular-nums text-[var(--accent)]">{it.etiqueta}</span>
+                </button>
+              </li>
+            );
+          })}
+        </Seccion>
+      )}
+
+      {panel.proximo.length > 0 && (
+        <Seccion nombre="Próximamente">
+          {panel.proximo.map((it) => (
+            <FilaInfo key={it.id} it={it} />
+          ))}
+        </Seccion>
+      )}
+
+      {panel.siempre.length > 0 && (
+        <Seccion nombre="Siempre a mano">
+          {panel.siempre.map((it) => (
+            <FilaInfo key={it.id} it={it} />
+          ))}
+        </Seccion>
+      )}
+
+      <Seccion nombre="Cuidadores">
+        <li className="flex min-h-14 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-3 shadow-[var(--shadow-1)]">
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
+            <User size={20} color="var(--accent)" aria-hidden="true" />
+          </span>
+          <span className="flex-1 text-base font-semibold">Tú</span>
+        </li>
+        {comparte && r.cuidadores && (
+          <li className="flex min-h-14 items-center gap-4 rounded-[var(--radius-card)] border border-dashed border-[var(--border-ui)] p-3">
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
+              <Users size={20} color="var(--accent)" aria-hidden="true" />
+            </span>
+            <span className="flex-1">
+              <span className="block text-base font-semibold">{TEXTO_CUIDADORES[r.cuidadores]}</span>
+              <span className="block text-sm text-[var(--text-secondary)]">Los invitas desde el Panel, cuando crees tu cuenta.</span>
+            </span>
+          </li>
+        )}
+      </Seccion>
+
+      <p className="mt-6 text-lg font-semibold">Ya no tienes que llevar todo esto en la cabeza.</p>
+      <p className="mt-1 text-sm text-[var(--text-secondary)]">Armado con tus {n} respuestas. Las fechas exactas las ajustas dentro.</p>
 
       <div className="mt-auto flex flex-col gap-2 pt-8">
         <Link href="/paywall" className={botonPrimario}>
