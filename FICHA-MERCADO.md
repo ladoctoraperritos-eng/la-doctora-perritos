@@ -25,7 +25,7 @@
 - Plazos de garantía que admite Hotmart: 7, 15, 21 y 30 días | verificado en: help.hotmart.com («Cómo ajustar el plazo de garantía del producto») | fecha: 2026-09-23
 - En suscripciones, la garantía aplica solo al PRIMER cobro, no a las renovaciones | mismo artículo | 2026-09-23
 - Plazos de prueba gratis que admite Hotmart: NO VERIFICADO — comprobar en el panel (18, Paso C).
-- Prueba elegida: 7 días · Garantía elegida: 15 días (AMBAS SIN VERIFICAR: Hotmart aún no está configurada, 2026-09-24; la web no las promete hasta que lib/oferta.ts las marque verificadas).
+- Prueba elegida: 7 días · Garantía elegida: 15 días (2026-09-24: la creadora informa que Hotmart ya está configurado; no verificado por mí en el panel. Inicio del plazo de la garantía: NO CONFIRMADO → la web no fija fecha de inicio).
 - Comprobación (regla dura de 18): garantía 15 > prueba 7 → SÍ.
 - ¿Desde cuándo cuenta la garantía (adhesión o primer cobro)?: NO CONFIRMADO. El copy dice «15 días de garantía» sin fijar la fecha de inicio.
 

@@ -9,10 +9,16 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - CTA: Empezar mis 7 días gratis
 - Franja de confianza (solo hechos de la oferta): Sin cobro hoy · cancela cuando quieras · garantía de 15 días
 
-## 2. Problema  (3 situaciones concretas; se eliminó la Agitación por repetir la carga mental)
+## 2. Problema  (3 síntomas concretos)
 1. ¿No sabes si otro tutor [b]ya dio el medicamento[/b]?
 2. ¿Notas tarde que [b]se acabará[/b] su comida o su tratamiento?
 3. ¿Buscas su receta entre [b]WhatsApp, fotos y papeles[/b]?
+
+## 3. Agitación  (consecuencias; NO repite la carga mental ni usa tarjetas Hoy / Si nada cambia)
+- Título: Lo que cuesta un descuido
+- Una dosis repetida o saltada [b]se nota cuando ya pasó[/b].
+- Sin aviso, el tratamiento o el alimento [b]se acaba en fin de semana[/b].
+- En la consulta, [b]nadie recuerda la fecha exacta[/b] de la última vacuna.
 
 ## 4. Solución  (mecanismo: el Panel de Hoy)
 - Título: Abres la app y ya sabes [acento]qué le toca hoy[/acento]
@@ -34,7 +40,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
   · Con prueba verificada: «Hoy pagas: US$0 · Primer cobro: <importe> el <hoy + 7 días> · Renovación: <importe> cada año/mes».
   · Sin prueba (estado actual): «Hoy pagas: <importe> · Próxima renovación: <fecha>, y luego cada año/mes».
   · Con garantía verificada y su inicio definido: «Garantía de 15 días desde <compra|primer cobro> (hasta el <fecha>): escribe a contacto@… y te devolvemos tu primer pago». Si no, no se muestra.
-- Sin prueba verificada no se muestran badges «7 días gratis», ni «Empieza gratis», ni «Prueba de 7 días». Sin garantía verificada se oculta la sección Garantía y las menciones.
+- Prueba de 7 días y garantía de 15 días ACTIVAS (la creadora confirma que están configuradas en Hotmart, 2026-09-24). Sin la nota de moneda bajo el selector (eliminada a pedido). Garantía sin fecha de inicio confirmada: se promete el plazo sin fijar desde cuándo.
 - Features (cambia solo el tope de perros): Avisos de medicamentos, comida y vacunas · Hasta 2/5 perros · Hasta 3 tutores: quién hizo qué · Resumen para el veterinario y datos exportables · (garantía si verificada) · Regalo del anual: ebook (valor real US$9).
 
 ## 7. Garantía

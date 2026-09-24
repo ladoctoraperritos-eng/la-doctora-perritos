@@ -10,15 +10,15 @@ export interface Condiciones {
   garantia: {
     dias: number;
     verificada: boolean;
-    /** Desde cuándo cuenta el plazo. null = sin confirmar en Hotmart → no se promete. */
-    desde: 'compra' | 'primer_cobro' | null;
+    /** Desde cuándo cuenta el plazo. 'sin_confirmar' = garantía activa pero sin fecha de inicio confirmada: se promete el plazo sin fijar cuándo empieza. null = no se promete. */
+    desde: 'compra' | 'primer_cobro' | 'sin_confirmar' | null;
   };
   contacto: string;
 }
 
 export const CONDICIONES: Condiciones = {
-  prueba: { dias: 7, verificada: false },
-  garantia: { dias: 15, verificada: false, desde: null },
+  prueba: { dias: 7, verificada: true },
+  garantia: { dias: 15, verificada: true, desde: 'sin_confirmar' },
   contacto: 'contacto@ladoctoraperritos.com',
 };
 
@@ -102,10 +102,15 @@ export function resumenCobro(args: {
     resumen.nota = `Equivale a ${equivalente}, pero se cobra ${importe} una sola vez al año.`;
   }
   if (hayGarantia()) {
-    const base = CONDICIONES.garantia.desde === 'compra' ? inicio : primerCobro;
-    const limite = addDays(base, CONDICIONES.garantia.dias);
-    const desde = CONDICIONES.garantia.desde === 'compra' ? 'el día de tu compra' : 'tu primer cobro';
-    resumen.garantia = `Garantía de ${CONDICIONES.garantia.dias} días desde ${desde} (hasta el ${formatFecha(limite)}): escribe a ${CONDICIONES.contacto} y te devolvemos tu primer pago.`;
+    const c = CONDICIONES.garantia;
+    if (c.desde === 'sin_confirmar') {
+      resumen.garantia = `Garantía de ${c.dias} días sobre tu primer pago: escribe a ${CONDICIONES.contacto} y te devolvemos ese primer pago.`;
+    } else {
+      const base = c.desde === 'compra' ? inicio : primerCobro;
+      const limite = addDays(base, c.dias);
+      const desde = c.desde === 'compra' ? 'el día de tu compra' : 'tu primer cobro';
+      resumen.garantia = `Garantía de ${c.dias} días desde ${desde} (hasta el ${formatFecha(limite)}): escribe a ${CONDICIONES.contacto} y te devolvemos tu primer pago.`;
+    }
   }
   return resumen;
 }

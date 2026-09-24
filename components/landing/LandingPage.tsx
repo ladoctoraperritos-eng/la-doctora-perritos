@@ -7,10 +7,11 @@
 
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { FileSearch, Package, Users } from 'lucide-react';
+import { AlertTriangle, CalendarClock, FileSearch, Package, PackageX, Users } from 'lucide-react';
 import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { Hero } from './Hero';
 import { Problema } from './Problema';
+import { Agitacion } from './Agitacion';
 import { Solucion } from './Solucion';
 import { AppPorDentro } from './AppPorDentro';
 import { Oferta } from './Oferta';
@@ -82,7 +83,8 @@ const LOGO = (
   <img src="/brand/logo.png" alt="" width={48} height={40} className="h-10 w-auto" />
 );
 
-const garantiaDesde = CONDICIONES.garantia.desde === 'compra' ? 'el día de tu compra' : 'tu primer cobro';
+const garantiaDesde =
+  CONDICIONES.garantia.desde === 'compra' ? ' desde el día de tu compra' : CONDICIONES.garantia.desde === 'primer_cobro' ? ' desde tu primer cobro' : '';
 
 export default function LandingPage() {
   const [plan, setPlan] = useState<IdPlan>('esencial');
@@ -135,13 +137,23 @@ export default function LandingPage() {
         visualPlaceholderSugerencia="captura de «Hoy con Toffee»: medicamento de las 19:00, alimento para ~8 días y quién dio el Omega-3"
       />
 
-      {/* Tres situaciones concretas; después se pasa directo a cómo funciona (sin sección de agitación). */}
+      {/* Estructura canónica de 19. Problema = síntomas concretos; Agitación = consecuencias, sin repetir la carga mental. */}
       <Problema
         titulo="¿Te suena?"
         preguntas={[
           { icon: Users, textoMarked: '¿No sabes si otro tutor [b]ya dio el medicamento[/b]?' },
           { icon: Package, textoMarked: '¿Notas tarde que [b]se acabará[/b] su comida o su tratamiento?' },
           { icon: FileSearch, textoMarked: '¿Buscas su receta entre [b]WhatsApp, fotos y papeles[/b]?' },
+        ]}
+      />
+
+      <Agitacion
+        titulo="Lo que cuesta un descuido"
+        iconos={[AlertTriangle, PackageX, CalendarClock]}
+        frases={[
+          'Una dosis repetida o saltada [b]se nota cuando ya pasó[/b].',
+          'Sin aviso, el tratamiento o el alimento [b]se acaba en fin de semana[/b].',
+          'En la consulta, [b]nadie recuerda la fecha exacta[/b] de la última vacuna.',
         ]}
       />
 
@@ -176,7 +188,6 @@ export default function LandingPage() {
 
       <PlanSelector
         titulo="¿Cuántos perros tienes?"
-        nota="Precios en dólares (US$), iguales en todos los países de habla hispana."
         activo={plan}
         onChange={(id) => setPlan(id as IdPlan)}
         opciones={(Object.keys(PLANES) as IdPlan[]).map((id) => ({ id, etiqueta: PLANES[id].etiqueta, nombre: PLANES[id].nombre }))}
@@ -238,7 +249,7 @@ export default function LandingPage() {
       {GARANTIA && (
         <Garantia
           nombre="Garantía del Primer Aviso"
-          condicionMarked={`Si la app no te quita el peso de recordar, escribe a ${SOPORTE_EMAIL} dentro de los ${DIAS_GARANTIA} días desde ${garantiaDesde} y te devolvemos tu primer pago. [b]Sin preguntas.[/b]`}
+          condicionMarked={`Si la app no te quita el peso de recordar, escribe a ${SOPORTE_EMAIL} dentro de los ${DIAS_GARANTIA} días de garantía${garantiaDesde} y te devolvemos tu primer pago. [b]Sin preguntas.[/b]`}
           pisoLegal={`Respaldada por la garantía de ${DIAS_GARANTIA} días de Hotmart`}
         />
       )}
