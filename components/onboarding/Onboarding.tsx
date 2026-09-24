@@ -210,7 +210,7 @@ const OLVIDOS: Opcion<Olvido>[] = [
   { valor: 'alimento', titulo: 'Cuándo comprar alimento', icono: Utensils },
   { valor: 'quien', titulo: 'Quién ya hizo cada cuidado', icono: Users },
   { valor: 'documentos', titulo: 'Documentos e historial', icono: FileText },
-  { valor: 'emergencia', titulo: 'Estar lista ante una emergencia', icono: Siren },
+  { valor: 'emergencia', titulo: 'Saber qué hacer en una emergencia', icono: Siren },
 ];
 const CUIDADORES: Opcion<Cuidadores>[] = [
   { valor: 'solo_yo', titulo: 'Solo yo', icono: User },
@@ -444,7 +444,7 @@ export default function Onboarding() {
               <>
                 <h1 tabIndex={-1} className={titulo}>¿Qué te gustaría dejar de tener que recordar?</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">
-                  Ese «¿le di la pastilla?» que se repite. Ese «¿le di la pastilla?» que se repite. Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
+                  Ese «¿le di la pastilla?» que se repite. Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
                 </p>
                 {error === LIMITE && (
                   <p role="alert" className="mt-3 flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
