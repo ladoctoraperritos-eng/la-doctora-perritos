@@ -7,6 +7,7 @@
 
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { MotionConfig, motion } from 'motion/react';
 import { ArrowLeft, Bell, Check, CreditCard, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { addDays, CONDICIONES, formatFecha, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { urlCheckout, type PeriodoPago } from '@/lib/hotmart';
@@ -75,12 +76,12 @@ function TarjetaPeriodo({
       role="radio"
       aria-checked={activa}
       onClick={onElegir}
-      className={`relative flex w-full items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
+      className={`relative flex w-full flex-col items-start gap-2 rounded-[var(--radius-card)] border-2 p-4 pt-5 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
         activa ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))] shadow-[var(--shadow-2)]' : 'border-[var(--border-ui)] bg-[var(--surface)]'
       }`}
     >
       {insignia && (
-        <span className="absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full bg-[var(--accent-2)] px-3 py-1 text-sm font-bold text-[var(--text-primary)]">
+        <span className="absolute -top-3 left-3 inline-flex items-center gap-1 rounded-full bg-[var(--accent-2)] px-3 py-1 text-sm font-bold text-[var(--text-primary)]">
           <Sparkles size={14} aria-hidden="true" />
           {insignia}
         </span>
@@ -93,8 +94,8 @@ function TarjetaPeriodo({
       </span>
       <span className="flex-1">
         <span className="block text-base font-semibold text-[var(--text-secondary)]">{titulo}</span>
-        <span className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold tabular-nums">{importe}</span>
+        <span className="flex flex-wrap items-baseline gap-x-1">
+          <span aria-live="polite" className="text-2xl font-bold tabular-nums">{importe}</span>
           <span className="text-base text-[var(--text-secondary)]">{unidad}</span>
         </span>
         {nota && <span className="block text-sm text-[var(--text-secondary)]">{nota}</span>}
@@ -204,6 +205,7 @@ export default function Paywall() {
   const lista = beneficios(r, comparte);
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
       <div className="flex items-center gap-2">
         <Link href="/onboarding" className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)]" aria-label="Volver">
@@ -222,13 +224,19 @@ export default function Paywall() {
             : 'Deja que La Doctora Perritos recuerde por ti.'}
         </p>
         <ul className="mt-4 flex flex-col gap-3" aria-label="Lo que ya armaste">
-          {lista.map((a) => (
-            <li key={a} className="flex items-start gap-3 text-base font-medium">
+          {lista.map((a, i) => (
+            <motion.li
+              key={a}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: 0.06 * i, ease: [0.16, 1, 0.3, 1] }}
+              className="flex items-start gap-3 text-base font-medium"
+            >
               <span aria-hidden="true" className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
                 <Check size={14} color="var(--accent)" strokeWidth={3} />
               </span>
               {a}
-            </li>
+            </motion.li>
           ))}
         </ul>
 
@@ -243,23 +251,23 @@ export default function Paywall() {
               { id: 'familia', texto: '3 a 5 perros', detalle: 'Plan Familia' },
             ]}
           />
-          <div role="radiogroup" aria-label="Cada cuánto pagas" className="mt-3 flex flex-col gap-4">
+          <div role="radiogroup" aria-label="Cada cuánto pagas" className="mt-4 grid grid-cols-2 gap-3">
             <TarjetaPeriodo
               activa={periodo === 'anio'}
               onElegir={() => setPeriodo('anio')}
               titulo="Anual"
               importe={P.anualTotal}
               unidad="/año"
-              nota={`Equivale a ${P.anualMes} al mes · Ahorras ${P.ahorroAnual}`}
+              nota={`Equivale a ${P.anualMes} al mes. Ahorras ${P.ahorroAnual}`}
               insignia="Mejor valor"
             />
-            <TarjetaPeriodo activa={periodo === 'mes'} onElegir={() => setPeriodo('mes')} titulo="Mensual" importe={P.mensual} unidad="/mes" />
+            <TarjetaPeriodo activa={periodo === 'mes'} onElegir={() => setPeriodo('mes')} titulo="Mensual" importe={P.mensual} unidad="/mes" nota="Sin compromiso anual" />
           </div>
         </section>
 
         {hayPrueba() && <LineaTiempo importe={importe} unidad={unidad} />}
 
-        <section aria-label="Tu tranquilidad" className="mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4">
+        <section aria-label="Tu tranquilidad" className="borde-degradado mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
           {hayGarantia() && (
             <div className="flex items-start gap-3">
               <ShieldCheck size={24} color="var(--accent)" className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -269,7 +277,7 @@ export default function Paywall() {
                   {CONDICIONES.garantia.dias} días de garantía
                 </strong>
                 <span className="block text-sm text-[var(--text-secondary)]">
-                  Si continúas y, después de tu primer cobro, no estás conforme, te devolvemos ese pago.
+                  Si continúas y no estás conforme, tienes {CONDICIONES.garantia.dias} días de garantía sobre tu primer pago.
                 </span>
               </p>
             </div>
@@ -295,7 +303,7 @@ export default function Paywall() {
       <div className="sticky bottom-0 -mx-6 flex flex-col gap-2 border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--bg)] px-6 pb-4 pt-3">
         <p className="text-center text-sm font-medium text-[var(--text-secondary)]">
           {hayPrueba() ? 'Hoy US$0' : `Hoy ${importe}`} · Luego {importe}
-          {unidad} · Cancela cuando quieras
+          {unidad} 
         </p>
         {checkout ? (
           <a href={checkout} className={boton}>
@@ -308,5 +316,6 @@ export default function Paywall() {
         )}
       </div>
     </div>
+    </MotionConfig>
   );
 }

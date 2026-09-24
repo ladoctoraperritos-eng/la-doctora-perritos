@@ -1,72 +1,29 @@
 # VEREDICTO revisor-visual — paywall
-Fecha: 2026-09-24 12:00
-Screenshot: docs/revisiones/paywall-375.png (y paywall-completo.png)
-Usabilidad: 27/40
+Fecha: 2026-09-24 18:00
+Screenshot: docs/revisiones/paywall-375.png
+Usabilidad: 28/40
 Craft: 11/20
 Copy (si vende): 14/20
 Fidelidad (si hubo referencia): N-A
 Veredicto: NO LISTA
+Top defectos: 1) La barra fija inferior (~130px, 16% del viewport) tapa la tarjeta Mensual en el primer viewport: solo se ve la opción Anual y el usuario no sabe que existe otra; en scroll la barra sigue tapando contenido. Fix: colapsar la barra o dar padding-bottom/scroll-margin para que Mensual quede visible sobre ella, o mostrar ambos periodos como toggle compacto arriba. 2) Movimiento casi nulo (solo active:scale y transition-colors): sin entrada escalonada, sin conteo/transición del precio al cambiar plan o periodo, sin aria-live en el importe, sin reduced-motion, sin ninguna animación de la línea de tiempo. Fix: motion/react con stagger 60ms, transición del importe, aria-live="polite" en el precio. 3) Identidad y profundidad flojas: ningún dispositivo ownable visible (sin duotone, sin hairline degradé, sin textura), checks planos de 24px, fondo casi plano; podría ser cualquier paywall teal. Fix: chips de 40px, un hairline degradé en la tarjeta Anual, foto/ilustración firma en el hero. 4) Copy de venta bajo umbral (emoción 2, garantía sin nombre propio, sin objeciones de la ficha: medios de pago LATAM, datos exportables, 'otra suscripción'): el titular dice resultado pero no la escena ("¿le di ya la pastilla?"). Fix: usar frase del avatar en el subtítulo, nombrar la garantía, añadir línea 'tarjeta u otros medios según tu país' solo si es cierto y 'tus datos siempre exportables'. 5) Promesas a alinear con la realidad: 'Cancela cuando quieras' y la prueba de 7 días figuran como verificadas en lib/oferta.ts aunque su propio encabezado dice que Hotmart no está configurado; y el texto de garantía afirma 'después de tu primer cobro' mientras el código declara desde='sin_confirmar'. Fix: dejar verificada=false hasta configurar Hotmart o redactar la garantía sin fijar el inicio.
 
-Detalle usabilidad (0-4): h1:3 h2:3 h3:3 h4:3 h5:2 h6:3 h7:2 h8:2 h9:3 h10:3
-Detalle craft: jerarquía:3 profundidad:2 identidad:2 movimiento:1 encaje:3
-Detalle copy: idea:3 especificidad:3 emoción:2 oferta:3 acción:3
-Nota de método: el botón desactivado y el aviso son intencionales (faltan enlaces de Hotmart). Puntúo el estado real renderizado, sin castigar más la ausencia de enlace; aun con enlace activo los defectos de abajo bloquean. En el «completo» la barra fija aparece a mitad de página: es artefacto de captura, no se puntúa.
+## Detalle
+Usabilidad (0-4): h1:3 h2:3 h3:3 h4:3 h5:2 h6:3 h7:3 h8:3 h9:2 h10:3
+Craft: jerarquía:3 profundidad:2 identidad:2 movimiento:1 encaje:3
+Copy: idea:3 especificidad:3 emoción:2 oferta:3 acción:3
+
+## Comparación con el veredicto anterior (27/40 · 11/20 · 14/20)
+Mejoró la usabilidad (+1): ya existe la línea de tiempo con fechas reales (29 sept aviso, 1 oct cobro), la verdad bajo el CTA ('Hoy US$0 · Luego US$29/año'), el ancla US$2,42/mes, el badge en coral, una sola lista de beneficios personalizada y garantía + Hotmart en un bloque. Craft y copy sin cambio neto: movimiento sigue en 1, identidad en 2 y la emoción del copy en 2. Regresión nueva: la barra fija oculta Mensual.
 
 ## Gate de carga cognitiva
-Pasa con reservas: 1 acción primaria, ≤4 ítems por lista. Reservas: dos listas con el mismo ícono de check (4 de «lo armado» + 4 de features) que dicen casi lo mismo; tres enlaces secundarios (plan, «Ahora no», «Ya tengo cuenta») + toggle + CTA. 1 falla leve; el «qué sigue» es claro.
+Pasa: 1 acción primaria, listas de 4 ítems, 2 decisiones (perros, periodo) de 2 opciones. Reservas: dos selectores con estilos distintos (segmentado y tarjetas radio) y dos enlaces secundarios de peso similar; el 'qué sigue' es claro.
 
-## Contraste WCAG (hex reales)
-| Par | Ratio | Resultado |
-|---|---|---|
-| acento #0B5F5A / fondo #F4F7F6 (Toffee, «Ya tengo cuenta», enlaces) | 6.96 | OK |
-| acento / superficie (badge «2 meses gratis» sobre blanco) | 7.42 | OK |
-| secundario #5A6A65 / fondo (subtítulo, «Ahora no», garantía) | 5.29 | OK |
-| secundario / surface-2 (texto «Mensual», resumen de cobro) | 4.83 | OK |
-| CTA #F4F7F6 sobre #0B5F5A (con enlace) | 6.96 | OK |
-| CTA disabled #5A6A65 / #E6EEEC | 4.83 | Legible pero pill «muerto» |
-| tamaño mínimo de texto | 14px (text-sm) en garantía, cobro, Hotmart | Aceptable, pero lo más importante de la confianza va en el tamaño más pequeño |
+## Anclas CTA héroe vivo
+Contraste: con enlace 6.96:1, OK (deshabilitado 4.83:1, se ve como pill muerto). Tap: active:scale definido. Nunca disabled por defecto: FALLA hoy (pendiente de Hotmart, no se penaliza más), sin hint al pulsarlo. Área: 56px de alto, ancho completo, OK.
 
-## Anclas de CTA héroe vivo
-- Contraste ≥3:1: sí (con enlace). Tap definido: sí (`active:scale`). Nunca disabled por defecto: FALLA hoy (intencional, sin enlaces). Área ≥48px: sí, 56px ancho completo.
-- Barra fija con el botón desactivado ocupa ≈181 de 812px (22% del viewport) y tapa la tarjeta del plan a media lectura.
-
-## Reglas de 02B / 50
-| Regla | Estado | Nota |
-|---|---|---|
-| Costo hundido visible | ✅ pero débil | «Hecho con tus 6 respuestas» es la última línea, en gris, sin énfasis. |
-| Personalización | ✅ | Nombre en acento, hora del aviso, cuidados contados. |
-| Sin lenguaje controlador | ✅ | |
-| Salida visible | ✅ | Flecha, «Ahora no», «Ya tengo cuenta» (esta lleva a un login que aún no envía nada). |
-| Precio con ancla (anual como $/mes, total visible) | ❌ | Display grande US$29 al año; el «US$2,42 al mes» está enterrado abajo; no se muestra el mensual como referencia. |
-| Fecha exacta de cobro si hay prueba | ⚠ | Existe («1 de octubre de 2026») pero debajo del pliegue y tapada por la barra; el CTA dice «gratis» sin el cobro cerca. |
-| Verdad bajo el CTA (50 C4bis) | ❌ | Bajo el botón solo hay garantía y aviso de pago; falta «Después US$29/año, cancela antes del 1 oct». |
-| Timeline del trial (50 C4) | ❌ | No existe. |
-| Prueba social | ❌ | Ninguna (la creadora es anónima; no se pueden inventar testimonios). Sustituir con prueba real cuando exista. |
-
-## Tabla pantalla → estado → defecto accionable
-| Pantalla | Estado | Defecto accionable |
-|---|---|---|
-| Primer viewport (375) | ❌ | Se ven titular, checklist, toggle y precio, pero el cobro (Hoy US$0 / primer cobro / renovación) queda fuera y bajo la barra; el CTA promete «7 días gratis» sin decir cuánto vale después. Poner línea «Luego US$29 al año desde el 1 oct» dentro de la barra sobre el botón. |
-| Tarjeta de plan | ❌ | Ícono check plano de 18px repetido (no chips 40-48px ni hairline degradé); dos checklists redundantes. Fusionar las listas y usar chips de marca. |
-| Selector Anual/Mensual | ❌ | «2 meses gratis» en teal, no en coral (ficha); Mensual no muestra su precio, sin ancla. Mostrar «US$2,99/mes» tachado o de referencia y el badge en coral. |
-| Resumen de cobro | ✅ | Claro y honesto, fechas reales calculadas (1 oct 2026 = hoy + 7). Falta subirlo. |
-| Pie | ❌ | «Cancela cuando quieras» está sin verificar en Hotmart (ESTADO: «NO verificado»); afirmarlo es riesgo legal. Quitar o confirmar antes de publicar. «El pago lo procesa Hotmart» no dice medios de pago LATAM (tarjeta, cuotas, OXXO) que pide FICHA-AVATAR objeción 6. |
-| Barra fija (estado sin checkout) | ❌ | Botón disabled + aviso ocupa 22% del alto. Aceptado como pendiente, pero mientras tanto colapsar el aviso a una línea. |
-
-## Ficha de arte y movimiento
-Paleta/tipo/radios coinciden con la ficha; el badge de ahorro debía ir en coral y va en teal; el dispositivo ownable (duotone) no aparece. Movimiento: solo `active:scale`; sin transición de precio al cambiar de plan/periodo, sin entrada escalonada, sin aria-live al cambiar el importe.
+## Ficha de arte
+Paleta (#F4F7F6, #0B5F5A, coral en badge), DM Sans y radios coinciden con la ficha. Falta el dispositivo ownable. El badge coral ya cumple la regla de la ficha.
 
 ## Copy (traza a la ficha)
-- Titular «El Panel de Hoy de Toffee está listo» + «no dependa de tu memoria»: traza al deseo 3 y al mecanismo «Panel de Hoy» (idea 3, pero no nombra «quién hizo qué» en el hero).
-- Especificidad 3: precios, 7 días, 15 días, fecha; sin prueba/testimonio → no sube.
-- Emoción 2: no nombra la escena («¿le di la pastilla?», «pensé que se lo habías dado tú»); el paywall solo dice el resultado.
-- Oferta 3: stack corto y claro; la garantía se llama «del Primer Aviso» (nombre propio pero sin explicar), plazo desde «tu primer pago» sin fijar inicio.
-- Acción 3: CTA en 1ª persona con beneficio; compite con 3 enlaces secundarios de peso similar.
-- Sub-checks: Garantía nombrada cerca del CTA: sí. Message-match con anuncio: sin dato (34).
-
-## Top 5 defectos
-1. [Barra fija / bajo el CTA] «7 días gratis» sin el cobro posterior a la vista (US$29 el 1 oct queda bajo el pliegue y tapado) → línea «Luego US$29/año, primer cobro el 1 oct» sobre el botón + timeline breve.
-2. [Selector y precio] sin ancla: no se ve el mensual ni el $/mes anual en grande; badge de ahorro fuera de ficha (coral) → US$2,42/mes en display con «se cobra US$29 al año» en label.
-3. [Tarjeta y checklist] dos listas de checks planos casi duplicadas, sin chips ni hairline, profundidad casi plana, movimiento nulo → una sola lista con chips 40px y una transición de precio.
-4. [Pie] «Cancela cuando quieras» sin verificar y medios de pago LATAM ausentes → verificar en Hotmart o quitar; añadir «tarjeta, cuotas u otros según tu país» solo si es cierto.
-5. [Copy] emoción 2 y costo hundido gris al final → mover «Hecho con tus 6 respuestas» junto al titular y usar la frase del avatar («¿le di ya la pastilla?») en el subtítulo.
+Idea 3: 'deja que La Doctora Perritos recuerde por ti' traza al deseo 3. Especificidad 3: hora, días, fechas, importes correctos (US$2,99x12-29 = 6,88); sin prueba social, correcto no inventar. Emoción 2: no nombra la escena del dolor 1. Oferta 3: precio, ahorro, cobro y garantía claros; garantía de 15 días sin nombre propio; no lista qué incluye el plan (3 tutores, exportar). Acción 3: CTA en 1ª persona con beneficio. Sub-check garantía nombrada: FALLA (tiene plazo, no nombre). Message-match: sin dato. Copy 14/20 < 16.
