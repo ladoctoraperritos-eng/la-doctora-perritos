@@ -10,7 +10,7 @@
 - Precios de competidores (mensual): DogLog US$3,99 (doglogapp.com, 2026-09-23) · Bitpet $3.990 CLP, 1 mes (bitpet.cl/app, 2026-09-23) · Ruffo Premium US$1,99 y Superhéroe US$4,99 (ruffo-app.com/planes, 2026-09-23) · 11pets €1,99 (App Store, 2026-09-23)
 - Anual: DogLog US$39,99 · Ruffo US$14,99 / US$39,99 · Bitpet $35.880 CLP · 11pets €19,99
 - Mediana mensual de los cuatro: ≈ US$3,99 · Ajuste por país: NO ENCONTRADO — se decide por criterio y se revisa el 2027-03-23
-- **Precio elegido:** US$3,99/mes y US$35/año · Desvío vs mediana: 0% mensual; anual −12% frente al anual de DogLog
+- **Precio elegido (2026-09-23):** Esencial US$2,99/mes o US$29/año · Familia US$4,99/mes o US$49/año. Desvío vs mediana (≈US$3,99): −25 % Esencial, +25 % Familia (dentro de ±30 %; razón: se paga por número de perros).
 - Price parity CLP/MXN: pendiente (Hotmart)
 
 ## 2. CICLO DE DECISIÓN

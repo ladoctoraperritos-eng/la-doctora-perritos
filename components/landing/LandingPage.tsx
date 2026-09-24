@@ -3,6 +3,7 @@
 // Landing de La Doctora Perritos — compone las 10 secciones canónicas de 19 desde el kit.
 // TODO el copy sale de docs/copy/landing.md (trazado a FICHA-AVATAR.md).
 
+import { useState } from 'react';
 import { AlertTriangle, Brain, FileSearch, Layers, Package, Pill, Users } from 'lucide-react';
 import { Hero } from './Hero';
 import { Problema } from './Problema';
@@ -10,6 +11,7 @@ import { Agitacion } from './Agitacion';
 import { Solucion } from './Solucion';
 import { AppPorDentro } from './AppPorDentro';
 import { Oferta } from './Oferta';
+import { PlanSelector } from './PlanSelector';
 import { RegaloEbook } from './RegaloEbook';
 import { Garantia } from './Garantia';
 import { Faq } from './Faq';
@@ -23,6 +25,39 @@ const CTA_HREF = '/empezar';
 const CTA_LABEL = 'Empezar mis 7 días gratis';
 // PENDIENTE (ESTADO.md): correo de soporte REAL que alguien lea.
 const SOPORTE_EMAIL = 'soporte@ladoctoraperritos.com';
+
+// Planes por número de perros (decisión de precio en ESTADO.md, 2026-09-23). Mismas funciones; cambia el tope de perros.
+const PLANES = {
+  esencial: {
+    etiqueta: '1 o 2 perros',
+    nombre: 'Esencial',
+    titulo: 'Empieza gratis. Sigue por [acento]US$0,08 al día[/acento]',
+    mensual: 'US$2,99',
+    anualMes: 'US$2,42',
+    anualTotal: 'Se cobra US$29/año',
+    dia: 'menos de US$0,10 al día',
+    perros: 'Hasta 2 perros',
+  },
+  familia: {
+    etiqueta: '3 a 5 perros',
+    nombre: 'Familia',
+    titulo: 'Empieza gratis. Sigue por [acento]US$0,13 al día[/acento]',
+    mensual: 'US$4,99',
+    anualMes: 'US$4,08',
+    anualTotal: 'Se cobra US$49/año',
+    dia: 'menos de US$0,14 al día',
+    perros: 'Hasta 5 perros',
+  },
+} as const;
+type IdPlan = keyof typeof PLANES;
+
+const featuresPlan = (perros: string) => [
+  'Avisos de medicamentos, comida y vacunas',
+  perros,
+  'Hasta 3 tutores: quién hizo qué',
+  'Resumen para el veterinario y datos exportables',
+  'Garantía de 15 días sobre tu primer pago',
+];
 
 // CTA repetido a mitad de scroll: mismo destino y mismo verbo que el hero (19).
 function CtaIntermedio() {
@@ -42,6 +77,8 @@ const LOGO = (
 );
 
 export default function LandingPage() {
+  const [plan, setPlan] = useState<IdPlan>('esencial');
+  const P = PLANES[plan];
   return (
     <div className="min-h-dvh bg-[var(--bg)] text-[var(--text-primary)] [font-family:var(--font-body)]">
       <Hero
@@ -125,38 +162,33 @@ export default function LandingPage() {
         ctaHref={CTA_HREF}
       />
 
+      <PlanSelector
+        titulo="¿Cuántos perros tienes?"
+        activo={plan}
+        onChange={(id) => setPlan(id as IdPlan)}
+        opciones={(Object.keys(PLANES) as IdPlan[]).map((id) => ({ id, etiqueta: PLANES[id].etiqueta, nombre: PLANES[id].nombre }))}
+      />
+
       <Oferta
-        tituloMarked="Empieza gratis. Sigue por [acento]US$0,10 al día[/acento]"
+        tituloMarked={P.titulo}
         trialDias={7}
         anual={{
-          nombre: 'Anual',
+          nombre: `Anual · ${P.nombre}`,
           badge: 'MEJOR VALOR',
-          precioMes: 'US$2,92',
-          totalAnual: 'Se cobra US$35/año',
-          ahorro: '3 meses gratis',
-          descomposicionDia: 'menos de US$0,10 al día',
+          precioMes: P.anualMes,
+          totalAnual: P.anualTotal,
+          ahorro: '2 meses gratis',
+          descomposicionDia: P.dia,
           ctaLabel: CTA_LABEL,
           ctaHref: CTA_HREF,
-          features: [
-            'Avisos de medicamentos, comida y vacunas',
-            'Hasta 3 tutores: quién hizo qué',
-            'Hasta 4 perros, un solo precio',
-            'Resumen para el veterinario y datos exportables',
-            'Garantía de 15 días sobre tu primer pago',
-          ],
+          features: featuresPlan(P.perros),
         }}
         mensual={{
-          nombre: 'Mensual',
-          precioMes: 'US$3,99',
+          nombre: `Mensual · ${P.nombre}`,
+          precioMes: P.mensual,
           ctaLabel: 'Elegir mensual',
           ctaHref: CTA_HREF,
-          features: [
-            'Avisos de medicamentos, comida y vacunas',
-            'Hasta 3 tutores: quién hizo qué',
-            'Hasta 4 perros, un solo precio',
-            'Resumen para el veterinario y datos exportables',
-            'Garantía de 15 días sobre tu primer pago',
-          ],
+          features: featuresPlan(P.perros),
         }}
       />
 

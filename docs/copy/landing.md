@@ -36,12 +36,13 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - Título: Tu perro, [acento]todo en orden[/acento]
 - Frames: «Qué toca hoy» · «Quién hizo qué, sin preguntar» · «Su ficha con fechas y alertas» · «Si tienes más de un perro»
 
-## 6. Oferta  (precio decidido en ESTADO.md: US$3,99/mes · US$35/año · 7 días gratis)
-- Título: Empieza gratis. Sigue por [acento]US$0,10 al día[/acento]  (≤8 palabras; «menos de» va en la card)
+## 6. Oferta  (2 planes por número de perros; decisión en ESTADO.md; 7 días gratis)
+- Selector: «¿Cuántos perros tienes?» → 1 o 2 perros (Esencial) · 3 a 5 perros (Familia)
+- Esencial: US$2,99/mes · anual US$29 (US$2,42/mes, 2 meses gratis, menos de US$0,10 al día)
+- Familia: US$4,99/mes · anual US$49 (US$4,08/mes, 2 meses gratis, menos de US$0,14 al día)
+- Título: Empieza gratis. Sigue por [acento]US$0,08 al día[/acento] (Esencial) / US$0,13 (Familia)
+- Features (IGUALES en mensual y anual; cambia solo el tope de perros): Avisos de medicamentos, comida y vacunas · Hasta 2 perros (Esencial) / Hasta 5 perros (Familia) · Hasta 3 tutores: quién hizo qué · Resumen para el veterinario y datos exportables · Garantía de 15 días sobre tu primer pago
 - Regalo del plan anual: ebook «Primeros Auxilios Caninos» (valor real US$9). Sin stack tachado inventado.
-- Anual: US$2,92/mes · Se cobra US$35/año · 3 meses gratis · menos de US$0,10 al día
-- Mensual: US$3,99/mes
-- Features (IGUALES en mensual y anual; solo cambia el precio): Avisos de medicamentos, comida y vacunas · Hasta 3 tutores: quién hizo qué · Hasta 4 perros, un solo precio · Resumen para el veterinario y datos exportables · Garantía de 15 días sobre tu primer pago
 
 ## 7. Garantía
 - Nombre: la Garantía del Primer Aviso
