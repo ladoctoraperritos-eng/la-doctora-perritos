@@ -10,6 +10,7 @@ import { Agitacion } from './Agitacion';
 import { Solucion } from './Solucion';
 import { AppPorDentro } from './AppPorDentro';
 import { Oferta } from './Oferta';
+import { RegaloEbook } from './RegaloEbook';
 import { Garantia } from './Garantia';
 import { Faq } from './Faq';
 import { CtaFinal } from './CtaFinal';
@@ -160,6 +161,14 @@ export default function LandingPage() {
             'Garantía de 15 días sobre tu primer pago',
           ],
         }}
+      />
+
+      <RegaloEbook
+        portadaSrc="/brand/portada-ebook.jpg"
+        portadaAlt="Portada del ebook Primeros Auxilios Caninos de La Doctora Perritos"
+        tituloMarked="Ebook «Primeros Auxilios Caninos»"
+        detalleMarked="La guía de la Doctora Perritos para [b]saber qué hacer en una emergencia[/b]."
+        valor="US$9"
       />
 
       <Garantia

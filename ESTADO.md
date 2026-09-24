@@ -103,3 +103,9 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
   · PENDIENTE (40/30): gate de viabilidad unitaria con costo REAL por mensaje; regla: costo de IA ≤ 20% del precio (≤ US$0,80/mes al plan mensual). Fijar cupo mensual justo por plan con la fórmula de 02C antes de prometer «ilimitado». Kill-switch de gasto (31).
   · RIESGO DE SALUD: guardrails obligatorios (nunca diagnosticar ni dosificar, siempre derivar al veterinario, mensajes de alarma → «acude ya a una clínica»), evals con casos de emergencia (31) y base de conocimiento propia de la creadora (su ebook de primeros auxilios como fuente) — decidir en Sesión 6.
 - Decisión: funciones IGUALES en mensual y anual (solo cambia el precio). La diferencia en exportación de datos y resumen para el veterinario era un descuido de copy y quedó corregida.
+
+## Ebook como regalo (2026-09-23)
+- La creadora agregó el ebook «Primeros Auxilios Caninos» (PDF de 90 páginas, ~77 KB de texto; se mantiene FUERA del repo por peso; portada en public/brand/portada-ebook.jpg). Se entrega como REGALO del plan anual (decisión propuesta; si lo quiere en ambos planes, cambiar). Landing: sección RegaloEbook tras la oferta.
+- Valor mostrado: US$9 = precio real de venta (no se infla; un valor mayor solo es válido si el ebook se vende de verdad a ese precio en Hotmart). Su landing del ebook usa un «Antes US$97» tachado: ancla inflada, revisar (47/policies de ads).
+- El ebook es la base de conocimiento natural para el chat de emergencias (Sesión 6, RAG 33): fuente propia, con derechos de la creadora.
+- ⚠️ Portada: muestra a una mujer con uniforme quirúrgico y estetoscopio y tres perros; parece imagen generada por IA. La creadora NO es veterinaria: usar esa figura como cara de la marca sugiere profesión veterinaria. Se usa solo como miniatura del producto; pendiente aclarar si es foto real y decidir el hero (foto real de su perro o ilustración).
