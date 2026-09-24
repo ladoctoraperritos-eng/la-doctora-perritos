@@ -9,23 +9,14 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - CTA: Empezar mis 7 días gratis
 - Franja de confianza (solo hechos de la oferta): Sin cobro hoy · cancela cuando quieras · garantía de 15 días
 
-## 2. Problema  (dolores 1-5 de la ficha, en su lenguaje)
-1. ¿Te preguntas si [b]ya le diste[/b] su medicamento?
-2. ¿En casa nadie sabe con certeza [b]quién lo hizo[/b]?
-3. ¿Descubres tarde que se le acabaron las pastillas o la comida?
-4. ¿Buscas su receta entre WhatsApp, fotos y papeles?
-5. ¿Cuidarlo bien ya se siente como otra tarea mental?
-
-## 3. Agitación  (costo de la inacción de la ficha; sin cifras inventadas)
-- Una dosis olvidada o repetida no avisa: [b]lo notas cuando ya pasó[/b].
-- Alarmas, chat familiar y fotos de recetas: [b]cinco sistemas para una sola preocupación[/b].
-- Mientras sigas así, [acento]cuidarlo depende de que te acuerdes[/acento].
-- Contraste — Hoy: [b]Alarmas sueltas[/b] y un «[b]pensé que se lo habías dado tú[/b]».
-- Contraste — Si nada cambia: [b]La misma carga mental[/b], todos los días, y el miedo constante de [b]olvidar algo importante[/b].
+## 2. Problema  (3 situaciones concretas; se eliminó la Agitación por repetir la carga mental)
+1. ¿No sabes si otro tutor [b]ya dio el medicamento[/b]?
+2. ¿Notas tarde que [b]se acabará[/b] su comida o su tratamiento?
+3. ¿Buscas su receta entre [b]WhatsApp, fotos y papeles[/b]?
 
 ## 4. Solución  (mecanismo: el Panel de Hoy)
 - Título: Abres la app y ya sabes [acento]qué le toca hoy[/acento]
-- Big Idea: Sabemos lo que pesa acordarte de todo. [b]No es tu memoria[/b]: su cuidado vive en cinco lugares. El Panel de Hoy lo junta y [b]te avisa antes de que algo falle[/b].
+- Big Idea: Sabemos lo que pesa acordarte de todo. [b]No es tu memoria[/b]: su cuidado vive en cinco lugares. El Panel de Hoy lo junta y [b]te avisa a tiempo[/b].
 - Paso 1 · Cuéntanos lo suyo — Un medicamento, su comida o una vacuna. Nosotros lo recordamos por ti.
 - Paso 2 · Te avisamos a tiempo — Antes de cada dosis y antes de que algo se acabe. Tú respiras.
 - Paso 3 · Todos ven qué se hizo — Quien lo da lo marca y la familia lo ve. Nadie duda.
@@ -36,13 +27,15 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - Título: Tu perro, [acento]todo en orden[/acento]
 - Frames: «Qué toca hoy» · «Quién hizo qué, sin preguntar» · «Su ficha con fechas y alertas» · «Si tienes más de un perro»
 
-## 6. Oferta  (2 planes por número de perros; decisión en ESTADO.md; 7 días gratis)
-- Selector: «¿Cuántos perros tienes?» → 1 o 2 perros (Esencial) · 3 a 5 perros (Familia)
-- Esencial: US$2,99/mes · anual US$29 (US$2,42/mes, 2 meses gratis, menos de US$0,10 al día)
-- Familia: US$4,99/mes · anual US$49 (US$4,08/mes, 2 meses gratis, menos de US$0,14 al día)
-- Título: Empieza gratis. Sigue por [acento]US$0,08 al día[/acento] (Esencial) / US$0,13 (Familia)
-- Features (IGUALES en mensual y anual; cambia solo el tope de perros): Avisos de medicamentos, comida y vacunas · Hasta 2 perros (Esencial) / Hasta 5 perros (Familia) · Hasta 3 tutores: quién hizo qué · Resumen para el veterinario y datos exportables · Garantía de 15 días sobre tu primer pago
-- Regalo del plan anual: ebook «Primeros Auxilios Caninos» (valor real US$9). Sin stack tachado inventado.
+## 6. Oferta  (2 planes por número de perros; condiciones comerciales en lib/oferta.ts)
+- Selector: «¿Cuántos perros tienes?» → 1 o 2 perros (Esencial) · 3 a 5 perros (Familia). Nota: precios en dólares (US$), iguales en todos los países de habla hispana.
+- Anual: importe destacado «US$29 al año» / «US$49 al año»; «Equivale a US$2,42 / US$4,08 al mes» sin parecer cobro mensual. Mensual: «US$2,99 al mes» / «US$4,99 al mes».
+- RESUMEN DE COBRO junto a cada botón (fechas calculadas con la fecha real del visitante): 
+  · Con prueba verificada: «Hoy pagas: US$0 · Primer cobro: <importe> el <hoy + 7 días> · Renovación: <importe> cada año/mes».
+  · Sin prueba (estado actual): «Hoy pagas: <importe> · Próxima renovación: <fecha>, y luego cada año/mes».
+  · Con garantía verificada y su inicio definido: «Garantía de 15 días desde <compra|primer cobro> (hasta el <fecha>): escribe a contacto@… y te devolvemos tu primer pago». Si no, no se muestra.
+- Sin prueba verificada no se muestran badges «7 días gratis», ni «Empieza gratis», ni «Prueba de 7 días». Sin garantía verificada se oculta la sección Garantía y las menciones.
+- Features (cambia solo el tope de perros): Avisos de medicamentos, comida y vacunas · Hasta 2/5 perros · Hasta 3 tutores: quién hizo qué · Resumen para el veterinario y datos exportables · (garantía si verificada) · Regalo del anual: ebook (valor real US$9).
 
 ## 7. Garantía
 - Nombre: la Garantía del Primer Aviso

@@ -1,3 +1,5 @@
+import { CONDICIONES, hayPrueba } from "@/lib/oferta";
+
 export const metadata = { title: "Términos · La Doctora Perritos" };
 
 export default function Terminos() {
@@ -13,9 +15,11 @@ export default function Terminos() {
         veterinario, no diagnostica ni receta, y no reemplaza a tu veterinario. Ante una duda de salud o una emergencia,
         consulta a un profesional.
       </p>
-      <h2 className="mt-6 text-lg font-semibold">Prueba, renovación y cancelación</h2>
+      <h2 className="mt-6 text-lg font-semibold">Cobro, renovación y cancelación</h2>
       <p className="mt-2">
-        Empiezas con 7 días gratis. Te avisamos antes de cobrarte y puedes cancelar cuando quieras.
+        {hayPrueba()
+          ? `Empiezas con ${CONDICIONES.prueba.dias} días de prueba. El primer cobro se hace al terminar la prueba; te avisamos antes y puedes cancelar cuando quieras.`
+          : "El primer cobro se hace al contratar. La suscripción se renueva cada mes o cada año, según el plan que elijas, y puedes cancelar cuando quieras."}
       </p>
       <h2 className="mt-6 text-lg font-semibold">Avisos</h2>
       <p className="mt-2">

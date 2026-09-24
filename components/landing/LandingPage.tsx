@@ -1,51 +1,58 @@
 'use client';
 
-// Landing de La Doctora Perritos — compone las 10 secciones canónicas de 19 desde el kit.
+// Landing de La Doctora Perritos — compone las secciones canónicas de 19 desde el kit.
 // TODO el copy sale de docs/copy/landing.md (trazado a FICHA-AVATAR.md).
+// Las condiciones comerciales (prueba, garantía) salen de lib/oferta.ts: solo se prometen
+// si están verificadas en la pasarela.
 
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { AlertTriangle, Brain, FileSearch, Layers, Package, Pill, Users } from 'lucide-react';
+import { FileSearch, Package, Users } from 'lucide-react';
+import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { Hero } from './Hero';
 import { Problema } from './Problema';
-import { Agitacion } from './Agitacion';
 import { Solucion } from './Solucion';
 import { AppPorDentro } from './AppPorDentro';
 import { Oferta } from './Oferta';
 import { PlanSelector } from './PlanSelector';
 import { RegaloEbook } from './RegaloEbook';
+import { ResumenCobro } from './ResumenCobro';
 import { Garantia } from './Garantia';
 import { Faq } from './Faq';
 import { CtaFinal } from './CtaFinal';
 import { FooterLegal } from './FooterLegal';
 import { CtaButton, StickyCtaMobile } from './ui';
 
+const PRUEBA = hayPrueba();
+const GARANTIA = hayGarantia();
+const DIAS_PRUEBA = CONDICIONES.prueba.dias;
+const DIAS_GARANTIA = CONDICIONES.garantia.dias;
+
 // Mismo destino en hero, mid-page, oferta, CTA final y sticky.
 // Provisional: /empezar hasta que existan el onboarding y el checkout de Hotmart.
 const CTA_HREF = '/empezar';
-const CTA_LABEL = 'Empezar mis 7 días gratis';
-const SOPORTE_EMAIL = 'contacto@ladoctoraperritos.com';
+const CTA_LABEL = PRUEBA ? `Empezar mis ${DIAS_PRUEBA} días gratis` : 'Empezar ahora';
+const SOPORTE_EMAIL = CONDICIONES.contacto;
+const MICROCOPY = PRUEBA ? `Prueba de ${DIAS_PRUEBA} días · cancela cuando quieras` : 'Cancela cuando quieras';
 
 // Planes por número de perros (decisión de precio en ESTADO.md, 2026-09-23). Mismas funciones; cambia el tope de perros.
 const PLANES = {
   esencial: {
     etiqueta: '1 o 2 perros',
     nombre: 'Esencial',
-    titulo: 'Empieza gratis. Sigue por [acento]US$0,08 al día[/acento]',
+    dia: 'US$0,08',
     mensual: 'US$2,99',
+    anualTotal: 'US$29',
     anualMes: 'US$2,42',
-    anualTotal: 'Se cobra US$29/año',
-    dia: 'menos de US$0,10 al día',
     perros: 'Hasta 2 perros',
   },
   familia: {
     etiqueta: '3 a 5 perros',
     nombre: 'Familia',
-    titulo: 'Empieza gratis. Sigue por [acento]US$0,13 al día[/acento]',
+    dia: 'US$0,13',
     mensual: 'US$4,99',
+    anualTotal: 'US$49',
     anualMes: 'US$4,08',
-    anualTotal: 'Se cobra US$49/año',
-    dia: 'menos de US$0,14 al día',
     perros: 'Hasta 5 perros',
   },
 } as const;
@@ -56,7 +63,6 @@ const featuresPlan = (perros: string) => [
   perros,
   'Hasta 3 tutores: quién hizo qué',
   'Resumen para el veterinario y datos exportables',
-  'Garantía de 15 días sobre tu primer pago',
 ];
 
 // CTA repetido a mitad de scroll: mismo destino y mismo verbo que el hero (19).
@@ -65,7 +71,7 @@ function CtaIntermedio() {
     <div className="mx-auto flex w-full max-w-md justify-center px-6 py-8">
       <div className="flex w-full flex-col items-center gap-2">
         <CtaButton href={CTA_HREF}>{CTA_LABEL}</CtaButton>
-        <p className="text-sm text-[var(--text-secondary)]">Sin cobro hoy · cancela cuando quieras</p>
+        <p className="text-sm text-[var(--text-secondary)]">{MICROCOPY}</p>
       </div>
     </div>
   );
@@ -76,10 +82,21 @@ const LOGO = (
   <img src="/brand/logo.png" alt="" width={48} height={40} className="h-10 w-auto" />
 );
 
+const garantiaDesde = CONDICIONES.garantia.desde === 'compra' ? 'el día de tu compra' : 'tu primer cobro';
+
 export default function LandingPage() {
   const [plan, setPlan] = useState<IdPlan>('esencial');
   const P = PLANES[plan];
   const reduce = useReducedMotion();
+
+  const recap = [PRUEBA && `${DIAS_PRUEBA} días de prueba`, GARANTIA && 'Garantía del Primer Aviso', 'Cancela cuando quieras']
+    .filter(Boolean)
+    .join(' · ');
+  const ps =
+    PRUEBA && GARANTIA
+      ? `PS: Empiezas con ${DIAS_PRUEBA} días de prueba y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos tu primer pago.`
+      : 'PS: La Doctora Perritos junta medicamentos, comida, vacunas y controles de tu perro en el Panel de Hoy, con quién hizo qué.';
+
   return (
     <div className="min-h-dvh bg-[var(--bg)] text-[var(--text-primary)] [font-family:var(--font-body)]">
       <Hero
@@ -90,7 +107,7 @@ export default function LandingPage() {
         subtitleMarked="Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]"
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
-        socialProof={<span className="text-base font-medium">Sin cobro hoy · cancela cuando quieras · garantía de 15 días</span>}
+        socialProof={<span className="text-base font-medium">{MICROCOPY}</span>}
         visual={
           <div className="bg-[var(--surface-2)]">
             <div className="aspect-video overflow-hidden">
@@ -118,36 +135,20 @@ export default function LandingPage() {
         visualPlaceholderSugerencia="captura de «Hoy con Toffee»: medicamento de las 19:00, alimento para ~8 días y quién dio el Omega-3"
       />
 
+      {/* Tres situaciones concretas; después se pasa directo a cómo funciona (sin sección de agitación). */}
       <Problema
         titulo="¿Te suena?"
         preguntas={[
-          { icon: Pill, textoMarked: '¿Te preguntas si [b]ya le diste[/b] su medicamento?' },
-          { icon: Users, textoMarked: '¿En casa nadie sabe con certeza [b]quién lo hizo[/b]?' },
-          { icon: Package, textoMarked: '¿Descubres tarde que se le acabaron las pastillas o la comida?' },
-          { icon: FileSearch, textoMarked: '¿Buscas su receta entre WhatsApp, fotos y papeles?' },
-          { icon: Brain, textoMarked: '¿Cuidarlo bien ya se siente como otra tarea mental?' },
+          { icon: Users, textoMarked: '¿No sabes si otro tutor [b]ya dio el medicamento[/b]?' },
+          { icon: Package, textoMarked: '¿Notas tarde que [b]se acabará[/b] su comida o su tratamiento?' },
+          { icon: FileSearch, textoMarked: '¿Buscas su receta entre [b]WhatsApp, fotos y papeles[/b]?' },
         ]}
-      />
-
-      <Agitacion
-        titulo="Lo que cuesta seguir así"
-        iconos={[AlertTriangle, Layers]}
-        frases={[
-          'Una dosis olvidada o repetida no avisa: [b]lo notas cuando ya pasó[/b].',
-          'Alarmas, chat familiar y fotos de recetas: [b]cinco sistemas para una sola preocupación[/b].',
-        ]}
-        contraste={{
-          labelHoy: 'Hoy',
-          hoy: '[b]Alarmas sueltas[/b] y un «[b]pensé que se lo habías dado tú[/b]».',
-          labelFuturo: 'Si nada cambia',
-          futuro: '[b]La misma carga mental[/b], todos los días, y el miedo constante de [b]olvidar algo importante[/b].',
-        }}
       />
 
       <Solucion
         tituloMarked="Abres la app y ya sabes [acento]qué le toca hoy[/acento]"
         mecanismo="el Panel de Hoy"
-        bigIdeaMarked="Sabemos lo que pesa acordarte de todo. [b]No es tu memoria[/b]: su cuidado vive en cinco lugares. El Panel de Hoy lo junta y [b]te avisa antes de que algo falle[/b]."
+        bigIdeaMarked="Sabemos lo que pesa acordarte de todo. [b]No es tu memoria[/b]: su cuidado vive en cinco lugares. El Panel de Hoy lo junta y [b]te avisa a tiempo[/b]."
         pasos={[
           { titulo: 'Cuéntanos lo suyo', detalle: 'Un medicamento, su comida o una vacuna. Nosotros lo recordamos por ti.' },
           { titulo: 'Te avisamos a tiempo', detalle: 'Antes de cada dosis y antes de que algo se acabe. Tú respiras.' },
@@ -189,41 +190,60 @@ export default function LandingPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       >
-      <Oferta
-        tituloMarked={P.titulo}
-        trialDias={7}
-        anual={{
-          nombre: 'Anual',
-          badge: 'MEJOR VALOR',
-          precioMes: P.anualMes,
-          totalAnual: P.anualTotal,
-          ahorro: '2 meses gratis',
-          descomposicionDia: P.dia,
-          ctaLabel: CTA_LABEL,
-          ctaHref: CTA_HREF,
-          features: [...featuresPlan(P.perros), 'Regalo: ebook «Primeros Auxilios Caninos»'],
-        }}
-        mensual={{
-          nombre: 'Mensual',
-          precioMes: P.mensual,
-          ctaLabel: 'Elegir mensual',
-          ctaHref: CTA_HREF,
-          features: ['Todas las funciones del plan anual', P.perros, 'Garantía de 15 días sobre tu primer pago', 'Cancelas cuando quieras'],
-        }}
-      />
+        <Oferta
+          tituloMarked={
+            PRUEBA
+              ? `Empieza gratis. Sigue por [acento]${P.dia} al día[/acento]`
+              : `Cuida a tu perro desde [acento]${P.dia} al día[/acento]`
+          }
+          trialDias={PRUEBA ? DIAS_PRUEBA : undefined}
+          anual={{
+            nombre: 'Anual',
+            badge: 'MEJOR VALOR',
+            precioMes: P.anualTotal,
+            sufijo: 'al año',
+            totalAnual: `Equivale a ${P.anualMes} al mes`,
+            ahorro: '2 meses gratis',
+            resumen: <ResumenCobro periodo="anio" importe={P.anualTotal} equivalente={`${P.anualMes} al mes`} />,
+            ctaLabel: CTA_LABEL,
+            ctaHref: CTA_HREF,
+            features: [
+              ...featuresPlan(P.perros),
+              ...(GARANTIA ? [`Garantía de ${DIAS_GARANTIA} días sobre tu primer pago`] : []),
+              'Regalo: ebook «Primeros Auxilios Caninos»',
+            ],
+          }}
+          mensual={{
+            nombre: 'Mensual',
+            precioMes: P.mensual,
+            sufijo: 'al mes',
+            resumen: <ResumenCobro periodo="mes" importe={P.mensual} />,
+            ctaLabel: PRUEBA ? 'Elegir mensual' : 'Empezar con el mensual',
+            ctaHref: CTA_HREF,
+            features: [
+              'Todas las funciones del plan anual',
+              P.perros,
+              ...(GARANTIA ? [`Garantía de ${DIAS_GARANTIA} días sobre tu primer pago`] : []),
+              'Cancelas cuando quieras',
+            ],
+          }}
+        />
       </motion.div>
 
       <RegaloEbook
-                tituloMarked="Ebook «Primeros Auxilios Caninos»"
+        tituloMarked="Ebook «Primeros Auxilios Caninos»"
         detalleMarked="La guía de la Doctora Perritos para [b]saber qué hacer en una emergencia[/b]."
         valor="US$9"
       />
 
-      <Garantia
-        nombre="Garantía del Primer Aviso"
-        condicionMarked="Si la app no te quita el peso de recordar, escribes un correo dentro de los 15 días de garantía y te devolvemos tu primer pago. [b]Sin preguntas.[/b]"
-        pisoLegal="Respaldada por la garantía de 15 días de Hotmart"
-      />
+      {/* La garantía solo se muestra si está definida y verificada en la pasarela (lib/oferta.ts). */}
+      {GARANTIA && (
+        <Garantia
+          nombre="Garantía del Primer Aviso"
+          condicionMarked={`Si la app no te quita el peso de recordar, escribe a ${SOPORTE_EMAIL} dentro de los ${DIAS_GARANTIA} días desde ${garantiaDesde} y te devolvemos tu primer pago. [b]Sin preguntas.[/b]`}
+          pisoLegal={`Respaldada por la garantía de ${DIAS_GARANTIA} días de Hotmart`}
+        />
+      )}
 
       <CtaIntermedio />
 
@@ -235,7 +255,9 @@ export default function LandingPage() {
           },
           {
             pregunta: '¿Otra suscripción más?',
-            respuestaMarked: 'Cuesta menos que un solo antiparasitario. Pruebas 7 días gratis y cancelas cuando quieras.',
+            respuestaMarked: PRUEBA
+              ? `Cuesta menos que un solo antiparasitario. Pruebas ${DIAS_PRUEBA} días y cancelas cuando quieras.`
+              : 'Cuesta menos que un solo antiparasitario y cancelas cuando quieras.',
           },
           {
             pregunta: '¿Tendré que llenar una ficha enorme?',
@@ -261,8 +283,8 @@ export default function LandingPage() {
         futurePacingMarked="Esta noche, a las 19:00, la app te avisa. Lo marcas y tu familia lo ve al instante."
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
-        recap="7 días gratis · Garantía del Primer Aviso · Cancela cuando quieras"
-        psMarked="PS: Empiezas con 7 días gratis y la Garantía del Primer Aviso: si no te quita el peso de recordar, un correo y te devolvemos tu primer pago."
+        recap={recap}
+        psMarked={ps}
       />
 
       <FooterLegal

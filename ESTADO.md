@@ -131,3 +131,10 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Correo real: contacto@ladoctoraperritos.com · Sitio: www.ladoctoraperritos.com (metadataBase en app/layout.tsx; footer actualizado). Ya no está pendiente el correo de soporte.
 - Moneda: precios en USD para todos los países de habla hispana (decisión de la creadora); nota visible bajo el selector de plan. La pregunta del revisor sobre pago en moneda local se responde con esa nota; medios de pago reales de Hotmart siguen sin verificar (FICHA-MERCADO §3).
 - Hero: se reemplazó la foto de los perros por la imagen de una mujer con su perro golden (public/brand/hero-mujer-golden.jpg). Ver FICHA-ARTE.
+
+## Condiciones comerciales: prueba y garantía DESACTIVADAS en la web (2026-09-24)
+- Verificación: no existe ningún sistema de pagos configurado (sin cuenta/producto/ofertas de Hotmart, sin código de checkout ni webhook). Por tanto ni la prueba de 7 días, ni la garantía de 15 días, ni desde cuándo cuenta esa garantía están aplicadas ni verificadas.
+- lib/oferta.ts es la fuente única: prueba.verificada=false, garantia.verificada=false, garantia.desde=null. Con eso la landing NO muestra «7 días gratis», «Hoy pagas: US$0» ni la sección/menciones de Garantía; las páginas /terminos y /reembolsos se adaptan. Al configurar Hotmart: comprobar prueba y garantía (y desde cuándo corre), cambiar los flags y verificar el resumen de cobro.
+- Resumen de cobro junto a cada botón (components/landing/ResumenCobro.tsx + resumenCobro() en lib/oferta.ts): fechas calculadas con la fecha real del visitante en el navegador; probado con scripts/probar-oferta.mts (fin de mes, año bisiesto, ambos planes).
+- «Cancela cuando quieras» sigue en la web: NO verificado aún en Hotmart (normalmente el comprador puede cancelar; confirmar).
+- Landing: eliminada la sección «Lo que cuesta seguir así» (Agitación, con «Hoy / Si nada cambia») y reducido «¿Te suena?» a 3 situaciones. Desviación DELIBERADA de la estructura canónica de 19 (10 secciones), pedida por la creadora para reducir la repetición de la carga mental.

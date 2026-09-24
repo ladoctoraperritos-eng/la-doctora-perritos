@@ -8,6 +8,7 @@
 // la card recomendada (el uso canónico de la técnica) · checkmarks custom.
 // El destino de los CTAs sigue al MODELO de 02C (checkout vs /onboarding).
 
+import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Star } from 'lucide-react';
 import { CheckCustom, CtaButton, Hairline, Kicker, SectionShell, useReveal, VIEWPORT_ONCE } from './ui';
@@ -20,6 +21,8 @@ export interface PlanOferta {
   sufijo?: string;
   /** Descomposición por día ("menos de $0.17 al día") — 13px bajo el precio. */
   descomposicionDia?: string;
+  /** Resumen de cobro (hoy pagas, primer cobro, renovación) — va JUNTO al botón. */
+  resumen?: ReactNode;
   ctaLabel: string;
   ctaHref: string;
   /** 4-6 features en lenguaje de RESULTADO, máx 12 palabras c/u. */
@@ -164,7 +167,8 @@ export function Oferta({
                   <p className="mt-2 text-[15px] font-semibold text-[var(--accent)]">{anual.ahorro}</p>
                 </div>
                 <Features items={anual.features} origen="Oferta → anual" />
-                <div className="mt-6">
+                {anual.resumen && <div className="mt-6">{anual.resumen}</div>}
+                <div className="mt-4">
                   <CtaButton href={anual.ctaHref} fullMobile>
                     {anual.ctaLabel}
                   </CtaButton>
@@ -186,10 +190,11 @@ export function Oferta({
               <Precio plan={mensual} />
             </div>
             <Features items={mensual.features} origen="Oferta → mensual" />
+            {mensual.resumen && <div className="mt-6">{mensual.resumen}</div>}
             <motion.a
               whileTap={{ scale: 0.97 }}
               href={mensual.ctaHref}
-              className="mt-6 flex h-12 w-full items-center justify-center rounded-[var(--radius-button)] border border-[color-mix(in_oklab,var(--accent)_45%,transparent)] text-[16px] font-semibold text-[var(--accent)] transition-colors duration-150 hover:bg-[var(--chip-bg)] [touch-action:manipulation]"
+              className="mt-4 flex h-12 w-full items-center justify-center rounded-[var(--radius-button)] border border-[color-mix(in_oklab,var(--accent)_45%,transparent)] text-[16px] font-semibold text-[var(--accent)] transition-colors duration-150 hover:bg-[var(--chip-bg)] [touch-action:manipulation]"
             >
               {mensual.ctaLabel}
             </motion.a>
