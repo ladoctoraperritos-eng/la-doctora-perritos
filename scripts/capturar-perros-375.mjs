@@ -25,4 +25,16 @@ await p.getByRole('button', { name: 'Lo hice hoy' }).click(); await p.waitForTim
 await p.getByRole('button', { name: 'Perros' }).first().click(); await p.waitForSelector('text=Tus perros');
 await p.getByRole('button', { name: 'Agregar perro' }).click(); await foto('8-limite');
 console.log('scrollWidth2', await p.evaluate(() => document.documentElement.scrollWidth));
+// Editar datos: foto propia, chip inválido y luego válido
+await p.getByRole('button', { name: 'Ahora no' }).click(); await p.waitForTimeout(400);
+await p.getByRole('button', { name: /Luna/ }).first().click(); await p.waitForSelector('text=Botiquín');
+await p.getByRole('button', { name: /Editar datos de Luna/ }).click(); await p.waitForTimeout(400);
+await p.setInputFiles('#foto-perro', 'public/brand/hero-mujer-golden.jpg'); await p.waitForTimeout(900);
+await p.fill('#chip-perro', '123'); await p.fill('#responsable-perro', 'Diego Soto'); await p.fill('#telefono-perro', '+52 55 1234 5678');
+await p.fill('#notas-perro', 'Sorda del oído izquierdo. Toma condroitina.');
+await p.getByRole('button', { name: 'Guardar cambios' }).click(); await foto('9-editar-perro-error');
+await p.fill('#chip-perro', '985 112 345 678 902');
+await p.getByRole('button', { name: 'Guardar cambios' }).click(); await p.waitForTimeout(600); await foto('10-ficha-luna');
+await p.screenshot({ path: 'docs/revisiones/perros-10b-ficha-luna-completa.png', fullPage: true });
+console.log('scrollWidth3', await p.evaluate(() => document.documentElement.scrollWidth));
 process.exit(0);

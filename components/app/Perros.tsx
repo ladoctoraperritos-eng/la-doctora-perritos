@@ -10,10 +10,10 @@
 //   baseline: entrada escalonada · tap con escala · hoja con transición · estados vacío/carga/límite del plan
 //   estados: cargando (esqueleto) · vacío por sección · límite de plan · error de validación · confirmación al borrar
 
-import { useState, useSyncExternalStore } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
-import { AlertCircle, ArrowLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Camera, Check, ChevronRight, Copy, Cpu, Phone, Pencil, Plus, Trash2, User } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Avatar, ChipIcono, entrada, Menu, textoDias, tono } from './Hoy';
 import {
@@ -279,6 +279,31 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
   );
 }
 
+/** Recorta la foto al centro en cuadrado y la reduce (480 px): liviana para guardar y rápida de mostrar. */
+async function procesarFoto(archivo: File): Promise<string> {
+  if (!archivo.type.startsWith('image/')) throw new Error('Elige una imagen (JPG, PNG o WEBP).');
+  if (archivo.size > 15 * 1024 * 1024) throw new Error('La foto pesa demasiado. Elige una de menos de 15 MB.');
+  const url = URL.createObjectURL(archivo);
+  try {
+    const img = await new Promise<HTMLImageElement>((ok, mal) => {
+      const i = new Image();
+      i.onload = () => ok(i);
+      i.onerror = () => mal(new Error('No pudimos abrir esa foto. Prueba con otra.'));
+      i.src = url;
+    });
+    const lado = Math.min(img.naturalWidth, img.naturalHeight);
+    const lienzo = document.createElement('canvas');
+    lienzo.width = 480;
+    lienzo.height = 480;
+    const ctx = lienzo.getContext('2d');
+    if (!ctx) throw new Error('No pudimos procesar esa foto. Prueba con otra.');
+    ctx.drawImage(img, (img.naturalWidth - lado) / 2, (img.naturalHeight - lado) / 2, lado, lado, 0, 0, 480, 480);
+    return lienzo.toDataURL('image/jpeg', 0.82);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 // ── Formulario de perro ──
 function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) => void }) {
   const hoyClave = claveDia(new Date());
@@ -287,12 +312,36 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
   const [nacimiento, setNacimiento] = useState(perro?.nacimiento ?? '');
   const [peso, setPeso] = useState(perro?.pesoKg !== undefined ? String(perro.pesoKg) : '');
   const [notas, setNotas] = useState(perro?.notas ?? '');
+  const [chip, setChip] = useState(perro?.chip ?? '');
+  const [responsable, setResponsable] = useState(perro?.responsable ?? '');
+  const [telefono, setTelefono] = useState(perro?.telefono ?? '');
+  const [foto, setFoto] = useState<string | undefined>(perro?.foto);
+  const [cargandoFoto, setCargandoFoto] = useState(false);
+  const entradaFoto = useRef<HTMLInputElement>(null);
   const [errores, setErrores] = useState<Record<string, string>>({});
+  const limpiar = (k: string) => setErrores((x) => ({ ...x, [k]: '' }));
+
+  const elegirFoto = async (archivo: File | undefined) => {
+    if (!archivo) return;
+    setCargandoFoto(true);
+    limpiar('foto');
+    try {
+      setFoto(await procesarFoto(archivo));
+    } catch (err) {
+      setErrores((x) => ({ ...x, foto: err instanceof Error ? err.message : 'No pudimos cargar la foto.' }));
+    } finally {
+      setCargandoFoto(false);
+    }
+  };
 
   const guardar = () => {
     const e: Record<string, string> = {};
     if (!nombre.trim()) e.nombre = 'Escribe su nombre.';
     if (peso !== '' && !(Number(peso) > 0 && Number(peso) < 120)) e.peso = 'Escribe un peso en kilos, por ejemplo 12,5.';
+    const soloChip = chip.replace(/[\s-]/g, '');
+    if (soloChip && !/^\d{9,15}$/.test(soloChip)) e.chip = 'El chip tiene entre 9 y 15 números. Revisa el que sale en su carné.';
+    const soloTel = telefono.replace(/[\s()-]/g, '');
+    if (soloTel && !/^\+?\d{7,15}$/.test(soloTel)) e.telefono = 'Escribe un teléfono válido, por ejemplo +56 9 1234 5678.';
     setErrores(e);
     if (Object.keys(e).length) return;
     const id = perro?.id ?? nuevoId('p');
@@ -304,6 +353,10 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
       nacimiento: nacimiento || undefined,
       pesoKg: peso !== '' ? Number(peso) : undefined,
       notas: notas.trim() || undefined,
+      chip: soloChip || undefined,
+      responsable: responsable.trim() || undefined,
+      telefono: telefono.trim() || undefined,
+      foto,
     });
     onListo(id);
   };
@@ -316,6 +369,27 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
       }}
       noValidate
     >
+      <div className="mt-3 flex items-center gap-4">
+        <Avatar perro={{ id: 'vista', nombre: nombre || 'Tu perro', foto }} grande />
+        <div className="flex flex-col items-start gap-1">
+          <input ref={entradaFoto} id="foto-perro" type="file" accept="image/*" className="sr-only" onChange={(ev) => { void elegirFoto(ev.target.files?.[0]); ev.target.value = ''; }} />
+          <button type="button" onClick={() => entradaFoto.current?.click()} disabled={cargandoFoto} className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] px-4 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
+            <Camera size={20} aria-hidden="true" />
+            {cargandoFoto ? 'Preparando…' : foto ? 'Cambiar foto' : 'Agregar foto'}
+          </button>
+          {foto && (
+            <button type="button" onClick={() => setFoto(undefined)} className="inline-flex min-h-11 items-center px-2 text-base font-medium text-[var(--text-secondary)] [touch-action:manipulation]">
+              Quitar foto
+            </button>
+          )}
+        </div>
+      </div>
+      {errores.foto && (
+        <p role="alert" className="mt-2 flex items-center gap-2 text-base font-semibold">
+          <AlertCircle size={18} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+          {errores.foto}
+        </p>
+      )}
       <Campo id="nombre-perro" etiqueta="Nombre" error={errores.nombre}>
         <input id="nombre-perro" value={nombre} maxLength={30} autoComplete="off" onChange={(e) => { setNombre(e.target.value); setErrores((x) => ({ ...x, nombre: '' })); }} placeholder="Por ejemplo, Toffee" className={campo} />
       </Campo>
@@ -329,8 +403,17 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
       <Campo id="peso-perro" etiqueta="Peso en kilos" opcional error={errores.peso}>
         <input id="peso-perro" type="number" inputMode="decimal" step="0.1" min={0} value={peso} onChange={(e) => { setPeso(e.target.value); setErrores((x) => ({ ...x, peso: '' })); }} placeholder="Por ejemplo, 12,5" className={campo} />
       </Campo>
-      <Campo id="notas-perro" etiqueta="Notas" opcional>
-        <textarea id="notas-perro" value={notas} maxLength={200} rows={3} onChange={(e) => setNotas(e.target.value)} placeholder="Alergias, cuidados especiales…" className={`${campo} h-auto py-3`} />
+      <Campo id="chip-perro" etiqueta="Número de microchip" opcional error={errores.chip}>
+        <input id="chip-perro" inputMode="numeric" value={chip} maxLength={20} autoComplete="off" onChange={(e) => { setChip(e.target.value); limpiar('chip'); }} placeholder="Por ejemplo, 985112345678901" className={campo} />
+      </Campo>
+      <Campo id="responsable-perro" etiqueta="Responsable" opcional>
+        <input id="responsable-perro" value={responsable} maxLength={50} autoComplete="name" onChange={(e) => setResponsable(e.target.value)} placeholder="Nombre de quien responde por él" className={campo} />
+      </Campo>
+      <Campo id="telefono-perro" etiqueta="Teléfono de contacto" opcional error={errores.telefono}>
+        <input id="telefono-perro" type="tel" inputMode="tel" value={telefono} maxLength={20} autoComplete="tel" onChange={(e) => { setTelefono(e.target.value); limpiar('telefono'); }} placeholder="+56 9 1234 5678" className={campo} />
+      </Campo>
+      <Campo id="notas-perro" etiqueta="Datos importantes" opcional>
+        <textarea id="notas-perro" value={notas} maxLength={300} rows={4} onChange={(e) => setNotas(e.target.value)} placeholder="Alergias, cirugías, condiciones, cuidados especiales…" className={`${campo} h-auto py-3`} />
       </Campo>
       <div className="mt-8">
         <button type="submit" className={botonPrimario}>
@@ -377,6 +460,75 @@ function FilaCuidado({ c, i, onAbrir }: { c: Cuidado; i: number; onAbrir: () => 
         <ChevronRight size={20} color="var(--text-secondary)" aria-hidden="true" />
       </button>
     </motion.li>
+  );
+}
+
+function Identificacion({ perro, onEditar }: { perro: Perro; onEditar: () => void }) {
+  const [copiado, setCopiado] = useState(false);
+  const copiar = async () => {
+    try {
+      await navigator.clipboard.writeText(perro.chip ?? '');
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      // sin permiso de portapapeles: el número sigue visible para copiarlo a mano
+    }
+  };
+  if (!perro.chip && !perro.responsable && !perro.telefono) {
+    return (
+      <button type="button" onClick={onEditar} className="flex min-h-16 w-full items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--border-ui)] p-4 text-left text-base text-[var(--text-secondary)] [touch-action:manipulation]">
+        <Plus size={20} color="var(--accent)" aria-hidden="true" />
+        Agrega el chip y un teléfono de contacto por si se pierde
+      </button>
+    );
+  }
+  return (
+    <section aria-label="Identificación" className="borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
+      <h2 className="mb-3 text-lg font-bold">Identificación</h2>
+      <dl className="flex flex-col gap-3">
+        {perro.chip && (
+          <div className="flex items-center gap-3">
+            <ChipDato icono={Cpu} />
+            <div className="min-w-0 flex-1">
+              <dt className="text-sm text-[var(--text-secondary)]">Microchip</dt>
+              <dd className="text-base font-semibold tabular-nums">{perro.chip.replace(/(\d{3})(?=\d)/g, '$1 ')}</dd>
+            </div>
+            <button type="button" onClick={copiar} aria-label={copiado ? 'Número copiado' : 'Copiar número de microchip'} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--accent)] text-[var(--accent)] [touch-action:manipulation]">
+              {copiado ? <Check size={20} aria-hidden="true" /> : <Copy size={20} aria-hidden="true" />}
+            </button>
+          </div>
+        )}
+        {perro.responsable && (
+          <div className="flex items-center gap-3">
+            <ChipDato icono={User} />
+            <div>
+              <dt className="text-sm text-[var(--text-secondary)]">Responsable</dt>
+              <dd className="text-base font-semibold">{perro.responsable}</dd>
+            </div>
+          </div>
+        )}
+        {perro.telefono && (
+          <div className="flex items-center gap-3">
+            <ChipDato icono={Phone} />
+            <div className="min-w-0 flex-1">
+              <dt className="text-sm text-[var(--text-secondary)]">Teléfono</dt>
+              <dd className="text-base font-semibold tabular-nums">{perro.telefono}</dd>
+            </div>
+            <a href={`tel:${perro.telefono.replace(/[\s()-]/g, '')}`} aria-label={`Llamar al ${perro.telefono}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--accent)] text-[var(--accent)]">
+              <Phone size={20} aria-hidden="true" />
+            </a>
+          </div>
+        )}
+      </dl>
+    </section>
+  );
+}
+
+function ChipDato({ icono: Icono }: { icono: typeof Cpu }) {
+  return (
+    <span aria-hidden="true" className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+      <Icono size={20} color="var(--accent)" />
+    </span>
   );
 }
 
@@ -530,7 +682,7 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
   const salud = suyos.filter((c) => TIPOS_SALUD.includes(c.tipo)).sort(porFecha);
   const botiquin = suyos.filter((c) => TIPOS_BOTIQUIN.includes(c.tipo)).sort((a, b) => (a.hora ?? '99').localeCompare(b.hora ?? '99'));
   const edad = edadTexto(perro.nacimiento, ahora);
-  const datos = [perro.raza, edad, perro.pesoKg !== undefined ? `${perro.pesoKg} kg` : null].filter(Boolean);
+  const datos = [edad, perro.pesoKg !== undefined ? `${perro.pesoKg} kg` : null].filter(Boolean);
   return (
     <>
       <button type="button" onClick={onVolver} className="-ml-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--text-secondary)] [touch-action:manipulation]">
@@ -538,10 +690,11 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
         Perros
       </button>
       <motion.header {...entrada(0)} className="flex items-center gap-4">
-        <Avatar perro={perro} />
+        <Avatar perro={perro} grande />
         <div className="min-w-0 flex-1">
           <h1 className="text-3xl font-bold leading-tight">{perro.nombre}</h1>
-          <p className="mt-1 text-base text-[var(--text-secondary)]">{datos.length ? datos.join(' · ') : 'Completa sus datos'}</p>
+          {perro.raza && <p className="mt-1 text-base text-[var(--text-secondary)]">{perro.raza}</p>}
+          <p className={`${perro.raza ? '' : 'mt-1 '}text-base text-[var(--text-secondary)]`}>{datos.length ? datos.join(' · ') : perro.raza ? '' : 'Completa sus datos'}</p>
         </div>
         <button
           type="button"
@@ -552,7 +705,13 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
           <Pencil size={18} aria-hidden="true" />
         </button>
       </motion.header>
-      {perro.notas && <p className="rounded-[var(--radius-card)] bg-[var(--elevated)] p-4 text-base">{perro.notas}</p>}
+      {perro.notas && (
+        <section aria-label="Datos importantes" className="rounded-[var(--radius-card)] bg-[var(--elevated)] p-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Datos importantes</h2>
+          <p className="mt-1 text-base">{perro.notas}</p>
+        </section>
+      )}
+      <Identificacion perro={perro} onEditar={() => onHoja({ kind: 'perro', perro })} />
 
       <Seccion titulo="Salud" onAgregar={() => onHoja({ kind: 'cuidado', perroId: perro.id, tipo: 'vacuna' })} vacio={salud.length === 0 ? 'Agrega su próxima vacuna, antiparasitario, baño o control' : undefined}>
         {salud.map((c, i) => (

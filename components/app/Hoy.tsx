@@ -134,15 +134,16 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
   );
 }
 
-export function Avatar({ perro }: { perro: Perro }) {
+export function Avatar({ perro, grande = false }: { perro: Perro; grande?: boolean }) {
+  const tam = grande ? 'size-24' : 'size-14';
   return perro.foto ? (
-    <span className="borde-degradado size-14 shrink-0 overflow-hidden rounded-full border-2 shadow-[var(--shadow-1)]">
+    <span className={`borde-degradado ${tam} shrink-0 overflow-hidden rounded-full border-2 shadow-[var(--shadow-1)]`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={perro.foto} alt={`Foto de ${perro.nombre}`} width={56} height={56} className="size-full object-cover" />
+      <img src={perro.foto} alt={`Foto de ${perro.nombre}`} width={96} height={96} className="size-full object-cover" />
     </span>
   ) : (
-    <span aria-hidden="true" className="inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
-      <PawPrint size={28} color="var(--accent)" />
+    <span aria-hidden="true" className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]`}>
+      <PawPrint size={grande ? 40 : 28} color="var(--accent)" />
     </span>
   );
 }

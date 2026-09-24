@@ -15,7 +15,13 @@ export interface Perro {
   nacimiento?: string;
   pesoKg?: number;
   raza?: string;
+  /** Datos importantes: alergias, condiciones, cirugías. */
   notas?: string;
+  /** Número de microchip (solo dígitos). */
+  chip?: string;
+  /** Persona responsable y su teléfono, para cuando alguien encuentra al perro. */
+  responsable?: string;
+  telefono?: string;
 }
 export interface Tutor {
   id: string;
@@ -107,7 +113,7 @@ function ejemplo(ahora: Date): EstadoApp {
   return {
     plan: 'esencial',
     perros: [
-      { id: 'p1', nombre: 'Toffee', foto: '/brand/perro-golden-onboarding.webp', raza: 'Golden retriever', pesoKg: 29, nacimiento: `${ahora.getFullYear() - 4}-03-12`, notas: 'Alérgico al pollo. Medicado con Apoquel.' },
+      { id: 'p1', nombre: 'Toffee', foto: '/brand/perro-golden-onboarding.webp', raza: 'Golden retriever', pesoKg: 29, nacimiento: `${ahora.getFullYear() - 4}-03-12`, notas: 'Alérgico al pollo. Medicado con Apoquel.', chip: '985112345678901', responsable: 'Camila Rojas', telefono: '+56 9 1234 5678' },
       { id: 'p2', nombre: 'Luna', raza: 'Mestiza', pesoKg: 12, nacimiento: `${ahora.getFullYear() - 8}-08-02` },
     ],
     tutores: [
