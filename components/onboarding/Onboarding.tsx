@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MotionConfig, motion, useReducedMotion } from 'motion/react';
 import {
+  AlertCircle,
   ArrowLeft,
   Check,
   Clock,
@@ -140,8 +141,6 @@ type Paso = 'nombre' | 'cantidad' | 'etapa' | 'cuidados' | 'cuidadores' | 'momen
 const PASOS: Paso[] = ['nombre', 'cantidad', 'etapa', 'cuidados', 'cuidadores', 'momento'];
 /** Solo estos se pueden saltar (no rompen el Panel). */
 const SALTABLES: Paso[] = ['etapa', 'cuidadores'];
-/** Las de una sola elección avanzan solas, con un respiro para ver la selección. */
-const AUTOAVANZAN: Paso[] = ['cantidad', 'etapa', 'cuidadores', 'momento'];
 type Fase = 'preguntas' | 'reconocimiento' | 'armando' | 'resultado';
 
 const AYUDA: Record<Paso, string> = {
@@ -191,7 +190,6 @@ const botonPrimario =
 export default function Onboarding() {
   const r = useRespuestas();
   const router = useRouter();
-  const reduce = useReducedMotion();
   const [fase, setFase] = useState<Fase>('preguntas');
   const [paso, setPaso] = useState(0);
   const [intento, setIntento] = useState(false);
@@ -245,15 +243,6 @@ export default function Onboarding() {
   const elegir = (parcial: Partial<Respuestas>) => {
     actualizar(parcial);
     setIntento(false);
-    if (AUTOAVANZAN.includes(actual) && !reduce) {
-      cancelarAvance();
-      const desde = pasoRef.current;
-      temporizador.current = setTimeout(() => {
-        if (pasoRef.current !== desde) return;
-        if (desde < PASOS.length - 1) irAlPaso(desde + 1);
-        else setFase('reconocimiento');
-      }, 320);
-    }
   };
   const atras = () => {
     if (fase === 'reconocimiento') {
@@ -379,9 +368,14 @@ export default function Onboarding() {
           )}
 
           <div className="mt-auto flex flex-col gap-2 pt-8">
-            <p id="ayuda" role="status" aria-live="polite" className="min-h-6 text-center text-base font-semibold text-[var(--text-primary)]">
-              {intento && !valido[actual] ? AYUDA[actual] : ''}
-            </p>
+            <div id="ayuda" role="status" aria-live="polite" className="min-h-12">
+              {intento && !valido[actual] && (
+                <p className="flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
+                  <AlertCircle size={20} color="var(--accent)" aria-hidden="true" />
+                  {AYUDA[actual]}
+                </p>
+              )}
+            </div>
             <button type="button" className={botonPrimario} onClick={continuar}>
               Continuar
             </button>
@@ -439,9 +433,9 @@ function Reconocimiento({
         <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={360} />
       </div>
       <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">
-        {nombre} tiene a alguien que quiere hacerlo <span className="text-[var(--accent)]">bien</span>
+        Cuidar a {nombre} no tiene que depender de tu <span className="text-[var(--accent)]">memoria</span>
       </h1>
-      <p className="text-lg text-[var(--text-secondary)]">Y no tienes que acordarte de todo tú solo: el Panel de Hoy lo hace contigo.</p>
+      <p className="text-lg text-[var(--text-secondary)]">Tú lo quieres hacer bien. El Panel de Hoy se acuerda contigo.</p>
 
       <ul aria-label="Tus respuestas" className="grid grid-cols-2 gap-2">
         {resumen(r).map((fila, i) => (
@@ -543,11 +537,13 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
       <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Tu Panel de Hoy</p>
       <h1 tabIndex={-1} className="mt-1 text-3xl font-bold leading-tight outline-none">Hoy con {nombre}</h1>
       <p className="mt-2 text-base text-[var(--text-secondary)]">Toca un cuidado para marcarlo como hecho. Así se siente.</p>
-      {hechos.length > 0 && (
-        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-3 rounded-[var(--radius-button)] bg-[var(--chip-bg)] px-4 py-3 text-base font-semibold" role="status">
-          ¡Eso es! Así de simple queda el día de {nombre}.
-        </motion.p>
-      )}
+      <div className="mt-3 min-h-14" role="status" aria-live="polite">
+        {hechos.length > 0 && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-[var(--radius-button)] bg-[var(--chip-bg)] px-4 py-3 text-base font-semibold">
+            ¡Eso es! Así de simple queda el día de {nombre}.
+          </motion.p>
+        )}
+      </div>
 
       <ul className="mt-6 flex flex-col gap-3">
         {items.map((it) => {
