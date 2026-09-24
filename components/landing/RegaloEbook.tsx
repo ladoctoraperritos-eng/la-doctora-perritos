@@ -41,7 +41,7 @@ export function RegaloEbook({ tituloMarked, detalleMarked, valor }: RegaloEbookP
                 className="flex h-40 w-28 shrink-0 flex-col items-center justify-between rounded-[var(--radius-button)] bg-[var(--accent)] px-2 py-4 shadow-[var(--shadow-2)]"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/logo-trio.svg" alt="" width={80} height={56} className="h-auto w-20" />
+                <img src="/brand/logo.png" alt="" width={88} height={72} className="h-auto w-24" />
                 <span className="text-center text-xs font-bold uppercase leading-tight tracking-wide text-[var(--bg)]">
                   Primeros auxilios caninos
                 </span>

@@ -29,4 +29,4 @@
 
 ## Logo (2026-09-23)
 - Marca: los tres perritos de la creadora (dorado, border collie, tricolor), dibujados como vector propio a partir de sus fotos: public/brand/logo-trio.svg · ícono/favicon app/icon.svg (cuadrado teal #0B5F5A). Sin fotografía de personas (la creadora quiere permanecer anónima).
-- Tipografía del nombre: DM Sans 700 (la de la ficha). Estado: propuesta pendiente de OK del usuario.
+- LOGO DEFINITIVO (aprobado 2026-09-23): los tres perros de la creadora con badge de campana teal (aviso). Fuente: public/brand/logo-campana.png → public/brand/logo.png (transparente) y app/icon.png. Nombre en DM Sans 700.

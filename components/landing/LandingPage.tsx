@@ -38,7 +38,7 @@ function CtaIntermedio() {
 
 const LOGO = (
   // eslint-disable-next-line @next/next/no-img-element
-  <img src="/brand/logo-trio.svg" alt="" width={56} height={40} className="h-10 w-auto" />
+  <img src="/brand/logo.png" alt="" width={48} height={40} className="h-10 w-auto" />
 );
 
 export default function LandingPage() {
