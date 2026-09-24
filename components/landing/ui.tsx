@@ -112,7 +112,7 @@ export function SectionShell({
     <section
       id={id}
       aria-label={ariaLabel}
-      className={`${elevacion === 'elevada' ? 'bg-[var(--surface)]' : ''} ${pt} ${pb} ${className}`}
+      className={`${elevacion === 'elevada' ? 'bg-[var(--elevated)]' : ''} ${pt} ${pb} ${className}`}
     >
       <div className="mx-auto w-full max-w-[1140px] px-5">{children}</div>
     </section>
@@ -203,7 +203,7 @@ export function StickyCtaMobile({
           const e = entries[0];
           if (e) onChange(e.isIntersecting);
         },
-        { threshold: 0.1 }
+        { threshold: 0 }
       );
       io.observe(el);
       return io;

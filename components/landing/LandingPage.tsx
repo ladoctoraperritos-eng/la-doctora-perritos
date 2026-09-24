@@ -31,7 +31,7 @@ const DIAS_GARANTIA = CONDICIONES.garantia.dias;
 // Mismo destino en hero, mid-page, oferta, CTA final y sticky.
 // Provisional: /empezar hasta que existan el onboarding y el checkout de Hotmart.
 const CTA_HREF = '/empezar';
-const CTA_LABEL = PRUEBA ? `Empezar mis ${DIAS_PRUEBA} días gratis` : 'Empezar ahora';
+const CTA_LABEL = PRUEBA ? `Empezar mis ${DIAS_PRUEBA} días gratis` : 'Quiero mi Panel de Hoy';
 const SOPORTE_EMAIL = CONDICIONES.contacto;
 const MICROCOPY = PRUEBA ? `Prueba de ${DIAS_PRUEBA} días · cancela cuando quieras` : 'Cancela cuando quieras';
 
@@ -120,7 +120,7 @@ export default function LandingPage() {
                 fetchPriority="high"
               />
             </div>
-            <div className="mt-6 flex max-h-[32rem] justify-center overflow-hidden px-6">
+            <div className="mt-6 flex max-h-[26rem] justify-center overflow-hidden px-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/screens/hoy.png"
@@ -161,8 +161,6 @@ export default function LandingPage() {
           despues: 'Todo en el Panel de Hoy: qué toca, quién lo hizo y qué falta.',
         }}
       />
-
-      <CtaIntermedio />
 
       <AppPorDentro
         tituloMarked="Tu perro, [acento]todo en orden[/acento]"
@@ -218,7 +216,7 @@ export default function LandingPage() {
             precioMes: P.mensual,
             sufijo: 'al mes',
             resumen: <ResumenCobro periodo="mes" importe={P.mensual} />,
-            ctaLabel: PRUEBA ? 'Elegir mensual' : 'Empezar con el mensual',
+            ctaLabel: PRUEBA ? 'Elegir mensual' : 'Elegir plan mensual',
             ctaHref: CTA_HREF,
             features: [
               'Todas las funciones del plan anual',
