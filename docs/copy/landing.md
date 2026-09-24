@@ -39,7 +39,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - RESUMEN DE COBRO junto a cada botón (fechas calculadas con la fecha real del visitante): 
   · Con prueba verificada: «Hoy pagas: US$0 · Primer cobro: <importe> el <hoy + 7 días> · Renovación: <importe> cada año/mes».
   · Sin prueba (estado actual): «Hoy pagas: <importe> · Próxima renovación: <fecha>, y luego cada año/mes».
-  · Con garantía verificada y su inicio definido: «Garantía de 15 días desde <compra|primer cobro> (hasta el <fecha>): escribe a contacto@… y te devolvemos tu primer pago». Si no, no se muestra.
+  · Con garantía activa: «Garantía de 15 días sobre tu primer pago.» (sin correo ni instrucciones de reembolso en el resumen; la sección Garantía y /reembolsos sí las explican).
 - Prueba de 7 días y garantía de 15 días ACTIVAS (la creadora confirma que están configuradas en Hotmart, 2026-09-24). Sin la nota de moneda bajo el selector (eliminada a pedido). Garantía sin fecha de inicio confirmada: se promete el plazo sin fijar desde cuándo.
 - Features (cambia solo el tope de perros): Avisos de medicamentos, comida y vacunas · Hasta 2/5 perros · Hasta 3 tutores: quién hizo qué · Resumen para el veterinario y datos exportables · (garantía si verificada) · Regalo del anual: ebook (valor real US$9).
 

@@ -104,12 +104,12 @@ export function resumenCobro(args: {
   if (hayGarantia()) {
     const c = CONDICIONES.garantia;
     if (c.desde === 'sin_confirmar') {
-      resumen.garantia = `Garantía de ${c.dias} días sobre tu primer pago: escribe a ${CONDICIONES.contacto} y te devolvemos ese primer pago.`;
+      resumen.garantia = `Garantía de ${c.dias} días sobre tu primer pago.`;
     } else {
       const base = c.desde === 'compra' ? inicio : primerCobro;
       const limite = addDays(base, c.dias);
       const desde = c.desde === 'compra' ? 'el día de tu compra' : 'tu primer cobro';
-      resumen.garantia = `Garantía de ${c.dias} días desde ${desde} (hasta el ${formatFecha(limite)}): escribe a ${CONDICIONES.contacto} y te devolvemos tu primer pago.`;
+      resumen.garantia = `Garantía de ${c.dias} días desde ${desde} (hasta el ${formatFecha(limite)}).`;
     }
   }
   return resumen;
