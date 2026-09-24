@@ -10,6 +10,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.ladoctoraperritos.com"),
   title: "La Doctora Perritos · Cuida y Recuerda",
   description:
     "Sabe qué necesita tu perro hoy: medicamentos, comida, vacunas y controles en una pantalla, y quién ya lo hizo.",

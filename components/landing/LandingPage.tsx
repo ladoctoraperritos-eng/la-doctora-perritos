@@ -24,8 +24,7 @@ import { CtaButton, StickyCtaMobile } from './ui';
 // Provisional: /empezar hasta que existan el onboarding y el checkout de Hotmart.
 const CTA_HREF = '/empezar';
 const CTA_LABEL = 'Empezar mis 7 días gratis';
-// PENDIENTE (ESTADO.md): correo de soporte REAL que alguien lea.
-const SOPORTE_EMAIL = 'soporte@ladoctoraperritos.com';
+const SOPORTE_EMAIL = 'contacto@ladoctoraperritos.com';
 
 // Planes por número de perros (decisión de precio en ESTADO.md, 2026-09-23). Mismas funciones; cambia el tope de perros.
 const PLANES = {
@@ -94,11 +93,11 @@ export default function LandingPage() {
         socialProof={<span className="text-base font-medium">Sin cobro hoy · cancela cuando quieras · garantía de 15 días</span>}
         visual={
           <div className="bg-[var(--surface-2)]">
-            <div className="foto-duotone aspect-video">
+            <div className="aspect-video overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/brand/perros-hero.jpg"
-                alt="Dos de los perros de La Doctora Perritos, un dorado y un border collie, mirando a la cámara"
+                src="/brand/hero-mujer-golden.jpg"
+                alt="Una mujer acaricia a su perro golden mientras mira el celular; sobre la mesa hay un pastillero semanal"
                 width={1200}
                 height={675}
                 fetchPriority="high"
@@ -178,6 +177,7 @@ export default function LandingPage() {
 
       <PlanSelector
         titulo="¿Cuántos perros tienes?"
+        nota="Precios en dólares (US$), iguales en todos los países de habla hispana."
         activo={plan}
         onChange={(id) => setPlan(id as IdPlan)}
         opciones={(Object.keys(PLANES) as IdPlan[]).map((id) => ({ id, etiqueta: PLANES[id].etiqueta, nombre: PLANES[id].nombre }))}

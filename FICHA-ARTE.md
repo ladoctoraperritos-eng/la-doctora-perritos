@@ -30,3 +30,6 @@
 ## Logo (2026-09-23)
 - Marca: los tres perritos de la creadora (dorado, border collie, tricolor), dibujados como vector propio a partir de sus fotos: public/brand/logo-trio.svg · ícono/favicon app/icon.svg (cuadrado teal #0B5F5A). Sin fotografía de personas (la creadora quiere permanecer anónima).
 - LOGO DEFINITIVO (aprobado 2026-09-23): los tres perros de la creadora con badge de campana teal (aviso). Fuente: public/brand/logo-campana.png → public/brand/logo.png (transparente) y app/icon.png. Nombre en DM Sans 700.
+
+## Fotografía (2026-09-24)
+- Hero: imagen lifestyle (mujer con su perro golden y el celular, pastillero semanal en la mesa) a color natural, cuyos tonos ya coinciden con la paleta (suéter y funda de teléfono teal). Fuente: public/brand/hero-mujer-golden.jpg. Parece generada con IA: se usa como ilustración, NUNCA como testimonio ni con nombre o cita de un cliente. El duotone (.foto-duotone) queda para fotos de perros de la creadora.

@@ -13,11 +13,14 @@ export interface OpcionPlan {
 
 export function PlanSelector({
   titulo,
+  nota,
   opciones,
   activo,
   onChange,
 }: {
   titulo: string;
+  /** Aclaración corta bajo los botones (moneda, alcance). */
+  nota?: string;
   opciones: OpcionPlan[];
   activo: string;
   onChange: (id: string) => void;
@@ -55,6 +58,7 @@ export function PlanSelector({
           );
         })}
       </div>
+      {nota && <p className="mt-3 text-sm text-[var(--text-secondary)]">{nota}</p>}
     </div>
   );
 }
