@@ -55,7 +55,6 @@ export default function Paywall() {
   const r = useSyncExternalStore(suscribir, obtener, () => VACIAS);
   const recomendado = planRecomendado(r);
   const [elegido, setElegido] = useState<IdPlan | null>(null);
-  const [cambiandoPlan, setCambiandoPlan] = useState(false);
   const [periodo, setPeriodo] = useState<PeriodoPago>('anio');
   const plan: IdPlan = elegido ?? recomendado;
   const P = PLANES[plan];
@@ -128,6 +127,17 @@ export default function Paywall() {
         </ul>
 
         <div className="mt-6 flex flex-col gap-3">
+          <p className="text-lg font-bold">¿Cuántos perros cuidas?</p>
+          <Selector<IdPlan>
+            etiqueta="Plan según cuántos perros tienes"
+            activo={plan}
+            onChange={setElegido}
+            opciones={[
+              { id: 'esencial', texto: '1 o 2 perros', detalle: 'Plan Esencial' },
+              { id: 'familia', texto: '3 a 5 perros', detalle: 'Plan Familia' },
+            ]}
+          />
+          <p className="mt-2 text-lg font-bold">¿Cómo prefieres pagar?</p>
           <Selector<PeriodoPago>
             etiqueta="Cada cuánto pagas"
             activo={periodo}
@@ -167,27 +177,6 @@ export default function Paywall() {
               equivalente={periodo === 'anio' ? `${P.anualMes} al mes` : undefined}
             />
           </div>
-          <button
-            type="button"
-            onClick={() => setCambiandoPlan((v) => !v)}
-            aria-expanded={cambiandoPlan}
-            className="mt-4 inline-flex min-h-11 items-center text-base font-semibold text-[var(--accent)] underline underline-offset-4"
-          >
-            {cambiandoPlan ? 'Ocultar' : 'Tengo más o menos perros'}
-          </button>
-          {cambiandoPlan && (
-            <div className="mt-2">
-              <Selector<IdPlan>
-                etiqueta="Plan según cuántos perros tienes"
-                activo={plan}
-                onChange={setElegido}
-                opciones={[
-                  { id: 'esencial', texto: '1 o 2 perros', detalle: 'Plan Esencial' },
-                  { id: 'familia', texto: '3 a 5 perros', detalle: 'Plan Familia' },
-                ]}
-              />
-            </div>
-          )}
         </section>
 
         <div className="mt-6 flex items-center justify-center gap-6 text-base">
