@@ -410,9 +410,9 @@ export default function Onboarding() {
           <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-6">
             {actual === 'nombre' && (
               <>
-                <div className="foto-duotone mb-6 aspect-[5/2] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+                <div className="mb-6 aspect-video overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={360} />
+                  <img src="/brand/perro-golden-onboarding.webp" alt="Un perro golden sonriendo en su casa" width={1672} height={941} className="size-full object-cover [object-position:50%_30%]" />
                 </div>
                 <h1 tabIndex={-1} className={titulo}>¿Cómo se llama tu perro?</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos con uno; los demás los agregas después.</p>
@@ -687,9 +687,9 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
   const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
   return (
     <motion.main {...entrada} className="flex flex-1 flex-col pt-4">
-      <div className="foto-duotone aspect-[3/1] rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
+      <div className="aspect-[5/2] overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/perros-duotone.jpg" alt="Dos perros mirando a la cámara" width={900} height={300} />
+        <img src="/brand/perro-golden-onboarding.webp" alt="Un perro golden sonriendo en su casa" width={1672} height={941} className="size-full object-cover [object-position:50%_30%]" />
       </div>
       <h1 tabIndex={-1} className="mt-4 text-3xl font-bold leading-tight outline-none">
         Todo listo para <span className="text-[var(--accent)]">{nombre}</span>
