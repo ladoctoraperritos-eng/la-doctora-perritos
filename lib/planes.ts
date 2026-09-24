@@ -10,6 +10,7 @@ export const PLANES = {
     anualTotal: 'US$29',
     anualMes: 'US$2,42',
     perros: 'Hasta 2 perros',
+    ahorroAnual: 'US$6,88',
   },
   familia: {
     etiqueta: '3 a 5 perros',
@@ -19,6 +20,7 @@ export const PLANES = {
     anualTotal: 'US$49',
     anualMes: 'US$4,08',
     perros: 'Hasta 5 perros',
+    ahorroAnual: 'US$10,88',
   },
 } as const satisfies Record<IdPlan, object>;
 

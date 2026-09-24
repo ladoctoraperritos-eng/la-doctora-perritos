@@ -1,17 +1,17 @@
 'use client';
 
-// Paywall: llega DESPUÉS del primer valor. Muestra el costo hundido (lo que ya armó con sus respuestas),
-// el plan que corresponde a su cantidad de perros, y el resumen de cobro con fechas reales.
-// El botón (fijo abajo) lleva al checkout de Hotmart de ese plan y periodo (lib/hotmart.ts).
+// Paywall: llega DESPUÉS del primer valor y funciona como la conclusión del onboarding.
+// Orden: resultado personalizado → plan (cuántos perros, anual/mensual) → línea de tiempo honesta de la
+// prueba (hoy → aviso → cobro, con fechas reales) → garantía y pago seguro. El botón (fijo abajo) lleva
+// al checkout de Hotmart de ese plan y periodo (lib/hotmart.ts).
 
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, ShieldCheck } from 'lucide-react';
-import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
+import { ArrowLeft, Bell, Check, CreditCard, Lock, ShieldCheck, Sparkles } from 'lucide-react';
+import { addDays, CONDICIONES, formatFecha, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { urlCheckout, type PeriodoPago } from '@/lib/hotmart';
-import { armarPanel, contarRespuestas, obtener, planRecomendado, suscribir, VACIAS, type IdPlan } from '@/lib/onboarding';
-import { featuresPlan, PLANES } from '@/lib/planes';
-import { ResumenCobro } from '@/components/landing/ResumenCobro';
+import { armarPanel, contarRespuestas, obtener, planRecomendado, suscribir, VACIAS, type IdPlan, type Respuestas } from '@/lib/onboarding';
+import { PLANES } from '@/lib/planes';
 import Marca from './Marca';
 
 const boton =
@@ -51,6 +51,125 @@ function Selector<T extends string>({
   );
 }
 
+/** Tarjeta de plan (anual / mensual): el importe REAL que se cobra es lo más grande. */
+function TarjetaPeriodo({
+  activa,
+  onElegir,
+  titulo,
+  importe,
+  unidad,
+  nota,
+  insignia,
+}: {
+  activa: boolean;
+  onElegir: () => void;
+  titulo: string;
+  importe: string;
+  unidad: string;
+  nota?: string;
+  insignia?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={activa}
+      onClick={onElegir}
+      className={`relative flex w-full items-center gap-4 rounded-[var(--radius-card)] border-2 p-4 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
+        activa ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))] shadow-[var(--shadow-2)]' : 'border-[var(--border-ui)] bg-[var(--surface)]'
+      }`}
+    >
+      {insignia && (
+        <span className="absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full bg-[var(--accent-2)] px-3 py-1 text-sm font-bold text-[var(--text-primary)]">
+          <Sparkles size={14} aria-hidden="true" />
+          {insignia}
+        </span>
+      )}
+      <span
+        aria-hidden="true"
+        className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full border-2 ${activa ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'}`}
+      >
+        {activa && <Check size={14} color="var(--bg)" strokeWidth={3} />}
+      </span>
+      <span className="flex-1">
+        <span className="block text-base font-semibold text-[var(--text-secondary)]">{titulo}</span>
+        <span className="flex items-baseline gap-1">
+          <span className="text-3xl font-bold tabular-nums">{importe}</span>
+          <span className="text-base text-[var(--text-secondary)]">{unidad}</span>
+        </span>
+        {nota && <span className="block text-sm text-[var(--text-secondary)]">{nota}</span>}
+      </span>
+    </button>
+  );
+}
+
+const suscribirReloj = (avisar: () => void) => {
+  const id = setInterval(avisar, 60000);
+  return () => clearInterval(id);
+};
+const minutoActual = () => Math.floor(Date.now() / 60000);
+
+/** «Cómo funciona tu prueba»: hoy → aviso → cobro. Las fechas salen de la fecha real (solo en el navegador). */
+function LineaTiempo({ importe, unidad }: { importe: string; unidad: string }) {
+  const minuto = useSyncExternalStore(suscribirReloj, minutoActual, () => null);
+  const inicio = minuto === null ? null : new Date(minuto * 60000);
+  const dias = CONDICIONES.prueba.dias;
+  const avisoDia = Math.max(dias - 2, 1);
+  const pasos = [
+    { icono: Sparkles, cuando: 'Hoy · US$0', texto: 'Acceso completo al cuidado de tu perro.' },
+    {
+      icono: Bell,
+      cuando: `Día ${avisoDia} · Te avisamos`,
+      texto: `Te recordamos que tu prueba está por terminar${inicio ? ` (${formatFecha(addDays(inicio, avisoDia))})` : ''}.`,
+    },
+    {
+      icono: CreditCard,
+      cuando: `${inicio ? formatFecha(addDays(inicio, dias)) : `Día ${dias + 1}`} · ${importe}${unidad}`,
+      texto: 'Solo si decides continuar. Si cancelas antes, no pagas nada.',
+    },
+  ];
+  return (
+    <section aria-label="Cómo funciona tu prueba" className="mt-6">
+      <h2 className="text-lg font-bold">Cómo funciona tu prueba</h2>
+      <ol className="mt-3 flex flex-col">
+        {pasos.map((p, i) => {
+          const Icono = p.icono;
+          return (
+            <li key={p.cuando} className="relative flex gap-4 pb-4 last:pb-0">
+              {i < pasos.length - 1 && <span aria-hidden="true" className="absolute left-5 top-11 bottom-1 w-0.5 bg-[var(--border-ui)]" />}
+              <span className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
+                <Icono size={20} color="var(--accent)" aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-base font-semibold">{p.cuando}</span>
+                <span className="block text-sm text-[var(--text-secondary)]">{p.texto}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+/** Lo que armó, en máximo 4 líneas; si respondió poco se completa con lo esencial del producto. */
+function beneficios(r: Respuestas, comparte: boolean): string[] {
+  const panel = armarPanel(r);
+  const hecho: string[] = [];
+  for (const i of panel.hoy) hecho.push(`${i.titulo} hoy a las ${i.etiqueta}`);
+  for (const i of panel.proximo) {
+    const aprox = i.etiqueta.startsWith('~');
+    if (i.id === 'com') hecho.push(aprox ? `Alimento para ${i.etiqueta}, con aviso` : 'Aviso antes de que se acabe el alimento');
+    else if (i.id === 'rep') hecho.push(aprox ? `${i.titulo} en ${i.etiqueta}` : i.titulo);
+    else hecho.push(`${i.titulo}: ${i.etiqueta.toLowerCase()}`);
+  }
+  if (comparte) hecho.push('Todos sabrán quién hizo qué');
+  for (const i of panel.siempre) hecho.push(i.titulo);
+  const relleno = ['Recordatorios de medicamentos, vacunas y controles', 'Avisos antes de que se acabe lo importante', 'Historial y documentos siempre a mano'];
+  for (const x of relleno) if (hecho.length < 4) hecho.push(x);
+  return hecho.slice(0, 4);
+}
+
 export default function Paywall() {
   const r = useSyncExternalStore(suscribir, obtener, () => VACIAS);
   const recomendado = planRecomendado(r);
@@ -61,6 +180,7 @@ export default function Paywall() {
   const nombre = r.nombre.trim();
   const n = contarRespuestas(r);
   const importe = periodo === 'anio' ? P.anualTotal : P.mensual;
+  const unidad = periodo === 'anio' ? '/año' : '/mes';
   const checkout = urlCheckout(plan, periodo);
   const etiquetaBoton = hayPrueba() ? `Empezar mis ${CONDICIONES.prueba.dias} días gratis` : 'Empezar ahora';
 
@@ -80,24 +200,8 @@ export default function Paywall() {
     );
   }
 
-  const panel = armarPanel(r);
   const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
-  const armado = [
-    ...panel.hoy.map((i) => `${i.titulo} a las ${i.etiqueta}, con aviso`),
-    ...panel.proximo.map((i) => `${i.titulo}: ${i.etiqueta.toLowerCase()}`),
-    comparte ? 'Cuidado compartido: quién hizo qué' : null,
-    ...panel.siempre.map((i) => i.titulo),
-  ]
-    .filter((x): x is string => x !== null)
-    .slice(0, 5);
-  // El mensaje sigue lo que más le pesa a esta persona (lo que dijo en el onboarding).
-  const promesa = r.olvidos.includes('medicamentos') ? (
-    <>Mantén los medicamentos de {nombre || 'tu perro'} <strong className="font-semibold text-[var(--text-primary)]">bajo control</strong>.</>
-  ) : comparte ? (
-    <>Que todos sepan <strong className="font-semibold text-[var(--text-primary)]">qué ya se hizo</strong> y qué falta.</>
-  ) : (
-    <>Para que su cuidado <strong className="font-semibold text-[var(--text-primary)]">no dependa de tu memoria</strong>.</>
-  );
+  const lista = beneficios(r, comparte);
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
@@ -110,24 +214,26 @@ export default function Paywall() {
 
       <main className="flex flex-1 flex-col pt-4">
         <h1 className="text-balance text-3xl font-bold leading-tight">
-          El Panel de Hoy de <span className="text-[var(--accent)]">{nombre || 'tu perro'}</span> está listo
+          El cuidado de <span className="text-[var(--accent)]">{nombre || 'tu perro'}</span> ya está bajo control
         </h1>
-        <p className="mt-2 text-lg text-[var(--text-secondary)]">{promesa}</p>
-        <ul className="mt-4 flex flex-col gap-2" aria-label="Lo que ya armaste">
-          {armado.map((a) => (
-            <li key={a} className="flex items-center gap-3 text-base">
-              <Check size={18} color="var(--accent)" aria-hidden="true" />
+        <p className="mt-2 text-lg text-[var(--text-secondary)]">
+          {hayPrueba()
+            ? `Durante los próximos ${CONDICIONES.prueba.dias} días, deja que La Doctora Perritos recuerde por ti.`
+            : 'Deja que La Doctora Perritos recuerde por ti.'}
+        </p>
+        <ul className="mt-4 flex flex-col gap-3" aria-label="Lo que ya armaste">
+          {lista.map((a) => (
+            <li key={a} className="flex items-start gap-3 text-base font-medium">
+              <span aria-hidden="true" className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
+                <Check size={14} color="var(--accent)" strokeWidth={3} />
+              </span>
               {a}
             </li>
           ))}
-          <li className="flex items-center gap-3 text-base text-[var(--text-secondary)]">
-            <Check size={18} color="var(--accent)" aria-hidden="true" />
-            Hecho con tus {n} respuestas
-          </li>
         </ul>
 
-        <div className="mt-6 flex flex-col gap-3">
-          <p className="text-lg font-bold">¿Cuántos perros cuidas?</p>
+        <section aria-label="Elige tu plan" className="mt-8 flex flex-col gap-3">
+          <h2 className="text-lg font-bold">¿Cuántos perros cuidas?</h2>
           <Selector<IdPlan>
             etiqueta="Plan según cuántos perros tienes"
             activo={plan}
@@ -137,45 +243,40 @@ export default function Paywall() {
               { id: 'familia', texto: '3 a 5 perros', detalle: 'Plan Familia' },
             ]}
           />
-          <p className="mt-2 text-lg font-bold">¿Cómo prefieres pagar?</p>
-          <Selector<PeriodoPago>
-            etiqueta="Cada cuánto pagas"
-            activo={periodo}
-            onChange={setPeriodo}
-            opciones={[
-              { id: 'anio', texto: 'Anual', detalle: '2 meses gratis' },
-              { id: 'mes', texto: 'Mensual' },
-            ]}
-          />
-        </div>
-
-        <section aria-label="Tu plan" className="mt-4 rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--accent)_30%,transparent)] bg-[var(--surface)] p-6 shadow-[var(--shadow-2)]">
-          <p className="text-base font-semibold text-[var(--text-secondary)]">
-            Plan {P.nombre} · {P.etiqueta} · {periodo === 'anio' ? 'Anual' : 'Mensual'}
-          </p>
-          <p className="mt-1 flex items-baseline gap-2">
-            <span className="text-4xl font-bold tabular-nums">{importe}</span>
-            <span className="text-base text-[var(--text-secondary)]">{periodo === 'anio' ? 'al año' : 'al mes'}</span>
-          </p>
-          {periodo === 'anio' && (
-            <p className="mt-1 text-base font-semibold">
-              Equivale a {P.anualMes} al mes <span className="font-normal text-[var(--text-secondary)]">(mensual: {P.mensual})</span>
-            </p>
-          )}
-          <ul className="mt-4 flex flex-col gap-2">
-            {featuresPlan(P.perros).map((f) => (
-              <li key={f} className="flex items-start gap-3 text-base">
-                <Check size={18} color="var(--accent)" className="mt-1 shrink-0" aria-hidden="true" />
-                {f}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-6">
-            <ResumenCobro
-              periodo={periodo === 'anio' ? 'anio' : 'mes'}
-              importe={importe}
-              equivalente={periodo === 'anio' ? `${P.anualMes} al mes` : undefined}
+          <div role="radiogroup" aria-label="Cada cuánto pagas" className="mt-3 flex flex-col gap-4">
+            <TarjetaPeriodo
+              activa={periodo === 'anio'}
+              onElegir={() => setPeriodo('anio')}
+              titulo="Anual"
+              importe={P.anualTotal}
+              unidad="/año"
+              nota={`Equivale a ${P.anualMes} al mes · Ahorras ${P.ahorroAnual}`}
+              insignia="Mejor valor"
             />
+            <TarjetaPeriodo activa={periodo === 'mes'} onElegir={() => setPeriodo('mes')} titulo="Mensual" importe={P.mensual} unidad="/mes" />
+          </div>
+        </section>
+
+        {hayPrueba() && <LineaTiempo importe={importe} unidad={unidad} />}
+
+        <section aria-label="Tu tranquilidad" className="mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4">
+          {hayGarantia() && (
+            <div className="flex items-start gap-3">
+              <ShieldCheck size={24} color="var(--accent)" className="mt-0.5 shrink-0" aria-hidden="true" />
+              <p className="text-base">
+                <strong className="font-semibold">
+                  {hayPrueba() ? `${CONDICIONES.prueba.dias} días gratis + ` : ''}
+                  {CONDICIONES.garantia.dias} días de garantía
+                </strong>
+                <span className="block text-sm text-[var(--text-secondary)]">
+                  Si continúas y, después de tu primer cobro, no estás conforme, te devolvemos ese pago.
+                </span>
+              </p>
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <Lock size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+            <p className="text-base font-medium">Pago seguro procesado por Hotmart</p>
           </div>
         </section>
 
@@ -187,33 +288,15 @@ export default function Paywall() {
             Ya tengo cuenta
           </Link>
         </div>
-        <p className="text-center text-sm text-[var(--text-secondary)]">El pago lo procesa Hotmart. Cancela cuando quieras.</p>
-
-        {!checkout && (
-          <p role="status" className="mt-4 rounded-[var(--radius-button)] bg-[var(--surface-2)] p-3 text-center text-sm text-[var(--text-secondary)]">
-            El pago se está conectando. Escríbenos a{' '}
-            <a href={`mailto:${CONDICIONES.contacto}`} className="font-semibold text-[var(--accent)] underline underline-offset-4">
-              {CONDICIONES.contacto}
-            </a>
-            .
-          </p>
-        )}
         {/* Espacio para que la barra fija no tape el final */}
         <div className="h-4" />
       </main>
 
       <div className="sticky bottom-0 -mx-6 flex flex-col gap-2 border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--bg)] px-6 pb-4 pt-3">
-        {hayGarantia() && (
-          <p className="flex items-center justify-center gap-2 text-sm font-medium text-[var(--text-secondary)]">
-            <ShieldCheck size={18} color="var(--accent)" aria-hidden="true" />
-            Garantía del Primer Aviso · {CONDICIONES.garantia.dias} días sobre tu primer pago
-          </p>
-        )}
-        <ResumenCobro
-          compacto
-          periodo={periodo === 'anio' ? 'anio' : 'mes'}
-          importe={importe}
-        />
+        <p className="text-center text-sm font-medium text-[var(--text-secondary)]">
+          {hayPrueba() ? 'Hoy US$0' : `Hoy ${importe}`} · Luego {importe}
+          {unidad} · Cancela cuando quieras
+        </p>
         {checkout ? (
           <a href={checkout} className={boton}>
             {etiquetaBoton}
