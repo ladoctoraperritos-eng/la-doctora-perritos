@@ -67,14 +67,14 @@ const sumarDias = (desde: Date, n: number) => {
   return d;
 };
 
-const campo =
+export const campo =
   'mt-2 h-14 w-full rounded-[var(--radius-card)] border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-lg font-semibold outline-none placeholder:font-normal placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]';
-const botonPrimario =
+export const botonPrimario =
   'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]';
-const botonSecundario =
+export const botonSecundario =
   'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] border-2 border-[var(--accent)] text-lg font-semibold text-[var(--accent)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]';
 
-function Campo({ id, etiqueta, opcional, error, children }: { id: string; etiqueta: string; opcional?: boolean; error?: string | null; children: React.ReactNode }) {
+export function Campo({ id, etiqueta, opcional, error, children }: { id: string; etiqueta: string; opcional?: boolean; error?: string | null; children: React.ReactNode }) {
   return (
     <div className="mt-5">
       <label htmlFor={id} className="block text-base font-semibold">
@@ -116,7 +116,7 @@ function Fichas<T extends string | number>({ titulo, opciones, valor, onElegir }
 }
 
 /** Confirmación en dos pasos para borrar: nada se pierde con un toque. */
-function Borrar({ etiqueta, aviso, onConfirmar }: { etiqueta: string; aviso: string; onConfirmar: () => void }) {
+export function Borrar({ etiqueta, aviso, onConfirmar }: { etiqueta: string; aviso: string; onConfirmar: () => void }) {
   const [seguro, setSeguro] = useState(false);
   if (!seguro) {
     return (

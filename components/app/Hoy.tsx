@@ -277,13 +277,13 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
   );
 }
 
-export function Menu({ activa }: { activa: 'hoy' | 'perros' | 'historial' }) {
+export function Menu({ activa }: { activa: 'hoy' | 'perros' | 'historial' | 'yo' }) {
   const items = [
     { id: 'hoy', icono: Home, texto: 'Hoy', href: '/app' },
     { id: 'perros', icono: PawPrint, texto: 'Perros', href: '/app/perros' },
     { id: 'historial', icono: ClipboardList, texto: 'Historial', href: '/app/historial' },
+    { id: 'yo', icono: User, texto: 'Yo', href: '/app/yo' },
   ] as const;
-  const pronto = [{ icono: User, texto: 'Yo' }];
   return (
     <nav aria-label="Secciones" className="sticky bottom-0 z-10 border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--surface)] px-2 pb-2 pt-1">
       <ul className="grid grid-cols-4">
@@ -299,15 +299,6 @@ export function Menu({ activa }: { activa: 'hoy' | 'perros' | 'historial' }) {
               <Icono size={22} aria-hidden="true" />
               {texto}
             </Link>
-          </li>
-        ))}
-        {pronto.map(({ icono: Icono, texto }) => (
-          <li key={texto}>
-            <span aria-disabled="true" className="flex min-h-16 flex-col items-center justify-start gap-1 pt-2 text-sm text-[var(--text-tertiary)]">
-              <Icono size={22} aria-hidden="true" />
-              {texto}
-              <span className="sr-only">Pronto</span>
-            </span>
           </li>
         ))}
       </ul>

@@ -26,7 +26,20 @@ export interface Perro {
 export interface Tutor {
   id: string;
   nombre: string;
+  /** Correo al que se manda la invitación (opcional). */
+  correo?: string;
+  /** Invitada pero aún no entra: el aviso se envía al conectar las cuentas. */
+  pendiente?: boolean;
 }
+
+export interface Ajustes {
+  avisoHora: boolean;
+  avisoStock: boolean;
+  avisoFechas: boolean;
+  /** Días de anticipación para stock y fechas. */
+  anticipacion: 3 | 5 | 7;
+}
+export const AJUSTES_INICIALES: Ajustes = { avisoHora: true, avisoStock: true, avisoFechas: true, anticipacion: 5 };
 export interface Cuidado {
   id: string;
   perroId: string;
@@ -51,6 +64,9 @@ export interface Registro {
 }
 export interface EstadoApp {
   plan: IdPlan;
+  ajustes: Ajustes;
+  /** Correo de acceso de esta cuenta (el que dejó en el paso de planes). */
+  correo?: string;
   perros: Perro[];
   tutores: Tutor[];
   /** Tutor que usa este aparato: quien queda registrado al marcar. */
@@ -104,7 +120,7 @@ function desdeOnboarding(r: Respuestas, ahora: Date): EstadoApp {
   }
   const tutores: Tutor[] = [{ id: 't1', nombre: 'Tú' }];
   if (r.cuidadores && r.cuidadores !== 'solo_yo') tutores.push({ id: 't2', nombre: TEXTO_CUIDADORES[r.cuidadores] });
-  return { plan: planRecomendado(r), perros: [perro], tutores, yo: 't1', cuidados, registros: [] };
+  return { plan: planRecomendado(r), ajustes: { ...AJUSTES_INICIALES, avisoHora: r.avisos !== 'no' }, correo: r.correo || undefined, perros: [perro], tutores, yo: 't1', cuidados, registros: [] };
 }
 
 /** Una semana de registros de ejemplo, repartidos entre dos personas (con algún día sin marcar, como en la vida real). */
@@ -132,6 +148,8 @@ function ejemplo(ahora: Date): EstadoApp {
   const hoy = claveDia(ahora);
   return {
     plan: 'esencial',
+    ajustes: AJUSTES_INICIALES,
+    correo: 'camila@correo.com',
     perros: [
       { id: 'p1', nombre: 'Toffee', foto: '/brand/perro-golden-onboarding.webp', raza: 'Golden retriever', pesoKg: 29, nacimiento: `${ahora.getFullYear() - 4}-03-12`, notas: 'Alérgico al pollo. Medicado con Apoquel.', chip: '985112345678901', responsable: 'Camila Rojas', telefono: '+56 9 1234 5678' },
       { id: 'p2', nombre: 'Luna', raza: 'Mestiza', pesoKg: 12, nacimiento: `${ahora.getFullYear() - 8}-08-02` },
@@ -168,7 +186,7 @@ function cargar(): EstadoApp {
     const crudo = window.localStorage.getItem(CLAVE);
     if (crudo) {
       const guardado = JSON.parse(crudo) as EstadoApp;
-      return { ...guardado, plan: guardado.plan ?? 'esencial' };
+      return { ...guardado, plan: guardado.plan ?? 'esencial', ajustes: { ...AJUSTES_INICIALES, ...guardado.ajustes } };
     }
   } catch {
     // almacenamiento bloqueado: se siembra en memoria
@@ -326,4 +344,41 @@ export function edadTexto(nacimiento: string | undefined, ahora: Date): string |
   if (anios === 0) return resto === 1 ? '1 mes' : `${resto} meses`;
   const aTxt = anios === 1 ? '1 año' : `${anios} años`;
   return resto === 0 ? aTxt : `${aTxt} y ${resto} ${resto === 1 ? 'mes' : 'meses'}`;
+}
+
+// ── Personas y ajustes ──
+export const LIMITE_TUTORES: Record<IdPlan, number> = { esencial: 2, familia: 3 };
+
+export function guardarTutor(t: Tutor): void {
+  const e = obtenerApp();
+  const existe = e.tutores.some((x) => x.id === t.id);
+  cambiar({ ...e, tutores: existe ? e.tutores.map((x) => (x.id === t.id ? t : x)) : [...e.tutores, t] });
+}
+/** Quita a una persona; sus registros pasados se conservan con su nombre. */
+export function eliminarTutor(id: string): void {
+  const e = obtenerApp();
+  if (id === e.yo) return;
+  cambiar({ ...e, tutores: e.tutores.filter((t) => t.id !== id) });
+}
+export function guardarAjustes(parcial: Partial<Ajustes>): void {
+  const e = obtenerApp();
+  cambiar({ ...e, ajustes: { ...e.ajustes, ...parcial } });
+}
+
+// ── Exportar ──
+const NOMBRE_TIPO_CSV: Record<Tipo, string> = { medicamento: 'Medicamento', suplemento: 'Suplemento', comida: 'Alimento', vacuna: 'Vacuna', antiparasitario: 'Antiparasitario', bano: 'Baño', control: 'Control' };
+const celda = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+
+/** Historial completo en CSV (abre en Excel/Sheets): día, hora, perro, cuidado, tipo, persona. */
+export function historialCsv(e: EstadoApp): string {
+  const filas = e.registros
+    .map((r) => {
+      const c = e.cuidados.find((x) => x.id === r.cuidadoId);
+      const p = c && e.perros.find((x) => x.id === c.perroId);
+      return c && p ? { r, c, p } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null)
+    .sort((a, b) => `${b.r.dia} ${b.r.hora}`.localeCompare(`${a.r.dia} ${a.r.hora}`));
+  const lineas = ['Día,Hora,Perro,Cuidado,Tipo,Persona', ...filas.map(({ r, c, p }) => [r.dia, r.hora, p.nombre, c.nombre, NOMBRE_TIPO_CSV[c.tipo], r.quien].map(celda).join(','))];
+  return '﻿' + lineas.join('\r\n');
 }
