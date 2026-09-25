@@ -62,8 +62,22 @@ export interface Registro {
   quien: string;
   hora: string;
 }
+/** Bitácora del perro: síntomas y notas con fecha, para el seguimiento y para llevar al veterinario. */
+export type Intensidad = 'leve' | 'moderado' | 'fuerte';
+export interface Nota {
+  id: string;
+  perroId: string;
+  dia: string;
+  hora: string;
+  tipo: 'sintoma' | 'nota';
+  texto: string;
+  intensidad?: Intensidad;
+  quien: string;
+}
+
 export interface EstadoApp {
   plan: IdPlan;
+  notas: Nota[];
   ajustes: Ajustes;
   /** Correo de acceso de esta cuenta (el que dejó en el paso de planes). */
   correo?: string;
@@ -120,7 +134,7 @@ function desdeOnboarding(r: Respuestas, ahora: Date): EstadoApp {
   }
   const tutores: Tutor[] = [{ id: 't1', nombre: 'Tú' }];
   if (r.cuidadores && r.cuidadores !== 'solo_yo') tutores.push({ id: 't2', nombre: TEXTO_CUIDADORES[r.cuidadores] });
-  return { plan: planRecomendado(r), ajustes: { ...AJUSTES_INICIALES, avisoHora: r.avisos !== 'no' }, correo: r.correo || undefined, perros: [perro], tutores, yo: 't1', cuidados, registros: [] };
+  return { plan: planRecomendado(r), notas: [], ajustes: { ...AJUSTES_INICIALES, avisoHora: r.avisos !== 'no' }, correo: r.correo || undefined, perros: [perro], tutores, yo: 't1', cuidados, registros: [] };
 }
 
 /** Una semana de registros de ejemplo, repartidos entre dos personas (con algún día sin marcar, como en la vida real). */
@@ -143,11 +157,21 @@ function historialEjemplo(ahora: Date): Registro[] {
   return filas;
 }
 
+function notasEjemplo(ahora: Date): Nota[] {
+  return [
+    { id: 'n1', perroId: 'p1', dia: enDias(-1, ahora), hora: '21:40', tipo: 'sintoma', intensidad: 'moderado', texto: 'Se rasca mucho las orejas después de comer.', quien: 'Diego' },
+    { id: 'n2', perroId: 'p1', dia: enDias(-3, ahora), hora: '09:10', tipo: 'sintoma', intensidad: 'leve', texto: 'Vomitó una vez, espuma blanca. Después comió normal.', quien: 'Camila' },
+    { id: 'n3', perroId: 'p1', dia: enDias(-5, ahora), hora: '18:00', tipo: 'nota', texto: 'Empezó el Omega-3. La veterinaria pidió revisar en 3 semanas.', quien: 'Camila' },
+    { id: 'n4', perroId: 'p2', dia: enDias(-2, ahora), hora: '08:30', tipo: 'sintoma', intensidad: 'leve', texto: 'Cojea un poco de la pata trasera al levantarse.', quien: 'Diego' },
+  ];
+}
+
 /** Ejemplo completo para quien entra sin haber hecho el onboarding (y para las capturas). */
 function ejemplo(ahora: Date): EstadoApp {
   const hoy = claveDia(ahora);
   return {
     plan: 'esencial',
+    notas: notasEjemplo(ahora),
     ajustes: AJUSTES_INICIALES,
     correo: 'camila@correo.com',
     perros: [
@@ -186,7 +210,7 @@ function cargar(): EstadoApp {
     const crudo = window.localStorage.getItem(CLAVE);
     if (crudo) {
       const guardado = JSON.parse(crudo) as EstadoApp;
-      return { ...guardado, plan: guardado.plan ?? 'esencial', ajustes: { ...AJUSTES_INICIALES, ...guardado.ajustes } };
+      return { ...guardado, notas: guardado.notas ?? [], plan: guardado.plan ?? 'esencial', ajustes: { ...AJUSTES_INICIALES, ...guardado.ajustes } };
     }
   } catch {
     // almacenamiento bloqueado: se siembra en memoria
@@ -309,7 +333,7 @@ export function guardarPerro(p: Perro): void {
 export function eliminarPerro(id: string): void {
   const e = obtenerApp();
   const suyos = new Set(e.cuidados.filter((c) => c.perroId === id).map((c) => c.id));
-  cambiar({ ...e, perros: e.perros.filter((p) => p.id !== id), cuidados: e.cuidados.filter((c) => c.perroId !== id), registros: e.registros.filter((r) => !suyos.has(r.cuidadoId)) });
+  cambiar({ ...e, perros: e.perros.filter((p) => p.id !== id), cuidados: e.cuidados.filter((c) => c.perroId !== id), registros: e.registros.filter((r) => !suyos.has(r.cuidadoId)), notas: e.notas.filter((n) => n.perroId !== id) });
 }
 export function guardarCuidado(c: Cuidado): void {
   const e = obtenerApp();
@@ -381,4 +405,19 @@ export function historialCsv(e: EstadoApp): string {
     .sort((a, b) => `${b.r.dia} ${b.r.hora}`.localeCompare(`${a.r.dia} ${a.r.hora}`));
   const lineas = ['Día,Hora,Perro,Cuidado,Tipo,Persona', ...filas.map(({ r, c, p }) => [r.dia, r.hora, p.nombre, c.nombre, NOMBRE_TIPO_CSV[c.tipo], r.quien].map(celda).join(','))];
   return '﻿' + lineas.join('\r\n');
+}
+
+// ── Bitácora ──
+export function guardarNota(n: Nota): void {
+  const e = obtenerApp();
+  const existe = e.notas.some((x) => x.id === n.id);
+  cambiar({ ...e, notas: existe ? e.notas.map((x) => (x.id === n.id ? n : x)) : [...e.notas, n] });
+}
+export function eliminarNota(id: string): void {
+  const e = obtenerApp();
+  cambiar({ ...e, notas: e.notas.filter((n) => n.id !== id) });
+}
+/** Quién escribe las notas en este aparato. */
+export function quienSoy(e: EstadoApp): string {
+  return e.tutores.find((t) => t.id === e.yo)?.nombre ?? 'Tú';
 }

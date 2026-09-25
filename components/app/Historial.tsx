@@ -11,24 +11,29 @@
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
-import { ClipboardList, X } from 'lucide-react';
-import { ChipIcono, entrada, Menu } from './Hoy';
-import { diasHasta, obtenerApp, suscribirApp, type EstadoApp, type Perro, type Registro, type Cuidado, type Tipo } from '@/lib/app';
+import { ClipboardList, NotebookPen, Thermometer, X } from 'lucide-react';
+import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
+import { ChipIcono, entrada, Menu, tono } from './Hoy';
+import { diasHasta, obtenerApp, suscribirApp, type EstadoApp, type Perro, type Registro, type Cuidado, type Nota, type Tipo } from '@/lib/app';
 
-type GrupoTipo = 'todos' | 'medicamento' | 'suplemento' | 'comida' | 'salud';
+type GrupoTipo = 'todos' | 'medicamento' | 'suplemento' | 'comida' | 'salud' | 'bitacora';
 const GRUPOS: { valor: GrupoTipo; texto: string }[] = [
   { valor: 'todos', texto: 'Todo' },
   { valor: 'medicamento', texto: 'Medicamentos' },
   { valor: 'suplemento', texto: 'Suplementos' },
   { valor: 'comida', texto: 'Alimento' },
   { valor: 'salud', texto: 'Salud' },
+  { valor: 'bitacora', texto: 'Bitácora' },
 ];
 const SALUD: Tipo[] = ['vacuna', 'antiparasitario', 'bano', 'control'];
 const DIAS_POR_PAGINA = 7;
 
 interface Fila {
   registro: Registro;
-  cuidado: Cuidado;
+  /** Un cuidado marcado como hecho… */
+  cuidado?: Cuidado;
+  /** …o una anotación de la bitácora (síntoma o nota). */
+  nota?: Nota;
   perro: Perro;
 }
 
@@ -133,13 +138,17 @@ function Contenido({
     const perro = cuidado && e.perros.find((p) => p.id === cuidado.perroId);
     if (cuidado && perro) todas.push({ registro: r, cuidado, perro });
   }
+  for (const n of e.notas) {
+    const perro = e.perros.find((p) => p.id === n.perroId);
+    if (perro) todas.push({ registro: { id: n.id, cuidadoId: '', dia: n.dia, hora: n.hora, quien: n.quien }, nota: n, perro });
+  }
   todas.sort((a, b) => `${b.registro.dia} ${b.registro.hora}`.localeCompare(`${a.registro.dia} ${a.registro.hora}`));
 
   const filtradas = todas.filter(
     (f) =>
       (perroId === 'todos' || f.perro.id === perroId) &&
       (persona === 'todos' || f.registro.quien === persona) &&
-      (grupo === 'todos' || (grupo === 'salud' ? SALUD.includes(f.cuidado.tipo) : f.cuidado.tipo === grupo)),
+      (grupo === 'todos' || (grupo === 'bitacora' ? !!f.nota : !!f.cuidado && (grupo === 'salud' ? SALUD.includes(f.cuidado.tipo) : f.cuidado.tipo === grupo))),
   );
   const hayFiltros = perroId !== 'todos' || persona !== 'todos' || grupo !== 'todos';
   const limpiar = () => {
@@ -149,7 +158,7 @@ function Contenido({
   };
 
   // Conteo de los últimos 7 días por persona (sobre lo visible según perro y tipo).
-  const semana = todas.filter((f) => diasHasta(f.registro.dia, ahora) > -7);
+  const semana = todas.filter((f) => f.cuidado && diasHasta(f.registro.dia, ahora) > -7);
   const porPersona = e.tutores.map((t) => ({ nombre: t.nombre, n: semana.filter((f) => f.registro.quien === t.nombre).length, esYo: t.nombre === yo }));
   const totalSemana = porPersona.reduce((s, p) => s + p.n, 0);
 
@@ -232,9 +241,23 @@ function Contenido({
                       .filter((f) => f.registro.dia === dia)
                       .map((f, i) => (
                         <motion.li key={f.registro.id} {...entrada(gi === 0 ? i : 0)} className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4">
-                          <ChipIcono tipo={f.cuidado.tipo} />
+                          {f.cuidado ? (
+                            <ChipIcono tipo={f.cuidado.tipo} />
+                          ) : (
+                            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+                              {f.nota?.tipo === 'sintoma' ? <Thermometer size={22} color="var(--accent)" aria-hidden="true" /> : <NotebookPen size={22} color="var(--accent)" aria-hidden="true" />}
+                            </span>
+                          )}
                           <span className="min-w-0 flex-1">
-                            <span className="block text-base font-semibold">{f.cuidado.nombre}</span>
+                            {f.nota ? (
+                              <span className="flex flex-wrap items-center gap-2">
+                                <span className="text-base font-semibold">{f.nota.tipo === 'sintoma' ? 'Síntoma' : 'Nota'}</span>
+                                {f.nota.intensidad && <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono[TONO_INTENSIDAD[f.nota.intensidad]]}`}>{NOMBRE_INTENSIDAD[f.nota.intensidad]}</span>}
+                              </span>
+                            ) : (
+                              <span className="block text-base font-semibold">{f.cuidado?.nombre}</span>
+                            )}
+                            {f.nota && <span className="mt-1 block text-base">{f.nota.texto}</span>}
                             <span className="mt-1 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
                               <Inicial nombre={f.registro.quien} esYo={f.registro.quien === yo} />
                               <span>

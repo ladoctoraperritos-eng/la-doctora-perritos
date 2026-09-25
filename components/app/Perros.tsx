@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
 import { AlertCircle, ArrowLeft, Camera, Check, ChevronRight, Copy, Cpu, FileText, Phone, Pencil, Plus, Trash2, User } from 'lucide-react';
 import { Hoja } from './Hoja';
+import { FilaNota, FormNota } from './Bitacora';
 import { Avatar, ChipIcono, entrada, Menu, textoDias, tono } from './Hoy';
 import {
   claveDia,
@@ -28,10 +29,12 @@ import {
   LIMITE_PERROS,
   nuevoId,
   obtenerApp,
+  quienSoy,
   registrarSalud,
   suscribirApp,
   type Cuidado,
   type EstadoApp,
+  type Nota,
   type Perro,
   type Tipo,
 } from '@/lib/app';
@@ -558,7 +561,7 @@ function Seccion({ titulo, onAgregar, vacio, children }: { titulo: string; onAgr
   );
 }
 
-type HojaEstado = null | { kind: 'cuidado'; perroId: string; cuidado?: Cuidado; tipo: Tipo } | { kind: 'perro'; perro?: Perro } | { kind: 'limite' };
+type HojaEstado = null | { kind: 'cuidado'; perroId: string; cuidado?: Cuidado; tipo: Tipo } | { kind: 'perro'; perro?: Perro } | { kind: 'nota'; perroId: string; nota?: Nota } | { kind: 'limite' };
 
 export default function Perros() {
   const e = useSyncExternalStore(suscribirApp, obtenerApp, () => null);
@@ -606,6 +609,9 @@ export default function Perros() {
               }}
             />
           )}
+        </Hoja>
+        <Hoja abierta={hoja?.kind === 'nota'} titulo={hoja?.kind === 'nota' && hoja.nota ? 'Editar anotación' : 'Nueva anotación'} onCerrar={cerrar}>
+          {hoja?.kind === 'nota' && <FormNota key={hoja.nota?.id ?? 'nueva'} perroId={hoja.perroId} nota={hoja.nota} quien={quienSoy(e)} onListo={cerrar} />}
         </Hoja>
         <Hoja abierta={hoja?.kind === 'limite'} titulo="Tu plan llegó a su límite" onCerrar={cerrar}>
           <p className="text-base text-[var(--text-secondary)]">
@@ -677,6 +683,8 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
 }
 
 function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Perro; ahora: Date; onVolver: () => void; onHoja: (h: HojaEstado) => void }) {
+  const [verTodo, setVerTodo] = useState(false);
+  const notas = e.notas.filter((n) => n.perroId === perro.id).sort((a, b) => `${b.dia} ${b.hora}`.localeCompare(`${a.dia} ${a.hora}`));
   const suyos = e.cuidados.filter((c) => c.perroId === perro.id);
   const porFecha = (a: Cuidado, b: Cuidado) => (a.proxima ?? '9999').localeCompare(b.proxima ?? '9999');
   const salud = suyos.filter((c) => TIPOS_SALUD.includes(c.tipo)).sort(porFecha);
@@ -728,6 +736,16 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
           <FilaCuidado key={c.id} c={c} i={i} onAbrir={() => onHoja({ kind: 'cuidado', perroId: perro.id, cuidado: c, tipo: c.tipo })} />
         ))}
       </Seccion>
+      <Seccion titulo="Bitácora" onAgregar={() => onHoja({ kind: 'nota', perroId: perro.id })} vacio={notas.length === 0 ? 'Anota síntomas o cambios para contárselos al veterinario' : undefined}>
+        {(verTodo ? notas : notas.slice(0, 3)).map((n, i) => (
+          <FilaNota key={n.id} n={n} i={i} onAbrir={() => onHoja({ kind: 'nota', perroId: perro.id, nota: n })} />
+        ))}
+      </Seccion>
+      {notas.length > 3 && (
+        <button type="button" onClick={() => setVerTodo((v) => !v)} className="-mt-3 inline-flex min-h-11 w-fit items-center rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
+          {verTodo ? 'Ver menos' : `Ver toda la bitácora (${notas.length})`}
+        </button>
+      )}
     </>
   );
 }

@@ -1,0 +1,26 @@
+// Bitácora: ficha, nueva anotación (error + guardar), historial con bitácora y resumen. Requiere `next start` en :3000.
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
+const foto = async (n) => { await p.waitForTimeout(500); await p.screenshot({ path: `docs/revisiones/bitacora-${n}.png` }); };
+await p.goto('http://localhost:3000/app/perros', { waitUntil: 'load' });
+await p.evaluate(() => localStorage.clear());
+await p.reload({ waitUntil: 'load' });
+await p.waitForSelector('text=Tus perros', { timeout: 15000 });
+await p.getByRole('button', { name: /Toffee/ }).first().click(); await p.waitForSelector('text=Bitácora');
+await p.getByRole('heading', { name: 'Bitácora' }).scrollIntoViewIfNeeded();
+await foto('1-ficha');
+await p.screenshot({ path: 'docs/revisiones/bitacora-1b-ficha-completa.png', fullPage: true });
+await p.getByRole('region', { name: 'Bitácora' }).getByRole('button', { name: 'Agregar' }).click(); await p.waitForTimeout(500);
+await p.getByRole('button', { name: 'Guardar en la bitácora' }).click(); await foto('2-error');
+await p.getByRole('button', { name: 'Picazón' }).click(); await p.getByRole('radio', { name: 'Fuerte' }).click();
+await p.fill('#texto-nota', 'Picazón. Se rasca el lomo y se lame las patas desde ayer.'); await foto('3-nueva');
+await p.getByRole('button', { name: 'Guardar en la bitácora' }).click(); await p.waitForTimeout(700);
+await p.getByRole('heading', { name: 'Bitácora' }).scrollIntoViewIfNeeded(); await foto('4-guardada');
+console.log('scrollWidth', await p.evaluate(() => document.documentElement.scrollWidth));
+await p.goto('http://localhost:3000/app/historial', { waitUntil: 'load' });
+await p.waitForSelector('text=Quién hizo qué y cuándo'); await p.getByRole('radio', { name: 'Bitácora' }).click(); await foto('5-historial');
+await p.goto('http://localhost:3000/app/resumen?perro=p1', { waitUntil: 'load' });
+await p.waitForSelector('text=Tratamiento actual'); await p.waitForTimeout(500);
+await p.screenshot({ path: 'docs/revisiones/bitacora-6-resumen.png', fullPage: true });
+process.exit(0);

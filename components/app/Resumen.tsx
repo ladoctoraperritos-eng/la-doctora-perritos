@@ -10,6 +10,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, Printer } from 'lucide-react';
 import { diasHasta, edadTexto, obtenerApp, suscribirApp, type Cuidado, type EstadoApp, type Perro, type Tipo } from '@/lib/app';
+import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
+import { tono } from './Hoy';
 
 const TIPOS_TRATAMIENTO: Tipo[] = ['medicamento'];
 const TIPOS_SUPLEMENTO: Tipo[] = ['suplemento', 'comida'];
@@ -111,6 +113,9 @@ export default function Resumen() {
   const suplementos = suyos.filter((c) => TIPOS_SUPLEMENTO.includes(c.tipo));
   const salud = suyos.filter((c) => TIPOS_SALUD.includes(c.tipo)).sort((a, b) => (a.proxima ?? '9999').localeCompare(b.proxima ?? '9999'));
   const edad = edadTexto(perro.nacimiento, ahora);
+  const bitacora = e.notas
+    .filter((n) => n.perroId === perro.id && diasHasta(n.dia, ahora) > -30)
+    .sort((a, b) => `${b.dia} ${b.hora}`.localeCompare(`${a.dia} ${a.hora}`));
 
   return (
     <div className="mx-auto w-full max-w-md px-6 pb-12 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)] print:max-w-none print:px-0">
@@ -185,6 +190,25 @@ export default function Resumen() {
             />
           ) : (
             <p className="text-base text-[var(--text-secondary)]">Sin registros.</p>
+          )}
+        </Seccion>
+
+        <Seccion titulo="Bitácora: últimos 30 días">
+          {bitacora.length > 0 ? (
+            <ul className="flex flex-col">
+              {bitacora.map((n) => (
+                <li key={n.id} className="break-inside-avoid border-b border-[color-mix(in_oklab,var(--border-ui)_40%,transparent)] py-3 first:pt-0 last:border-b-0">
+                  <p className="flex flex-wrap items-center gap-2 text-base font-semibold">
+                    {fechaClave(n.dia)} · {n.hora}
+                    <span className="text-sm font-normal text-[var(--text-secondary)]">{n.tipo === 'sintoma' ? 'Síntoma' : 'Nota'} · {n.quien}</span>
+                    {n.intensidad && <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono[TONO_INTENSIDAD[n.intensidad]]}`}>{NOMBRE_INTENSIDAD[n.intensidad]}</span>}
+                  </p>
+                  <p className="mt-1 text-base">{n.texto}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-base text-[var(--text-secondary)]">Sin anotaciones en los últimos 30 días.</p>
           )}
         </Seccion>
 

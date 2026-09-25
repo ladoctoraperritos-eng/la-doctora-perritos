@@ -207,3 +207,7 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 ## Resumen para el veterinario (2026-09-24)
 - `/app/resumen?perro=ID` (components/app/Resumen.tsx), botón en la ficha de cada perro: paciente (raza, edad, nacimiento, peso, chip), responsable y teléfono, datos importantes, tratamiento actual con cumplimiento de los últimos 14 días, suplementos/alimento, vacunas/antiparasitarios/controles con última y próxima fecha (vencidas marcadas), aviso de que no es documento clínico. «Imprimir / PDF» usa la impresión del navegador (los botones se ocultan al imprimir). Sin revisor (pantalla secundaria/documento).
 - Pendiente: compartir por WhatsApp/correo con enlace (requiere cuentas), y logo en el encabezado impreso.
+
+## Bitácora de síntomas y notas (2026-09-24, pedido del usuario)
+- Modelo: `Nota {perroId, dia, hora, tipo: sintoma|nota, texto, intensidad leve|moderado|fuerte, quien}` en `EstadoApp.notas`. Ficha del perro → sección «Bitácora» (agregar con síntomas comunes de un toque, intensidad, día/hora editables; editar y borrar en dos pasos; últimas 3 + «Ver toda»). Aparece en Historial (filtro «Bitácora») y en el resumen para el veterinario («Bitácora: últimos 30 días»). Borrar un perro borra su bitácora; exportar «todos mis datos» la incluye.
+- Es información que la persona escribe: el texto del resumen aclara que no es documento clínico. Pendiente: adjuntar fotos a una anotación (requiere Storage), avisos si un síntoma fuerte se repite.
