@@ -13,7 +13,7 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
-import { AlertCircle, ArrowLeft, Camera, Check, ChevronRight, Copy, Cpu, Phone, Pencil, Plus, Trash2, User } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Camera, Check, ChevronRight, Copy, Cpu, FileText, Phone, Pencil, Plus, Trash2, User } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Avatar, ChipIcono, entrada, Menu, textoDias, tono } from './Hoy';
 import {
@@ -712,6 +712,11 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
         </section>
       )}
       <Identificacion perro={perro} onEditar={() => onHoja({ kind: 'perro', perro })} />
+
+      <Link href={`/app/resumen?perro=${perro.id}`} className="flex min-h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-[var(--accent)] text-base font-semibold text-[var(--accent)] active:scale-[0.98]">
+        <FileText size={20} aria-hidden="true" />
+        Resumen para el veterinario
+      </Link>
 
       <Seccion titulo="Salud" onAgregar={() => onHoja({ kind: 'cuidado', perroId: perro.id, tipo: 'vacuna' })} vacio={salud.length === 0 ? 'Agrega su próxima vacuna, antiparasitario, baño o control' : undefined}>
         {salud.map((c, i) => (

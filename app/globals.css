@@ -48,3 +48,10 @@ body {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Impresión (resumen para el veterinario): papel limpio, sin el fondo de pantalla. */
+@media print {
+  body {
+    background: none;
+  }
+}
