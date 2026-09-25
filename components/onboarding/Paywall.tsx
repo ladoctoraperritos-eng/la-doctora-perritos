@@ -16,6 +16,9 @@ import { PLANES } from '@/lib/planes';
 import { correoValido } from '@/lib/auth';
 import Marca from './Marca';
 
+/** Solo para probar el recorrido antes de conectar Hotmart: NEXT_PUBLIC_MODO_DEMO=1. En producción NO se define. */
+const MODO_DEMO = process.env.NEXT_PUBLIC_MODO_DEMO === '1';
+
 const boton =
   'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-colors active:scale-[0.98] disabled:bg-[var(--surface-2)] disabled:text-[var(--text-secondary)] disabled:shadow-none [touch-action:manipulation]';
 
@@ -358,9 +361,14 @@ export default function Paywall() {
           {etiquetaBoton}
         </button>
         {guardado && (
-          <p role="status" className="text-center text-sm font-semibold">
-            Guardamos tu correo. El pago se activa muy pronto.
-          </p>
+          <div role="status" className="flex flex-col items-center gap-1 text-center">
+            <p className="text-sm font-semibold">Guardamos tu correo. El pago se activa muy pronto.</p>
+            {MODO_DEMO && (
+              <Link href="/app" className="inline-flex min-h-11 items-center text-base font-semibold text-[var(--accent)] underline underline-offset-4">
+                Ver la app de demostración
+              </Link>
+            )}
+          </div>
         )}
       </div>
     </div>
