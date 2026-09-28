@@ -148,6 +148,28 @@ export function Avatar({ perro, grande = false }: { perro: Perro; grande?: boole
   );
 }
 
+/** Círculo de una persona: su foto si tiene, si no la inicial (verde si eres tú, coral si es otra). */
+export function PersonaCirculo({ nombre, foto, esYo, tam = 'size-8', textoTam = 'text-sm' }: { nombre: string; foto?: string; esYo: boolean; tam?: string; textoTam?: string }) {
+  if (foto) {
+    return (
+      <span className={`inline-flex ${tam} shrink-0 items-center justify-center overflow-hidden rounded-full border-2 ${esYo ? 'border-[var(--accent)]' : 'border-[var(--accent-2)]'}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={foto} alt={`Foto de ${nombre}`} width={64} height={64} className="size-full object-cover" />
+      </span>
+    );
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-full font-bold ${textoTam} ${
+        esYo ? 'bg-[var(--accent)] text-[var(--bg)]' : 'bg-[var(--accent-2)] text-[var(--text-primary)]'
+      }`}
+    >
+      {nombre.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
 function Esqueleto() {
   return (
     <div className="flex flex-col gap-4 px-6 pt-6" aria-busy="true" aria-label="Cargando tu día">

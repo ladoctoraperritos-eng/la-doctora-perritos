@@ -8,14 +8,14 @@
 //   baseline: entrada escalonada · tap con escala · hoja con transición
 //   estados: cargando (esqueleto) · límite de personas del plan · validación de correo · confirmación al borrar todo · copia descargada
 
-import { useState, useSyncExternalStore } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, MotionConfig } from 'motion/react';
-import { Download, FileText, Mail, Pencil, ShieldCheck, UserPlus } from 'lucide-react';
+import { AlertCircle, Camera, Download, FileText, Mail, Pencil, ShieldCheck, UserPlus } from 'lucide-react';
 import { Hoja } from './Hoja';
-import { Borrar, botonPrimario, botonSecundario, Campo, campo } from './Perros';
-import { entrada, Menu } from './Hoy';
+import { Borrar, botonPrimario, botonSecundario, Campo, campo, procesarFoto } from './Perros';
+import { entrada, Menu, PersonaCirculo } from './Hoy';
 import {
   guardarAjustes,
   guardarTutor,
@@ -44,19 +44,6 @@ function descargar(nombre: string, contenido: string, tipo: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function Inicial({ nombre, esYo, grande = false }: { nombre: string; esYo: boolean; grande?: boolean }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`inline-flex ${grande ? 'size-14 text-2xl' : 'size-11 text-lg'} shrink-0 items-center justify-center rounded-full font-bold ${
-        esYo ? 'bg-[var(--accent)] text-[var(--bg)]' : 'bg-[var(--accent-2)] text-[var(--text-primary)]'
-      }`}
-    >
-      {nombre.charAt(0).toUpperCase()}
-    </span>
-  );
-}
-
 function Interruptor({ activo, onCambiar, etiqueta, detalle }: { activo: boolean; onCambiar: (v: boolean) => void; etiqueta: string; detalle?: string }) {
   return (
     <button
@@ -80,7 +67,23 @@ function Interruptor({ activo, onCambiar, etiqueta, detalle }: { activo: boolean
 function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onListo: () => void }) {
   const [nombre, setNombre] = useState(tutor?.nombre ?? '');
   const [correo, setCorreo] = useState(tutor?.correo ?? '');
+  const [foto, setFoto] = useState<string | undefined>(tutor?.foto);
+  const [cargandoFoto, setCargandoFoto] = useState(false);
+  const entradaFoto = useRef<HTMLInputElement>(null);
   const [errores, setErrores] = useState<Record<string, string>>({});
+
+  const elegirFoto = async (archivo: File | undefined) => {
+    if (!archivo) return;
+    setCargandoFoto(true);
+    setErrores((x) => ({ ...x, foto: '' }));
+    try {
+      setFoto(await procesarFoto(archivo));
+    } catch (err) {
+      setErrores((x) => ({ ...x, foto: err instanceof Error ? err.message : 'No pudimos cargar la foto.' }));
+    } finally {
+      setCargandoFoto(false);
+    }
+  };
 
   const guardar = () => {
     const e: Record<string, string> = {};
@@ -94,6 +97,7 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
       nombre: nombre.trim(),
       correo: esYo ? tutor?.correo : correo.trim() || undefined,
       pendiente: esYo ? undefined : tutor ? tutor.pendiente : true,
+      foto,
     });
     onListo();
   };
@@ -106,6 +110,27 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
       }}
       noValidate
     >
+      <div className="mt-3 flex items-center gap-4">
+        <PersonaCirculo nombre={nombre || (esYo ? 'Tú' : 'Persona')} foto={foto} esYo={esYo} tam="size-16" textoTam="text-2xl" />
+        <div className="flex flex-col items-start gap-1">
+          <input ref={entradaFoto} id="foto-tutor" type="file" accept="image/*" className="sr-only" onChange={(ev) => { void elegirFoto(ev.target.files?.[0]); ev.target.value = ''; }} />
+          <button type="button" onClick={() => entradaFoto.current?.click()} disabled={cargandoFoto} className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] px-4 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
+            <Camera size={20} aria-hidden="true" />
+            {cargandoFoto ? 'Preparando…' : foto ? 'Cambiar foto' : 'Agregar foto'}
+          </button>
+          {foto && (
+            <button type="button" onClick={() => setFoto(undefined)} className="inline-flex min-h-11 items-center px-2 text-base font-medium text-[var(--text-secondary)] [touch-action:manipulation]">
+              Quitar foto
+            </button>
+          )}
+        </div>
+      </div>
+      {errores.foto && (
+        <p role="alert" className="mt-2 flex items-center gap-2 text-base font-semibold">
+          <AlertCircle size={18} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+          {errores.foto}
+        </p>
+      )}
       <Campo id="nombre-tutor" etiqueta={esYo ? 'Tu nombre' : 'Nombre'} error={errores.nombre}>
         <input id="nombre-tutor" value={nombre} maxLength={30} autoComplete={esYo ? 'name' : 'off'} onChange={(e) => { setNombre(e.target.value); setErrores((x) => ({ ...x, nombre: '' })); }} placeholder="Por ejemplo, Diego" className={campo} />
       </Campo>
@@ -172,7 +197,7 @@ export default function Yo() {
           </header>
 
           <motion.section {...entrada(0)} aria-label="Mi cuenta" className="borde-degradado flex items-center gap-4 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]">
-            <Inicial nombre={yo.nombre} esYo grande />
+            <PersonaCirculo nombre={yo.nombre} foto={yo.foto} esYo tam="size-14" textoTam="text-2xl" />
             <div className="min-w-0 flex-1">
               <p className="text-xl font-bold leading-tight">{yo.nombre}</p>
               <p className="mt-1 break-words text-base text-[var(--text-secondary)]">{e.correo ?? 'Sin correo de acceso todavía'}</p>
@@ -199,7 +224,7 @@ export default function Yo() {
                       onClick={() => setHoja({ kind: 'tutor', tutor: t, esYo })}
                       className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] active:scale-[0.98] [touch-action:manipulation]"
                     >
-                      <Inicial nombre={t.nombre} esYo={esYo} />
+                      <PersonaCirculo nombre={t.nombre} foto={t.foto} esYo={esYo} tam="size-11" textoTam="text-lg" />
                       <span className="min-w-0 flex-1">
                         <span className="block text-base font-semibold">{esYo ? `${t.nombre} (tú)` : t.nombre}</span>
                         {t.pendiente ? (
@@ -220,34 +245,40 @@ export default function Yo() {
             </button>
           </section>
 
-          <section aria-label="Avisos">
-            <h2 className="mb-2 text-lg font-bold">Avisos</h2>
-            <div className="flex flex-col gap-2">
-              <Interruptor activo={e.ajustes.avisoHora} onCambiar={(v) => ajuste({ avisoHora: v })} etiqueta="A la hora de cada cuidado" detalle="Medicamentos y suplementos" />
-              <Interruptor activo={e.ajustes.avisoStock} onCambiar={(v) => ajuste({ avisoStock: v })} etiqueta="Antes de que se acabe algo" detalle="Alimento y medicamentos" />
-              <Interruptor activo={e.ajustes.avisoFechas} onCambiar={(v) => ajuste({ avisoFechas: v })} etiqueta="Antes de una vacuna o control" detalle="Baños, antiparasitarios y citas" />
+          <section aria-label="Avisos" className="flex flex-col gap-4">
+            <div>
+              <h2 className="mb-2 text-lg font-bold">Avisos</h2>
+              <Interruptor activo={e.ajustes.avisoHora} onCambiar={(v) => ajuste({ avisoHora: v })} etiqueta="A la hora de cada cuidado" detalle="Medicamentos y suplementos, justo a la hora que fijaste" />
             </div>
-            <div role="radiogroup" aria-label="Con cuánta anticipación" className="mt-4">
-              <p className="text-base font-semibold">¿Con cuánta anticipación te avisamos?</p>
-              <div className="mt-2 flex gap-2">
-                {([3, 5, 7] as const).map((d) => {
-                  const on = e.ajustes.anticipacion === d;
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      role="radio"
-                      aria-checked={on}
-                      onClick={() => ajuste({ anticipacion: d })}
-                      className={`inline-flex min-h-11 items-center rounded-full border-2 px-4 text-base font-semibold [touch-action:manipulation] ${on ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]' : 'border-[var(--border-ui)] bg-[var(--surface)]'}`}
-                    >
-                      {d} días
-                    </button>
-                  );
-                })}
+            <div className="rounded-[var(--radius-card)] border border-[var(--border-ui)] p-3">
+              <p className="mb-2 text-base font-semibold">Avisos anticipados</p>
+              <div className="flex flex-col gap-2">
+                <Interruptor activo={e.ajustes.avisoStock} onCambiar={(v) => ajuste({ avisoStock: v })} etiqueta="Antes de que se acabe algo" detalle="Alimento y medicamentos" />
+                <Interruptor activo={e.ajustes.avisoFechas} onCambiar={(v) => ajuste({ avisoFechas: v })} etiqueta="Antes de una vacuna o control" detalle="Baños, antiparasitarios y citas" />
+              </div>
+              <div role="radiogroup" aria-label="Con cuánta anticipación" className="mt-4">
+                <p className="text-base font-semibold">¿Con cuántos días de anticipación?</p>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">Se aplica a estos dos avisos, no al de la hora del cuidado.</p>
+                <div className="mt-2 flex gap-2">
+                  {([3, 5, 7] as const).map((d) => {
+                    const on = e.ajustes.anticipacion === d;
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        role="radio"
+                        aria-checked={on}
+                        onClick={() => ajuste({ anticipacion: d })}
+                        className={`inline-flex min-h-11 items-center rounded-full border-2 px-4 text-base font-semibold [touch-action:manipulation] ${on ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]' : 'border-[var(--border-ui)] bg-[var(--surface)]'}`}
+                      >
+                        {d} días
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-            <p className="mt-3 text-sm text-[var(--text-secondary)]">Los avisos llegan a tu correo y a tu celular en cuanto activemos tu cuenta.</p>
+            <p className="text-sm text-[var(--text-secondary)]">Los avisos llegan a tu correo y a tu celular en cuanto activemos tu cuenta.</p>
           </section>
 
           <section aria-label="Tu plan">

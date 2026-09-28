@@ -13,7 +13,9 @@ import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
 import { ClipboardList, NotebookPen, Thermometer, X } from 'lucide-react';
 import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
-import { ChipIcono, entrada, Menu, tono } from './Hoy';
+import { ChipIcono, entrada, Menu, PersonaCirculo, tono } from './Hoy';
+import { Hoja } from './Hoja';
+import { SlidersHorizontal } from 'lucide-react';
 import { diasHasta, obtenerApp, suscribirApp, type EstadoApp, type Perro, type Registro, type Cuidado, type Nota, type Tipo } from '@/lib/app';
 
 type GrupoTipo = 'todos' | 'medicamento' | 'suplemento' | 'comida' | 'salud' | 'bitacora';
@@ -71,19 +73,6 @@ function Chips({ titulo, opciones, valor, onElegir }: { titulo: string; opciones
 }
 
 /** Inicial de la persona: verde para ti, coral para las demás (2.ª nota de la ficha de arte). */
-function Inicial({ nombre, esYo }: { nombre: string; esYo: boolean }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-        esYo ? 'bg-[var(--accent)] text-[var(--bg)]' : 'bg-[var(--accent-2)] text-[var(--text-primary)]'
-      }`}
-    >
-      {nombre.charAt(0).toUpperCase()}
-    </span>
-  );
-}
-
 export default function Historial() {
   const e = useSyncExternalStore(suscribirApp, obtenerApp, () => null);
   const [perroId, setPerroId] = useState('todos');
@@ -130,6 +119,7 @@ function Contenido({
 }) {
   const ahora = new Date();
   const yo = e.tutores.find((t) => t.id === e.yo)?.nombre ?? '';
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
 
   // Todos los registros con su cuidado y su perro, del más reciente al más antiguo.
   const todas: Fila[] = [];
@@ -151,6 +141,7 @@ function Contenido({
       (grupo === 'todos' || (grupo === 'bitacora' ? !!f.nota : !!f.cuidado && (grupo === 'salud' ? SALUD.includes(f.cuidado.tipo) : f.cuidado.tipo === grupo))),
   );
   const hayFiltros = perroId !== 'todos' || persona !== 'todos' || grupo !== 'todos';
+  const nFiltros = [perroId !== 'todos', persona !== 'todos', grupo !== 'todos'].filter(Boolean).length;
   const limpiar = () => {
     setPerroId('todos');
     setPersona('todos');
@@ -182,7 +173,7 @@ function Contenido({
               <ul className="mt-3 flex flex-col gap-3">
                 {porPersona.map((p) => (
                   <li key={p.nombre} className="flex items-center gap-3">
-                    <Inicial nombre={p.nombre} esYo={p.esYo} />
+                    <PersonaCirculo nombre={p.nombre} esYo={p.esYo} />
                     <span className="w-24 shrink-0 truncate text-base font-semibold">{p.esYo ? `${p.nombre} (tú)` : p.nombre}</span>
                     <span className="h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_40%,var(--surface-2))]" aria-hidden="true">
                       <motion.span
@@ -200,17 +191,56 @@ function Contenido({
             </motion.section>
           )}
 
-          <section aria-label="Filtros" className="flex flex-col gap-2">
-            {e.perros.length > 1 && <Chips titulo="Perro" valor={perroId} onElegir={setPerroId} opciones={[{ valor: 'todos', texto: 'Todos' }, ...e.perros.map((p) => ({ valor: p.id, texto: p.nombre }))]} />}
-            {e.tutores.length > 1 && <Chips titulo="Persona" valor={persona} onElegir={setPersona} opciones={[{ valor: 'todos', texto: 'Todas' }, ...e.tutores.map((t) => ({ valor: t.nombre, texto: t.nombre === yo ? `${t.nombre} (tú)` : t.nombre }))]} />}
-            <Chips titulo="Tipo de cuidado" valor={grupo} onElegir={(v) => setGrupo(v as GrupoTipo)} opciones={GRUPOS} />
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setFiltrosAbiertos(true)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-base font-semibold [touch-action:manipulation]"
+            >
+              <SlidersHorizontal size={18} aria-hidden="true" />
+              Filtros
+              {nFiltros > 0 && <span className="inline-flex size-6 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-[var(--bg)]">{nFiltros}</span>}
+            </button>
             {hayFiltros && (
-              <button type="button" onClick={limpiar} className="inline-flex min-h-11 w-fit items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
+              <button type="button" onClick={limpiar} className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
                 <X size={18} aria-hidden="true" />
-                Quitar filtros
+                Quitar
               </button>
             )}
-          </section>
+          </div>
+          <Hoja abierta={filtrosAbiertos} titulo="Filtros" onCerrar={() => setFiltrosAbiertos(false)}>
+            <div className="flex flex-col gap-5">
+              {e.perros.length > 1 && (
+                <div>
+                  <p className="mb-2 text-base font-semibold">Perro</p>
+                  <div role="radiogroup" aria-label="Perro" className="flex flex-wrap gap-3">
+                    <AvatarChip nombre="Todos" activo={perroId === 'todos'} onElegir={() => setPerroId('todos')} />
+                    {e.perros.map((p) => (
+                      <AvatarChip key={p.id} nombre={p.nombre} foto={p.foto} activo={perroId === p.id} onElegir={() => setPerroId(p.id)} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {e.tutores.length > 1 && (
+                <div>
+                  <p className="mb-2 text-base font-semibold">Persona</p>
+                  <div role="radiogroup" aria-label="Persona" className="flex flex-wrap gap-3">
+                    <AvatarChip nombre="Todas" activo={persona === 'todos'} onElegir={() => setPersona('todos')} />
+                    {e.tutores.map((t) => (
+                      <AvatarChip key={t.id} nombre={t.nombre === yo ? `${t.nombre} (tú)` : t.nombre} foto={t.foto} esYo={t.nombre === yo} activo={persona === t.nombre} onElegir={() => setPersona(t.nombre)} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div>
+                <p className="mb-2 text-base font-semibold">Tipo de cuidado</p>
+                <Chips titulo="Tipo de cuidado" valor={grupo} onElegir={(v) => setGrupo(v as GrupoTipo)} opciones={GRUPOS} />
+              </div>
+              <button type="button" onClick={() => setFiltrosAbiertos(false)} className="inline-flex h-14 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)]">
+                Ver resultados
+              </button>
+            </div>
+          </Hoja>
 
           {todas.length === 0 ? (
             <section aria-label="Sin registros" className="flex flex-col items-start gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--border-ui)] p-6">
@@ -259,7 +289,7 @@ function Contenido({
                             )}
                             {f.nota && <span className="mt-1 block text-base">{f.nota.texto}</span>}
                             <span className="mt-1 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                              <Inicial nombre={f.registro.quien} esYo={f.registro.quien === yo} />
+                              <PersonaCirculo nombre={f.registro.quien} foto={e.tutores.find((t) => t.nombre === f.registro.quien)?.foto} esYo={f.registro.quien === yo} />
                               <span>
                                 {e.perros.length > 1 ? `${f.perro.nombre} · ` : ''}
                                 {f.registro.quien}
@@ -287,5 +317,28 @@ function Contenido({
         <Menu activa="historial" />
       </div>
     </MotionConfig>
+  );
+}
+
+function AvatarChip({ nombre, foto, esYo = false, activo, onElegir }: { nombre: string; foto?: string; esYo?: boolean; activo: boolean; onElegir: () => void }) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={activo}
+      onClick={onElegir}
+      className={`flex flex-col items-center gap-1 rounded-[var(--radius-button)] p-2 [touch-action:manipulation] ${activo ? 'bg-[color-mix(in_oklab,var(--accent)_10%,transparent)]' : ''}`}
+    >
+      <span className={`inline-flex size-14 items-center justify-center rounded-full border-2 ${activo ? 'border-[var(--accent)]' : 'border-transparent'}`}>
+        {foto ? (
+          <PersonaCirculo nombre={nombre} foto={foto} esYo={esYo} tam="size-12" />
+        ) : (
+          <span aria-hidden="true" className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--chip-bg)] text-lg font-bold text-[var(--accent)]">
+            {nombre.charAt(0).toUpperCase()}
+          </span>
+        )}
+      </span>
+      <span className={`max-w-16 truncate text-sm ${activo ? 'font-semibold text-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}>{nombre}</span>
+    </button>
   );
 }

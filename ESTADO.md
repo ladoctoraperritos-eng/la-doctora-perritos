@@ -211,3 +211,14 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 ## Bitácora de síntomas y notas (2026-09-24, pedido del usuario)
 - Modelo: `Nota {perroId, dia, hora, tipo: sintoma|nota, texto, intensidad leve|moderado|fuerte, quien}` en `EstadoApp.notas`. Ficha del perro → sección «Bitácora» (agregar con síntomas comunes de un toque, intensidad, día/hora editables; editar y borrar en dos pasos; últimas 3 + «Ver toda»). Aparece en Historial (filtro «Bitácora») y en el resumen para el veterinario («Bitácora: últimos 30 días»). Borrar un perro borra su bitácora; exportar «todos mis datos» la incluye.
 - Es información que la persona escribe: el texto del resumen aclara que no es documento clínico. Pendiente: adjuntar fotos a una anotación (requiere Storage), avisos si un síntoma fuerte se repite.
+
+## Ajustes por feedback de uso real (2026-09-28)
+- **Teléfono con país:** `CampoTelefono` (Perros.tsx) con selector de 20 países de habla hispana + Brasil/EE.UU., en vez de asumir el código del dispositivo. Relevante porque los anuncios de Meta se segmentarán por idioma en toda Latinoamérica.
+- **Bitácora del resumen:** ya no es fija a 30 días. El resumen para el veterinario tiene un selector (7/15/30/Todo) que solo cambia lo que se imprime; la bitácora completa nunca se borra, sigue en la ficha del perro.
+- **Resumen: PDF primero.** El botón principal ahora es «Descargar PDF» (usa impresión del navegador → «Guardar como PDF»); «Imprimir» quedó como enlace secundario.
+- **Avisos, copy más claro:** «A la hora de cada cuidado» quedó separado y aclara «justo a la hora que fijaste»; los dos avisos anticipados (stock y fechas) y el selector de anticipación se agruparon en una tarjeta «Avisos anticipados» para que quede claro a cuáles aplica.
+- **Historial más liviano:** los filtros (antes 3 filas de chips siempre visibles) pasaron a una hoja «Filtros» con contador de activos; dentro, Perro y Persona se eligen con círculos de foto/inicial (nuevo componente `PersonaCirculo` en Hoy.tsx, reutilizado en Historial e Yo). Se agregó foto opcional a `Tutor` (mismo recorte 480px que la foto del perro).
+- **Baño/Control:** «Baño» ya no pregunta «¿Cómo se llama?» (el nombre se fija solo en «Baño»); pregunta «¿Dónde fue?» (peluquería, veterinaria, en casa). «Control» pregunta «¿Qué tipo de control es?».
+- **Bitácora — «Otro»:** chip adicional en los síntomas comunes que enfoca el cuadro de texto libre, sin imponer una palabra.
+- **Bitácora, más visible en la ficha:** la sección tiene tarjeta con borde degradado y título en el color de marca; cada anotación lleva un borde izquierdo de color según intensidad (rojo fuerte, ámbar moderado).
+- Verificado: tsc, eslint y `npm run build` sin errores; capturas 375px en `docs/revisiones/fb-*.png`, sin desborde horizontal.

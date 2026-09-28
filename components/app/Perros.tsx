@@ -94,6 +94,73 @@ export function Campo({ id, etiqueta, opcional, error, children }: { id: string;
   );
 }
 
+/** Países de habla hispana (+ Brasil y EE. UU. por vecindad de audiencia), para no asumir el código del dispositivo. */
+export const CODIGOS_PAIS: { codigo: string; pais: string }[] = [
+  { codigo: '+56', pais: 'Chile' },
+  { codigo: '+52', pais: 'México' },
+  { codigo: '+57', pais: 'Colombia' },
+  { codigo: '+54', pais: 'Argentina' },
+  { codigo: '+51', pais: 'Perú' },
+  { codigo: '+34', pais: 'España' },
+  { codigo: '+58', pais: 'Venezuela' },
+  { codigo: '+593', pais: 'Ecuador' },
+  { codigo: '+502', pais: 'Guatemala' },
+  { codigo: '+591', pais: 'Bolivia' },
+  { codigo: '+1', pais: 'Rep. Dominicana / Puerto Rico / EE. UU.' },
+  { codigo: '+503', pais: 'El Salvador' },
+  { codigo: '+504', pais: 'Honduras' },
+  { codigo: '+505', pais: 'Nicaragua' },
+  { codigo: '+506', pais: 'Costa Rica' },
+  { codigo: '+507', pais: 'Panamá' },
+  { codigo: '+598', pais: 'Uruguay' },
+  { codigo: '+595', pais: 'Paraguay' },
+  { codigo: '+53', pais: 'Cuba' },
+  { codigo: '+55', pais: 'Brasil' },
+];
+
+/** Separa «+52 55 1234 5678» en código y número; si no reconoce el código, usa Chile por defecto. */
+function separarTelefono(valor: string): { codigo: string; numero: string } {
+  const t = valor.trim();
+  const porLargo = [...CODIGOS_PAIS].sort((a, b) => b.codigo.length - a.codigo.length);
+  for (const { codigo } of porLargo) {
+    if (t.startsWith(codigo)) return { codigo, numero: t.slice(codigo.length).trim() };
+  }
+  return { codigo: '+56', numero: t };
+}
+
+/** Teléfono con código de país explícito: nadie asume el país de quien escribe (se vende en toda Latinoamérica y España). */
+export function CampoTelefono({ id, valor, onCambiar, error }: { id: string; valor: string; onCambiar: (v: string) => void; error?: string | null }) {
+  const { codigo, numero } = separarTelefono(valor);
+  return (
+    <Campo id={id} etiqueta="Teléfono de contacto" opcional error={error}>
+      <select
+        id={`${id}-codigo`}
+        aria-label="País"
+        value={codigo}
+        onChange={(e) => onCambiar(`${e.target.value} ${numero}`.trim())}
+        className={`${campo} text-base`}
+      >
+        {CODIGOS_PAIS.map((c) => (
+          <option key={c.codigo + c.pais} value={c.codigo}>
+            {c.pais} ({c.codigo})
+          </option>
+        ))}
+      </select>
+      <input
+        id={id}
+        type="tel"
+        inputMode="tel"
+        autoComplete="off"
+        value={numero}
+        maxLength={15}
+        placeholder="9 1234 5678"
+        onChange={(e) => onCambiar(`${codigo} ${e.target.value}`.trim())}
+        className={`${campo}`}
+      />
+    </Campo>
+  );
+}
+
 function Fichas<T extends string | number>({ titulo, opciones, valor, onElegir }: { titulo: string; opciones: { valor: T; texto: string }[]; valor: T | null; onElegir: (v: T) => void }) {
   return (
     <div role="radiogroup" aria-label={titulo} className="mt-2 flex flex-wrap gap-2">
@@ -160,17 +227,18 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
   const diario = tipo === 'medicamento' || tipo === 'suplemento';
   const comida = tipo === 'comida';
   const salud = TIPOS_SALUD.includes(tipo);
+  const bano = tipo === 'bano';
 
   const guardar = () => {
     const e: Record<string, string> = {};
-    if (!nombre.trim()) e.nombre = 'Escribe cómo se llama.';
+    if (!bano && !nombre.trim()) e.nombre = 'Escribe cómo se llama.';
     if (diario && !hora) e.hora = 'Elige la hora del aviso.';
     if (comida && !(Number(dias) >= 1 && Number(dias) <= 365)) e.dias = 'Escribe un número de días entre 1 y 365.';
     if (diario && dias !== '' && !(Number(dias) >= 1 && Number(dias) <= 365)) e.dias = 'Escribe un número de días entre 1 y 365.';
     if (salud && !proxima) e.proxima = 'Elige la próxima fecha.';
     setErrores(e);
     if (Object.keys(e).length) return;
-    const base: Cuidado = { id: cuidado?.id ?? nuevoId('c'), perroId, tipo, nombre: nombre.trim(), detalle: detalle.trim() };
+    const base: Cuidado = { id: cuidado?.id ?? nuevoId('c'), perroId, tipo, nombre: bano ? 'Baño' : nombre.trim(), detalle: detalle.trim() };
     if (diario) {
       base.hora = hora;
       if (dias !== '') base.proxima = claveDia(sumarDias(ahora, Number(dias)));
@@ -214,11 +282,29 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
           </div>
         </div>
       )}
-      <Campo id="nombre-cuidado" etiqueta={comida ? '¿Qué alimento es?' : '¿Cómo se llama?'} error={errores.nombre}>
-        <input id="nombre-cuidado" value={nombre} maxLength={40} autoComplete="off" onChange={(e) => { setNombre(e.target.value); setErrores((x) => ({ ...x, nombre: '' })); }} placeholder={comida ? 'Por ejemplo, Croquetas adulto' : 'Por ejemplo, Apoquel'} className={campo} />
-      </Campo>
-      <Campo id="detalle-cuidado" etiqueta={diario ? 'Dosis o indicación' : 'Detalle'} opcional>
-        <input id="detalle-cuidado" value={detalle} maxLength={60} autoComplete="off" onChange={(e) => setDetalle(e.target.value)} placeholder={diario ? 'Por ejemplo, 1 comprimido' : ''} className={campo} />
+      {!bano && (
+        <Campo id="nombre-cuidado" etiqueta={comida ? '¿Qué alimento es?' : tipo === 'control' ? '¿Qué tipo de control es?' : '¿Cómo se llama?'} error={errores.nombre}>
+          <input
+            id="nombre-cuidado"
+            value={nombre}
+            maxLength={40}
+            autoComplete="off"
+            onChange={(e) => { setNombre(e.target.value); setErrores((x) => ({ ...x, nombre: '' })); }}
+            placeholder={comida ? 'Por ejemplo, Croquetas adulto' : tipo === 'control' ? 'Por ejemplo, Chequeo general' : 'Por ejemplo, Apoquel'}
+            className={campo}
+          />
+        </Campo>
+      )}
+      <Campo id="detalle-cuidado" etiqueta={diario ? 'Dosis o indicación' : bano ? '¿Dónde fue?' : 'Detalle'} opcional>
+        <input
+          id="detalle-cuidado"
+          value={detalle}
+          maxLength={60}
+          autoComplete="off"
+          onChange={(e) => setDetalle(e.target.value)}
+          placeholder={diario ? 'Por ejemplo, 1 comprimido' : bano ? 'Peluquería, veterinaria, en casa…' : ''}
+          className={campo}
+        />
       </Campo>
       {diario && (
         <>
@@ -283,7 +369,7 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
 }
 
 /** Recorta la foto al centro en cuadrado y la reduce (480 px): liviana para guardar y rápida de mostrar. */
-async function procesarFoto(archivo: File): Promise<string> {
+export async function procesarFoto(archivo: File): Promise<string> {
   if (!archivo.type.startsWith('image/')) throw new Error('Elige una imagen (JPG, PNG o WEBP).');
   if (archivo.size > 15 * 1024 * 1024) throw new Error('La foto pesa demasiado. Elige una de menos de 15 MB.');
   const url = URL.createObjectURL(archivo);
@@ -412,9 +498,7 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
       <Campo id="responsable-perro" etiqueta="Responsable" opcional>
         <input id="responsable-perro" value={responsable} maxLength={50} autoComplete="name" onChange={(e) => setResponsable(e.target.value)} placeholder="Nombre de quien responde por él" className={campo} />
       </Campo>
-      <Campo id="telefono-perro" etiqueta="Teléfono de contacto" opcional error={errores.telefono}>
-        <input id="telefono-perro" type="tel" inputMode="tel" value={telefono} maxLength={20} autoComplete="tel" onChange={(e) => { setTelefono(e.target.value); limpiar('telefono'); }} placeholder="+56 9 1234 5678" className={campo} />
-      </Campo>
+      <CampoTelefono id="telefono-perro" valor={telefono} onCambiar={(v) => { setTelefono(v); limpiar('telefono'); }} error={errores.telefono} />
       <Campo id="notas-perro" etiqueta="Datos importantes" opcional>
         <textarea id="notas-perro" value={notas} maxLength={300} rows={4} onChange={(e) => setNotas(e.target.value)} placeholder="Alergias, cirugías, condiciones, cuidados especiales…" className={`${campo} h-auto py-3`} />
       </Campo>
@@ -535,11 +619,11 @@ function ChipDato({ icono: Icono }: { icono: typeof Cpu }) {
   );
 }
 
-function Seccion({ titulo, onAgregar, vacio, children }: { titulo: string; onAgregar: () => void; vacio?: string; children: React.ReactNode }) {
+function Seccion({ titulo, onAgregar, vacio, destacada, children }: { titulo: string; onAgregar: () => void; vacio?: string; destacada?: boolean; children: React.ReactNode }) {
   return (
-    <section aria-label={titulo}>
+    <section aria-label={titulo} className={destacada ? 'borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]' : undefined}>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold">{titulo}</h2>
+        <h2 className={destacada ? 'text-lg font-bold text-[var(--accent)]' : 'text-lg font-bold'}>{titulo}</h2>
         <button type="button" onClick={onAgregar} className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
           <Plus size={18} aria-hidden="true" />
           Agregar
@@ -736,7 +820,7 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
           <FilaCuidado key={c.id} c={c} i={i} onAbrir={() => onHoja({ kind: 'cuidado', perroId: perro.id, cuidado: c, tipo: c.tipo })} />
         ))}
       </Seccion>
-      <Seccion titulo="Bitácora" onAgregar={() => onHoja({ kind: 'nota', perroId: perro.id })} vacio={notas.length === 0 ? 'Anota síntomas o cambios para contárselos al veterinario' : undefined}>
+      <Seccion titulo="Bitácora" destacada onAgregar={() => onHoja({ kind: 'nota', perroId: perro.id })} vacio={notas.length === 0 ? 'Anota síntomas o cambios para contárselos al veterinario' : undefined}>
         {(verTodo ? notas : notas.slice(0, 3)).map((n, i) => (
           <FilaNota key={n.id} n={n} i={i} onAbrir={() => onHoja({ kind: 'nota', perroId: perro.id, nota: n })} />
         ))}

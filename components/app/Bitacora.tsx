@@ -3,7 +3,7 @@
 // Bitácora del perro: síntomas y notas con fecha e intensidad. Sirve de seguimiento durante un tratamiento y se
 // incluye en el resumen para el veterinario. Formulario (hoja) + fila de la lista.
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { ChevronRight, NotebookPen, Thermometer } from 'lucide-react';
 import { Borrar, botonPrimario, Campo, campo } from './Perros';
@@ -31,6 +31,7 @@ export function FormNota({ perroId, nota, quien, onListo }: { perroId: string; n
   const [dia, setDia] = useState(nota?.dia ?? claveDia(ahora));
   const [hora, setHora] = useState(nota?.hora ?? horaTexto(ahora));
   const [errores, setErrores] = useState<Record<string, string>>({});
+  const areaTexto = useRef<HTMLTextAreaElement>(null);
 
   const guardar = () => {
     const e: Record<string, string> = {};
@@ -94,12 +95,20 @@ export function FormNota({ perroId, nota, quien, onListo }: { perroId: string; n
                 {c}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => areaTexto.current?.focus()}
+              className="inline-flex min-h-11 items-center rounded-full border border-dashed border-[var(--border-ui)] bg-[var(--surface)] px-4 text-base text-[var(--text-secondary)] [touch-action:manipulation]"
+            >
+              Otro
+            </button>
           </div>
         </div>
       )}
 
       <Campo id="texto-nota" etiqueta={tipo === 'sintoma' ? '¿Qué notaste?' : 'Tu nota'} error={errores.texto}>
         <textarea
+          ref={areaTexto}
           id="texto-nota"
           value={texto}
           maxLength={400}
@@ -168,13 +177,15 @@ export function FormNota({ perroId, nota, quien, onListo }: { perroId: string; n
 export function FilaNota({ n, i, onAbrir }: { n: Nota; i: number; onAbrir: () => void }) {
   const ahora = new Date();
   const Icono = n.tipo === 'sintoma' ? Thermometer : NotebookPen;
+  const urgente = n.intensidad === 'fuerte' || n.intensidad === 'moderado';
+  const bordeIzq = n.intensidad === 'fuerte' ? 'border-l-[var(--danger)]' : n.intensidad === 'moderado' ? 'border-l-[var(--warn)]' : 'border-l-[var(--border-ui)]';
   return (
     <motion.li {...entrada(i)}>
       <button
         type="button"
         onClick={onAbrir}
         aria-label={`Abrir ${n.tipo === 'sintoma' ? 'síntoma' : 'nota'} del ${diaCorto(n.dia, ahora)}`}
-        className="flex min-h-16 w-full items-start gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        className={`flex min-h-16 w-full items-start gap-4 rounded-[var(--radius-card)] border border-l-4 border-[var(--border-ui)] ${bordeIzq} bg-[var(--surface)] p-4 text-left ${urgente ? 'shadow-[var(--shadow-2)]' : 'shadow-[var(--shadow-1)]'} transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]`}
       >
         <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
           <Icono size={22} color="var(--accent)" aria-hidden="true" />

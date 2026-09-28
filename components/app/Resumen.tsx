@@ -5,10 +5,10 @@
 // SPEC (PREFLIGHT): objeto_principal = la hoja (documento, no pantalla de app) · niveles 2xl/lg/base/sm ·
 // acento_en = títulos de sección · estados: cargando, perro no encontrado, sin tratamiento · sin menú (es un documento).
 
-import { useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, Printer } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import { diasHasta, edadTexto, obtenerApp, suscribirApp, type Cuidado, type EstadoApp, type Perro, type Tipo } from '@/lib/app';
 import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
 import { tono } from './Hoy';
@@ -25,10 +25,13 @@ const fechaClave = (clave: string) => {
   return `${d} de ${MESES[m - 1]} de ${a}`;
 };
 
-function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+function Seccion({ titulo, accion, children }: { titulo: string; accion?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section aria-label={titulo} className="break-inside-avoid">
-      <h2 className="border-b-2 border-[var(--accent)] pb-1 text-lg font-bold text-[var(--accent)]">{titulo}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[var(--accent)] pb-1">
+        <h2 className="text-lg font-bold text-[var(--accent)]">{titulo}</h2>
+        {accion}
+      </div>
       <div className="mt-3">{children}</div>
     </section>
   );
@@ -84,6 +87,7 @@ export default function Resumen() {
   const e = useSyncExternalStore(suscribirApp, obtenerApp, () => null);
   const parametros = useSearchParams();
   const id = parametros.get('perro');
+  const [rango, setRango] = useState(30);
 
   if (!e) {
     return (
@@ -114,8 +118,9 @@ export default function Resumen() {
   const salud = suyos.filter((c) => TIPOS_SALUD.includes(c.tipo)).sort((a, b) => (a.proxima ?? '9999').localeCompare(b.proxima ?? '9999'));
   const edad = edadTexto(perro.nacimiento, ahora);
   const bitacora = e.notas
-    .filter((n) => n.perroId === perro.id && diasHasta(n.dia, ahora) > -30)
+    .filter((n) => n.perroId === perro.id && (rango === 0 || diasHasta(n.dia, ahora) > -rango))
     .sort((a, b) => `${b.dia} ${b.hora}`.localeCompare(`${a.dia} ${a.hora}`));
+  const totalBitacora = e.notas.filter((n) => n.perroId === perro.id).length;
 
   return (
     <div className="mx-auto w-full max-w-md px-6 pb-12 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)] print:max-w-none print:px-0">
@@ -124,14 +129,19 @@ export default function Resumen() {
           <ArrowLeft size={20} aria-hidden="true" />
           Volver
         </Link>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-button)] bg-[var(--accent)] px-4 text-base font-semibold text-[var(--bg)] [touch-action:manipulation]"
-        >
-          <Printer size={18} aria-hidden="true" />
-          Imprimir / PDF
-        </button>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => window.print()} className="inline-flex min-h-11 items-center text-base font-semibold text-[var(--text-secondary)] underline underline-offset-4 [touch-action:manipulation]">
+            Imprimir
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-button)] bg-[var(--accent)] px-4 text-base font-semibold text-[var(--bg)] [touch-action:manipulation]"
+          >
+            <Download size={18} aria-hidden="true" />
+            Descargar PDF
+          </button>
+        </div>
       </div>
 
       <article className="flex flex-col gap-6 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-6 print:rounded-none print:border-0 print:p-0">
@@ -193,7 +203,35 @@ export default function Resumen() {
           )}
         </Seccion>
 
-        <Seccion titulo="Bitácora: últimos 30 días">
+        <Seccion
+          titulo={`Bitácora: ${rango === 0 ? 'todo' : `últimos ${rango} días`}`}
+          accion={
+            totalBitacora > 0 ? (
+              <div role="radiogroup" aria-label="Rango de la bitácora" className="flex gap-1 print:hidden">
+                {[7, 15, 30, 0].map((d) => {
+                  const on = rango === d;
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => setRango(d)}
+                      className={`inline-flex min-h-9 items-center rounded-full border px-3 text-sm font-semibold [touch-action:manipulation] ${on ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]' : 'border-[var(--border-ui)] bg-[var(--surface)]'}`}
+                    >
+                      {d === 0 ? 'Todo' : `${d} días`}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : undefined
+          }
+        >
+          {totalBitacora > 0 && (
+            <p className="mb-3 text-sm text-[var(--text-secondary)] print:hidden">
+              Tu bitácora completa sigue guardada en la ficha del perro. Esto solo elige cuánto se imprime aquí.
+            </p>
+          )}
           {bitacora.length > 0 ? (
             <ul className="flex flex-col">
               {bitacora.map((n) => (

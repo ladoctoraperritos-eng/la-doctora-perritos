@@ -30,6 +30,8 @@ export interface Tutor {
   correo?: string;
   /** Invitada pero aún no entra: el aviso se envía al conectar las cuentas. */
   pendiente?: boolean;
+  /** Foto de perfil (opcional). */
+  foto?: string;
 }
 
 export interface Ajustes {
