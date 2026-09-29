@@ -16,7 +16,7 @@ import { motion, MotionConfig } from 'motion/react';
 import { AlertCircle, ArrowLeft, Camera, Check, ChevronRight, Copy, Cpu, FileText, Phone, Pencil, Plus, Trash2, User } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { FilaNota, FormNota } from './Bitacora';
-import { Avatar, ChipIcono, entrada, Menu, textoDias, tono } from './Hoy';
+import { Avatar, ChipIcono, entrada, textoDias, tono } from './Hoy';
 import {
   claveDia,
   diasHasta,
@@ -504,7 +504,7 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
       </Campo>
       <div className="mt-8">
         <button type="submit" className={botonPrimario}>
-          {perro ? 'Guardar cambios' : 'Agregar perro'}
+          {perro ? 'Guardar cambios' : 'Agregar mascota'}
         </button>
       </div>
       {perro && (
@@ -655,14 +655,11 @@ export default function Perros() {
 
   if (!e) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col [font-family:var(--font-body)]">
-        <main className="flex flex-1 flex-col gap-4 px-6 pt-6" aria-busy="true" aria-label="Cargando tus perros">
-          <div className="h-10 w-48 rounded-[var(--radius-button)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-          <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-          <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-        </main>
-        <Menu activa="perros" />
-      </div>
+      <main className="flex flex-1 flex-col gap-4 px-6 pt-6" aria-busy="true" aria-label="Cargando tus mascotas">
+        <div className="h-10 w-48 rounded-[var(--radius-button)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+        <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+        <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+      </main>
     );
   }
 
@@ -674,15 +671,15 @@ export default function Perros() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
-        <main className="flex flex-1 flex-col gap-6 px-6 pb-24 pt-6">
+      <>
+        <main className="flex flex-1 flex-col gap-6 px-6 pb-6 pt-6">
           {!perro ? <Lista e={e} ahora={ahora} limite={limite} onAbrir={setPerroId} onAgregar={agregarPerro} /> : <Ficha e={e} perro={perro} ahora={ahora} onVolver={() => setPerroId(null)} onHoja={setHoja} />}
         </main>
 
         <Hoja abierta={hoja?.kind === 'cuidado'} titulo={hoja?.kind === 'cuidado' && hoja.cuidado ? 'Editar cuidado' : 'Agregar cuidado'} onCerrar={cerrar}>
           {hoja?.kind === 'cuidado' && <FormCuidado key={hoja.cuidado?.id ?? hoja.tipo} perroId={hoja.perroId} cuidado={hoja.cuidado} tipoInicial={hoja.tipo} onListo={cerrar} />}
         </Hoja>
-        <Hoja abierta={hoja?.kind === 'perro'} titulo={hoja?.kind === 'perro' && hoja.perro ? 'Datos del perro' : 'Agregar perro'} onCerrar={cerrar}>
+        <Hoja abierta={hoja?.kind === 'perro'} titulo={hoja?.kind === 'perro' && hoja.perro ? 'Datos de tu mascota' : 'Agregar mascota'} onCerrar={cerrar}>
           {hoja?.kind === 'perro' && (
             <FormPerro
               key={hoja.perro?.id ?? 'nuevo'}
@@ -699,7 +696,7 @@ export default function Perros() {
         </Hoja>
         <Hoja abierta={hoja?.kind === 'limite'} titulo="Tu plan llegó a su límite" onCerrar={cerrar}>
           <p className="text-base text-[var(--text-secondary)]">
-            El plan {PLANES[e.plan].nombre} permite hasta {limite} perros. {e.plan === 'esencial' ? 'El plan Familia llega hasta 5 perros, con las mismas funciones.' : 'Es el máximo de perros por cuenta.'}
+            El plan {PLANES[e.plan].nombre} permite hasta {limite} mascotas. {e.plan === 'esencial' ? 'El plan Familia llega hasta 5 mascotas, con las mismas funciones.' : 'Es el máximo de mascotas por cuenta.'}
           </p>
           <div className="mt-6 flex flex-col gap-3">
             {e.plan === 'esencial' && (
@@ -712,8 +709,7 @@ export default function Perros() {
             </button>
           </div>
         </Hoja>
-        <Menu activa="perros" />
-      </div>
+      </>
     </MotionConfig>
   );
 }
@@ -722,7 +718,7 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
   return (
     <>
       <header>
-        <h1 className="text-3xl font-bold leading-tight">Tus perros</h1>
+        <h1 className="text-3xl font-bold leading-tight">Tus mascotas</h1>
         <p className="mt-1 text-base text-[var(--text-secondary)]">
           {e.perros.length} de {limite} · Plan {PLANES[e.plan].nombre}
         </p>
@@ -760,7 +756,7 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
         className="flex min-h-16 w-full items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--accent)] text-lg font-semibold text-[var(--accent)] [touch-action:manipulation]"
       >
         <Plus size={22} aria-hidden="true" />
-        Agregar perro
+        Agregar mascota
       </button>
     </>
   );

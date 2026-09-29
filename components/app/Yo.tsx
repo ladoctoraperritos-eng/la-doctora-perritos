@@ -15,7 +15,7 @@ import { motion, MotionConfig } from 'motion/react';
 import { AlertCircle, Camera, Download, FileText, Mail, Pencil, ShieldCheck, UserPlus } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Borrar, botonPrimario, botonSecundario, Campo, campo, procesarFoto } from './Perros';
-import { entrada, Menu, PersonaCirculo } from './Hoy';
+import { entrada, PersonaCirculo } from './Hoy';
 import {
   guardarAjustes,
   guardarTutor,
@@ -170,14 +170,11 @@ export default function Yo() {
 
   if (!e) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col [font-family:var(--font-body)]">
-        <main className="flex flex-1 flex-col gap-4 px-6 pt-6" aria-busy="true" aria-label="Cargando tu cuenta">
-          <div className="h-10 w-32 rounded-[var(--radius-button)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-          <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-          <div className="h-16 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-        </main>
-        <Menu activa="yo" />
-      </div>
+      <main className="flex flex-1 flex-col gap-4 px-6 pt-6" aria-busy="true" aria-label="Cargando tu cuenta">
+        <div className="h-10 w-32 rounded-[var(--radius-button)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+        <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+        <div className="h-16 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+      </main>
     );
   }
 
@@ -190,8 +187,8 @@ export default function Yo() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
-        <main className="flex flex-1 flex-col gap-8 px-6 pb-24 pt-6">
+      <>
+        <main className="flex flex-1 flex-col gap-8 px-6 pb-6 pt-6">
           <header>
             <h1 className="text-3xl font-bold leading-tight">Yo</h1>
           </header>
@@ -389,8 +386,7 @@ export default function Yo() {
             </button>
           </div>
         </Hoja>
-        <Menu activa="yo" />
-      </div>
+      </>
     </MotionConfig>
   );
 }

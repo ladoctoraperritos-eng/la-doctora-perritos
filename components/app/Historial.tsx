@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
 import { ClipboardList, NotebookPen, Thermometer, X } from 'lucide-react';
 import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
-import { ChipIcono, entrada, Menu, PersonaCirculo, tono } from './Hoy';
+import { ChipIcono, entrada, PersonaCirculo, tono } from './Hoy';
 import { Hoja } from './Hoja';
 import { SlidersHorizontal } from 'lucide-react';
 import { diasHasta, obtenerApp, suscribirApp, type EstadoApp, type Perro, type Registro, type Cuidado, type Nota, type Tipo } from '@/lib/app';
@@ -82,15 +82,12 @@ export default function Historial() {
 
   if (!e) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col [font-family:var(--font-body)]">
-        <main className="flex flex-1 flex-col gap-4 px-6 pt-6" aria-busy="true" aria-label="Cargando el historial">
-          <div className="h-10 w-48 rounded-[var(--radius-button)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-          <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-          <div className="h-16 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-          <div className="h-16 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
-        </main>
-        <Menu activa="historial" />
-      </div>
+      <main className="flex flex-1 flex-col gap-4 px-6 pt-6" aria-busy="true" aria-label="Cargando el historial">
+        <div className="h-10 w-48 rounded-[var(--radius-button)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+        <div className="h-24 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+        <div className="h-16 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+        <div className="h-16 rounded-[var(--radius-card)] bg-[var(--surface-2)] motion-safe:animate-pulse" />
+      </main>
     );
   }
   return <Contenido e={e} perroId={perroId} setPerroId={setPerroId} persona={persona} setPersona={setPersona} grupo={grupo} setGrupo={setGrupo} paginas={paginas} setPaginas={setPaginas} />;
@@ -160,8 +157,8 @@ function Contenido({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
-        <main className="flex flex-1 flex-col gap-6 px-6 pb-24 pt-6">
+      <>
+        <main className="flex flex-1 flex-col gap-6 px-6 pb-6 pt-6">
           <header>
             <h1 className="text-3xl font-bold leading-tight">Historial</h1>
             <p className="mt-1 text-base text-[var(--text-secondary)]">Quién hizo qué y cuándo.</p>
@@ -314,8 +311,7 @@ function Contenido({
             </div>
           )}
         </main>
-        <Menu activa="historial" />
-      </div>
+      </>
     </MotionConfig>
   );
 }

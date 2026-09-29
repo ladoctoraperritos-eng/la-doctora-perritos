@@ -10,21 +10,17 @@
 //   estados: cargando (esqueleto) · vacío · al día (éxito) · sin conexión · deshabilitado (menú «Pronto»)
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import Link from 'next/link';
 import { AnimatePresence, MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
 import {
   Bug,
   Check,
-  ClipboardList,
   Droplets,
-  Home,
   Leaf,
   PawPrint,
   Pill,
   Stethoscope,
   Syringe,
   Undo2,
-  User,
   Utensils,
   WifiOff,
   type LucideIcon,
@@ -312,35 +308,6 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
   );
 }
 
-export function Menu({ activa }: { activa: 'hoy' | 'perros' | 'historial' | 'yo' }) {
-  const items = [
-    { id: 'hoy', icono: Home, texto: 'Hoy', href: '/app' },
-    { id: 'perros', icono: PawPrint, texto: 'Perros', href: '/app/perros' },
-    { id: 'historial', icono: ClipboardList, texto: 'Historial', href: '/app/historial' },
-    { id: 'yo', icono: User, texto: 'Yo', href: '/app/yo' },
-  ] as const;
-  return (
-    <nav aria-label="Secciones" className="sticky bottom-0 z-10 border-t border-[color-mix(in_oklab,var(--text-tertiary)_30%,transparent)] bg-[var(--surface)] px-2 pb-2 pt-1">
-      <ul className="grid grid-cols-4">
-        {items.map(({ id, icono: Icono, texto, href }) => (
-          <li key={id}>
-            <Link
-              href={href}
-              aria-current={activa === id ? 'page' : undefined}
-              className={`flex min-h-16 flex-col items-center justify-start gap-1 rounded-[var(--radius-button)] pt-2 text-sm ${
-                activa === id ? 'bg-[var(--chip-bg)] font-semibold text-[var(--accent)]' : 'font-medium text-[var(--text-secondary)]'
-              }`}
-            >
-              <Icono size={22} aria-hidden="true" />
-              {texto}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
 function Selector({ e, activo, onElegir }: { e: EstadoApp; activo: string | null; onElegir: (id: string | null) => void }) {
   const opciones = [{ id: null as string | null, nombre: 'Todos' }, ...e.perros.map((p) => ({ id: p.id as string | null, nombre: p.nombre }))];
   return (
@@ -382,12 +349,9 @@ export default function Hoy() {
 
   if (!e || minuto === null) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col [font-family:var(--font-body)]">
-        <main className="flex-1">
-          <Esqueleto />
-        </main>
-        <Menu activa="hoy" />
-      </div>
+      <main className="flex-1">
+        <Esqueleto />
+      </main>
     );
   }
 
@@ -403,7 +367,7 @@ export default function Hoy() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
+      <>
         {fallo && (
           <div role="alert" className="flex items-center justify-between gap-2 bg-[color-mix(in_oklab,var(--danger)_14%,var(--surface))] px-6 py-2 text-[var(--danger)]">
             <p className="text-sm font-semibold">No pudimos guardar en este aparato. Lo ves ahora, pero puede perderse al cerrar.</p>
@@ -534,8 +498,7 @@ export default function Hoy() {
           </motion.div>
         )}
         </AnimatePresence>
-        <Menu activa="hoy" />
-      </div>
+      </>
     </MotionConfig>
   );
 }
