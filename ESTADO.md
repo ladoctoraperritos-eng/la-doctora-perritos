@@ -242,3 +242,7 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 ## Ícono propio en el menú, Historial (2026-09-29, pedido del usuario)
 - El usuario subió una ilustración a color (ficha médica con foto de perro) para reemplazar el ícono genérico de «Historial». Guardada en `public/brand/icono-historial.webp` (640×640, fondo blanco sin transparencia; se ve bien porque el fondo de la app ya es casi blanco). `components/app/Menu.tsx` ahora soporta `icono` (Lucide) o `imagen` (ruta) por ítem; Historial usa `imagen` y no cambia de color al activarse (solo escala levemente), a diferencia de los otros 3 íconos monolínea que sí cambian a verde.
 - Pendiente si el usuario trae más íconos propios: decidir si se unifica el estilo (todos a color) o se queda mixto como ahora.
+
+## Menú con los 4 íconos propios (2026-09-29)
+- Los 4 íconos del menú flotante son ahora ilustraciones del usuario, a color, sin recolor al activarse (el rectángulo verde detrás marca la pestaña activa): `icono-hoy.webp` (casita de perro), `icono-mascotas.webp` (perro de perfil, reemplaza la huella), `icono-historial.webp` (ficha médica), `icono-yo.webp` (mujer con perro). Decisión confirmada por el usuario: todos a color (opción 1), no de una línea.
+- Pendiente: el resto del inventario de íconos de la app (categorías de cuidado, bitácora, acciones generales, identificación, onboarding/paywall) — el usuario los irá subiendo de a poco con los nombres acordados.

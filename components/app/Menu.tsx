@@ -6,14 +6,15 @@
 
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Home, PawPrint, User, type LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
+// Los 4 íconos son ilustraciones propias del usuario (2026-09-29): a color, no cambian de tono al
+// activarse (el rectángulo verde detrás marca cuál está activo).
 const ITEMS: { id: string; texto: string; href: string; icono?: LucideIcon; imagen?: string }[] = [
-  { id: 'hoy', icono: Home, texto: 'Hoy', href: '/app' },
-  { id: 'perros', icono: PawPrint, texto: 'Mascotas', href: '/app/perros' },
-  // Ícono propio del usuario (2026-09-29): reemplaza al genérico de lista; es a color, no cambia de tono al activarse.
+  { id: 'hoy', imagen: '/brand/icono-hoy.webp', texto: 'Hoy', href: '/app' },
+  { id: 'perros', imagen: '/brand/icono-mascotas.webp', texto: 'Mascotas', href: '/app/perros' },
   { id: 'historial', imagen: '/brand/icono-historial.webp', texto: 'Historial', href: '/app/historial' },
-  { id: 'yo', icono: User, texto: 'Yo', href: '/app/yo' },
+  { id: 'yo', imagen: '/brand/icono-yo.webp', texto: 'Yo', href: '/app/yo' },
 ] as const;
 
 export type SeccionApp = (typeof ITEMS)[number]['id'];
