@@ -6,7 +6,7 @@ const foto = async (n) => { await p.waitForTimeout(500); await p.screenshot({ pa
 await p.goto('http://localhost:3000/app/perros', { waitUntil: 'load' });
 await p.evaluate(() => localStorage.clear());
 await p.reload({ waitUntil: 'load' });
-await p.waitForSelector('text=Tus perros', { timeout: 15000 });
+await p.waitForSelector('text=Tus mascotas', { timeout: 15000 });
 await foto('1-lista');
 console.log('scrollWidth', await p.evaluate(() => document.documentElement.scrollWidth));
 await p.getByRole('button', { name: /Toffee/ }).first().click(); await p.waitForSelector('text=Botiquín'); await foto('2-ficha');
@@ -22,7 +22,7 @@ await foto('5-ficha-con-nuevo');
 await p.getByRole('button', { name: 'Abrir Vacuna anual' }).click(); await foto('6-hoja-editar-salud');
 await p.getByRole('button', { name: 'Lo hice hoy' }).click(); await p.waitForTimeout(600); await foto('7-vacuna-hecha');
 // límite del plan
-await p.getByRole('button', { name: 'Perros' }).first().click(); await p.waitForSelector('text=Tus perros');
+await p.getByRole('button', { name: 'Perros' }).first().click(); await p.waitForSelector('text=Tus mascotas');
 await p.getByRole('button', { name: 'Agregar perro' }).click(); await foto('8-limite');
 console.log('scrollWidth2', await p.evaluate(() => document.documentElement.scrollWidth));
 // Editar datos: foto propia, chip inválido y luego válido

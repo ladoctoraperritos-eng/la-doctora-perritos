@@ -52,6 +52,17 @@ export const ICONO: Record<Tipo, LucideIcon> = {
   control: Stethoscope,
 };
 
+/** Ilustraciones propias del usuario (2026-09-29), a color: reemplazan el ícono de línea cuando existen.
+ * «comida» aún no tiene la suya, así que sigue con el ícono de línea + color de categoría. */
+const IMAGEN_TIPO: Partial<Record<Tipo, string>> = {
+  medicamento: '/brand/cuidado-medicamento.png',
+  suplemento: '/brand/cuidado-suplemento.png',
+  antiparasitario: '/brand/cuidado-antiparasitario.png',
+  bano: '/brand/cuidado-bano.png',
+  control: '/brand/cuidado-control.png',
+  vacuna: '/brand/cuidado-vacuna.png',
+};
+
 // Reloj de la app: minuto actual en el navegador; en el servidor es null (sin desajuste de hidratación).
 const suscribirReloj = (avisar: () => void) => {
   const id = setInterval(avisar, 30000);
@@ -191,6 +202,15 @@ export const CATEGORIA: Record<Tipo, string> = {
 };
 
 export function ChipIcono({ tipo, tam = 'size-11' }: { tipo: Tipo; tam?: string }) {
+  const imagen = IMAGEN_TIPO[tipo];
+  if (imagen) {
+    return (
+      <span className={`inline-flex ${tam} shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--surface-2)]`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={imagen} alt="" width={40} height={40} className="size-[80%] object-contain" />
+      </span>
+    );
+  }
   const Icono = ICONO[tipo];
   const color = CATEGORIA[tipo];
   return (

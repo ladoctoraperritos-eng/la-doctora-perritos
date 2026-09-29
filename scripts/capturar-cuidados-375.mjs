@@ -1,0 +1,13 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
+await p.goto('http://localhost:3000/app/perros', { waitUntil: 'load' });
+await p.evaluate(() => localStorage.clear());
+await p.reload({ waitUntil: 'load' });
+await p.waitForSelector('text=Tus mascotas', { timeout: 15000 });
+await p.getByRole('button', { name: /Toffee/ }).first().click();
+await p.waitForSelector('text=Botiquín');
+await p.waitForTimeout(400);
+await p.screenshot({ path: 'docs/revisiones/cuidados-ficha-toffee.png', fullPage: true });
+console.log('scrollWidth', await p.evaluate(() => document.documentElement.scrollWidth));
+process.exit(0);
