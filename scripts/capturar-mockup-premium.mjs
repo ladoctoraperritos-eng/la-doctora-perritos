@@ -1,0 +1,14 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
+await p.goto('http://localhost:3000/app', { waitUntil: 'load' });
+await p.evaluate(() => localStorage.clear());
+await p.reload({ waitUntil: 'load' });
+await p.waitForSelector('text=Siguiente cuidado', { timeout: 15000 }); await p.waitForTimeout(600);
+await p.screenshot({ path: 'docs/revisiones/mockup-actual.png' });
+await p.goto('http://localhost:3000/app/mockup-premium', { waitUntil: 'load' });
+await p.waitForSelector('text=Siguiente cuidado', { timeout: 15000 }); await p.waitForTimeout(600);
+await p.screenshot({ path: 'docs/revisiones/mockup-premium.png' });
+await p.screenshot({ path: 'docs/revisiones/mockup-premium-completo.png', fullPage: true });
+console.log('scrollWidth', await p.evaluate(() => document.documentElement.scrollWidth));
+process.exit(0);

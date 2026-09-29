@@ -51,6 +51,13 @@
 
   /* ── DERIVADOS (no se tocan: se recalculan solos desde --accent) ── */
   --chip-bg: color-mix(in oklab, var(--accent) 10%, transparent);
+
+  /* ── COLOR POR CATEGORÍA (mockup «premium» en revisión — 2026-09-28, aún NO aplicado a la app real) ──
+     Uso: solo en el chip/ícono secundario de cada tipo de cuidado, nunca en CTA ni precio (eso sigue siendo --accent). */
+  --cat-botiquin: #7c6aa6;   /* medicamentos y suplementos */
+  --cat-comida: #c98a2b;     /* alimento */
+  --cat-salud: #3e7cb1;      /* vacunas, antiparasitarios, baños, controles */
+  --cat-bitacora: var(--accent-2);
 }
 
 /* ============================================================================
