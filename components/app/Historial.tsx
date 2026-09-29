@@ -236,7 +236,7 @@ function Contenido({
                 <p className="mb-2 text-base font-semibold">Tipo de cuidado</p>
                 <Chips titulo="Tipo de cuidado" valor={grupo} onElegir={(v) => setGrupo(v as GrupoTipo)} opciones={GRUPOS} />
               </div>
-              <button type="button" onClick={() => setFiltrosAbiertos(false)} className="inline-flex h-14 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)]">
+              <button type="button" onClick={() => setFiltrosAbiertos(false)} className="inline-flex h-14 items-center justify-center rounded-[var(--radius-button)] bg-[image:var(--accent-gradient)] text-lg font-semibold text-[var(--bg)]">
                 Ver resultados
               </button>
             </div>

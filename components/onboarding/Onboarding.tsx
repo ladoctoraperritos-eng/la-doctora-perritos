@@ -297,7 +297,7 @@ function Cabecera({ paso, total, onAtras }: { paso: number; total: number; onAtr
 }
 
 const botonPrimario =
-  'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-colors active:scale-[0.98] [touch-action:manipulation]';
+  'inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[image:var(--accent-gradient)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-colors active:scale-[0.98] [touch-action:manipulation]';
 const botonSecundario =
   'h-12 rounded-[var(--radius-button)] text-base font-medium text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--accent)] [touch-action:manipulation]';
 const titulo = 'text-3xl font-bold leading-tight outline-none';

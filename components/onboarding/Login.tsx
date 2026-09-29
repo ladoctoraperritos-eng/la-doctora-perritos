@@ -69,7 +69,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={estado.tipo === 'enviando'}
-            className="mt-2 inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] active:scale-[0.98] disabled:bg-[var(--surface-2)] disabled:text-[var(--text-secondary)] disabled:shadow-none [touch-action:manipulation]"
+            className="mt-2 inline-flex h-14 w-full items-center justify-center rounded-[var(--radius-button)] bg-[image:var(--accent-gradient)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] active:scale-[0.98] disabled:bg-[image:none] disabled:bg-[var(--surface-2)] disabled:text-[var(--text-secondary)] disabled:shadow-none [touch-action:manipulation]"
           >
             {estado.tipo === 'enviando' ? 'Enviando…' : 'Enviarme el enlace'}
           </button>

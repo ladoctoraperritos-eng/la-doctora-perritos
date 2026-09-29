@@ -16,7 +16,8 @@
 ## Brand kit final
 - Fondo #F4F7F6 · Superficie #FDFEFD · Texto 1º #22302C · Texto 2º #5F706B
 - Acento #0B5F5A (verde azulado oscuro; SOLO en: CTA, hora/fecha clave, estado activo, barras de progreso) · 2ª nota coral #E8896B (SOLO: cuidador secundario, badge de ahorro)
-- Display y body: DM Sans (400-800) · Radio 18/14px · Sombras tintadas teal · Espaciado 4·8·12·16·24·32·48·64
+- Display y body: DM Sans (400-800) · Radio 24/20px (2026-09-28: antes 18/14px, dirección «premium» — ver abajo) · Sombras tintadas teal, más grandes y suaves · Espaciado 4·8·12·16·24·32·48·64
+- **Dirección «premium» (2026-09-28, revisión aprobada por el usuario — referencias: Dogify y una app de cuidado de mascotas):** radios más grandes (24/20px), sombras más grandes y cálidas, botón principal con `--accent-gradient` (degradado sutil del acento, nunca en toggles/badges/progreso), y un **color por categoría** solo en el ícono secundario de cada tipo de cuidado — `--cat-botiquin` (violeta, medicamentos/suplementos), `--cat-comida` (ámbar, alimento), `--cat-salud` (azul, vacunas/antiparasitarios/baños/controles), `--cat-bitacora` (coral, síntomas/notas). El verde de marca sigue siendo el ÚNICO color de acción/precio/dato clave (60-30-10 no cambia); las etiquetas de urgencia (atrasado/pronto) siguen semáforo rojo/ámbar, nunca color de categoría.
 - Modo: claro, DERIVADO por: uso diurno de tutores + lectura de datos de salud (29)
 
 ## Trazabilidad

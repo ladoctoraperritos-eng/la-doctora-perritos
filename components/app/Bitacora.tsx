@@ -187,8 +187,8 @@ export function FilaNota({ n, i, onAbrir }: { n: Nota; i: number; onAbrir: () =>
         aria-label={`Abrir ${n.tipo === 'sintoma' ? 'síntoma' : 'nota'} del ${diaCorto(n.dia, ahora)}`}
         className={`flex min-h-16 w-full items-start gap-4 rounded-[var(--radius-card)] border border-l-4 border-[var(--border-ui)] ${bordeIzq} bg-[var(--surface)] p-4 text-left ${urgente ? 'shadow-[var(--shadow-2)]' : 'shadow-[var(--shadow-1)]'} transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]`}
       >
-        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
-          <Icono size={22} color="var(--accent)" aria-hidden="true" />
+        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)]" style={{ background: 'color-mix(in oklab, var(--cat-bitacora) 18%, var(--surface))' }}>
+          <Icono size={22} color="var(--cat-bitacora)" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">

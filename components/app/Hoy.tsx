@@ -182,11 +182,24 @@ function Esqueleto() {
   );
 }
 
+/** Color por categoría (2026-09-28, dirección «premium»): solo en el ícono secundario, nunca en CTA/precio
+ * ni en las etiquetas de urgencia (esas siguen semáforo rojo/ámbar). El acento verde manda en todo lo demás. */
+export const CATEGORIA: Record<Tipo, string> = {
+  medicamento: 'var(--cat-botiquin)',
+  suplemento: 'var(--cat-botiquin)',
+  comida: 'var(--cat-comida)',
+  vacuna: 'var(--cat-salud)',
+  antiparasitario: 'var(--cat-salud)',
+  bano: 'var(--cat-salud)',
+  control: 'var(--cat-salud)',
+};
+
 export function ChipIcono({ tipo, tam = 'size-11' }: { tipo: Tipo; tam?: string }) {
   const Icono = ICONO[tipo];
+  const color = CATEGORIA[tipo];
   return (
-    <span className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]`}>
-      <Icono size={22} color="var(--accent)" aria-hidden="true" />
+    <span className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-[var(--radius-button)]`} style={{ background: `color-mix(in oklab, ${color} 16%, var(--surface))` }}>
+      <Icono size={22} color={color} aria-hidden="true" />
     </span>
   );
 }
@@ -213,7 +226,7 @@ function Tarjeta({ fila, onHecho, varios }: { fila: FilaHoy; onHecho: () => void
       <button
         type="button"
         onClick={onHecho}
-        className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]"
+        className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-[image:var(--accent-gradient)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]"
       >
         <Check size={22} strokeWidth={3} aria-hidden="true" />
         Marcar como hecho

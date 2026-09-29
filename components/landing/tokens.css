@@ -38,16 +38,17 @@
                                  si no hay 2ª nota, repetir aquí el valor de --accent */
 
   /* ── FORMA (radios del brand kit — UNO por rol, toda la página) ── */
-  --radius-card: 18px;        /* ← reemplazar con FICHA-ARTE — cards, frames, secciones */
-  --radius-button: 14px;      /* ← reemplazar con FICHA-ARTE — botones y chips de ícono */
+  --radius-card: 24px;        /* ← reemplazar con FICHA-ARTE — cards, frames, secciones (2026-09-28: más redondeado, dirección «premium») */
+  --radius-button: 20px;      /* ← reemplazar con FICHA-ARTE — botones y chips de ícono */
 
   /* ── TIPOGRAFÍA (2 familias de la ficha — jamás Inter/Roboto/system-ui de marca) ── */
   --font-display: var(--font-dm-sans), 'DM Sans', sans-serif;      /* ← reemplazar con FICHA-ARTE (display) */
   --font-body: var(--font-dm-sans), 'DM Sans', sans-serif;    /* ← reemplazar con FICHA-ARTE (body) */
 
   /* ── SOMBRAS con el TINTE del neutro de marca (49 Parte 2c — nunca negro puro) ── */
-  --shadow-1: 0 1px 2px rgb(10 50 46 / 0.08);          /* ← reemplazar el tinte RGB con FICHA-ARTE */
-  --shadow-2: 0 12px 32px -12px rgb(10 50 46 / 0.2);  /* ← reemplazar el tinte RGB con FICHA-ARTE */
+  --shadow-1: 0 2px 6px rgb(10 50 46 / 0.10);          /* ← reemplazar el tinte RGB con FICHA-ARTE */
+  --shadow-2: 0 18px 40px -14px rgb(10 50 46 / 0.28);  /* ← reemplazar el tinte RGB con FICHA-ARTE (2026-09-28: más grande y cálida) */
+  --accent-gradient: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 70%, black));  /* CTA principal (2026-09-28) — nunca en toggles/badges, solo en el botón de acción */
 
   /* ── DERIVADOS (no se tocan: se recalculan solos desde --accent) ── */
   --chip-bg: color-mix(in oklab, var(--accent) 10%, transparent);

@@ -104,7 +104,7 @@ export default function Resumen() {
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-6 pt-6 text-[var(--text-primary)] [font-family:var(--font-body)]">
         <h1 className="text-3xl font-bold leading-tight">No encontramos a ese perro</h1>
         <p className="text-base text-[var(--text-secondary)]">Abre el resumen desde la ficha de tu perro.</p>
-        <Link href="/app/perros" className="inline-flex h-14 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] text-lg font-semibold text-[var(--bg)]">
+        <Link href="/app/perros" className="inline-flex h-14 items-center justify-center rounded-[var(--radius-button)] bg-[image:var(--accent-gradient)] text-lg font-semibold text-[var(--bg)]">
           Ir a Perros
         </Link>
       </div>
@@ -136,7 +136,7 @@ export default function Resumen() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-button)] bg-[var(--accent)] px-4 text-base font-semibold text-[var(--bg)] [touch-action:manipulation]"
+            className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-button)] bg-[image:var(--accent-gradient)] px-4 text-base font-semibold text-[var(--bg)] [touch-action:manipulation]"
           >
             <Download size={18} aria-hidden="true" />
             Descargar PDF
