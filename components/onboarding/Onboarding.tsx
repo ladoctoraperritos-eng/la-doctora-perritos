@@ -8,26 +8,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
-import {
-  AlertCircle,
-  ArrowLeft,
-  Bell,
-  Check,
-  FileText,
-  Footprints,
-  Heart,
-  Home,
-  PackageOpen,
-  PawPrint,
-  Pill,
-  ShieldPlus,
-  Siren,
-  Syringe,
-  User,
-  Users,
-  Utensils,
-  type LucideIcon,
-} from 'lucide-react';
+import { Check, Footprints, Heart, Home, PawPrint, User, Users, type LucideIcon } from 'lucide-react';
 import Marca from './Marca';
 import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
 import {
@@ -79,7 +60,16 @@ interface Opcion<T extends string> {
   valor: T;
   titulo: string;
   detalle?: string;
-  icono: LucideIcon;
+  icono?: LucideIcon;
+  imagen?: string;
+}
+
+function IconoOpcion({ icono: Icono, imagen, tam }: { icono?: LucideIcon; imagen?: string; tam: number }) {
+  if (imagen) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={imagen} alt="" width={tam} height={tam} className="object-contain" />;
+  }
+  return Icono ? <Icono size={tam} color="var(--accent)" aria-hidden="true" /> : null;
 }
 
 const entradaEscalonada = (i: number) => ({
@@ -103,13 +93,12 @@ function Lista<T extends string>({
   return (
     <div role="radiogroup" aria-label={nombreGrupo} className="mt-6 flex flex-col gap-2">
       {opciones.map((o, i) => {
-        const Icono = o.icono;
         const on = seleccion === o.valor;
         return (
           <motion.div key={o.valor} {...entradaEscalonada(i)}>
             <button type="button" role="radio" aria-checked={on} onClick={() => onElegir(o.valor)} className={`${base} min-h-14 items-center gap-4 p-3 ${estiloOpcion(on)}`}>
-              <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
-                <Icono size={22} color="var(--accent)" aria-hidden="true" />
+              <span className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+                <IconoOpcion icono={o.icono} imagen={o.imagen} tam={22} />
               </span>
               <span className="flex-1">
                 <span className="block text-base font-semibold text-[var(--text-primary)]">{o.titulo}</span>
@@ -139,7 +128,6 @@ function Rejilla({
   return (
     <div role="group" aria-label={nombreGrupo} className="mt-5 grid grid-cols-2 gap-2">
       {opciones.map((o, i) => {
-        const Icono = o.icono;
         const on = seleccion.includes(o.valor);
         return (
           <motion.div key={o.valor} {...entradaEscalonada(i)} className="h-full">
@@ -151,8 +139,8 @@ function Rejilla({
               className={`${base} h-full min-h-[6.5rem] flex-col justify-between gap-2 p-3 ${estiloOpcion(on)}`}
             >
               <span className="flex w-full items-start justify-between">
-                <span className="inline-flex size-10 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
-                  <Icono size={22} color="var(--accent)" aria-hidden="true" />
+                <span className="inline-flex size-10 items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+                  <IconoOpcion icono={o.icono} imagen={o.imagen} tam={22} />
                 </span>
                 <Marcador on={on} tam={22} />
               </span>
@@ -205,12 +193,12 @@ function Fichas<T extends string>({
 }
 
 const OLVIDOS: Opcion<Olvido>[] = [
-  { valor: 'medicamentos', titulo: 'Sus medicamentos', icono: Pill },
-  { valor: 'vacunas', titulo: 'Vacunas, antiparasitarios y controles', icono: Syringe },
-  { valor: 'alimento', titulo: 'Cuándo comprar alimento', icono: Utensils },
-  { valor: 'quien', titulo: 'Quién ya hizo cada cuidado', icono: Users },
-  { valor: 'documentos', titulo: 'Documentos e historial', icono: FileText },
-  { valor: 'emergencia', titulo: 'Saber qué hacer en una emergencia', icono: Siren },
+  { valor: 'medicamentos', titulo: 'Sus medicamentos', imagen: '/brand/cuidado-medicamento.png' },
+  { valor: 'vacunas', titulo: 'Vacunas, antiparasitarios y controles', imagen: '/brand/cuidado-vacuna.png' },
+  { valor: 'alimento', titulo: 'Cuándo comprar alimento', imagen: '/brand/cuidado-comida.png' },
+  { valor: 'quien', titulo: 'Quién ya hizo cada cuidado', imagen: '/brand/personas.png' },
+  { valor: 'documentos', titulo: 'Documentos e historial', imagen: '/brand/documentos.png' },
+  { valor: 'emergencia', titulo: 'Saber qué hacer en una emergencia', imagen: '/brand/emergencia.png' },
 ];
 const CUIDADORES: Opcion<Cuidadores>[] = [
   { valor: 'solo_yo', titulo: 'Solo yo', icono: User },
@@ -277,7 +265,8 @@ function Cabecera({ paso, total, onAtras }: { paso: number; total: number; onAtr
         aria-label="Volver"
         className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
       >
-        <ArrowLeft size={22} aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/accion-volver.png" alt="" width={22} height={22} className="object-contain" />
       </button>
       <div
         role="progressbar"
@@ -402,7 +391,8 @@ export default function Onboarding() {
             aria-label="Volver"
             className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
           >
-            <ArrowLeft size={22} aria-hidden="true" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/accion-volver.png" alt="" width={22} height={22} className="object-contain" />
           </button>
         )}
 
@@ -448,7 +438,8 @@ export default function Onboarding() {
                 </p>
                 {error === LIMITE && (
                   <p role="alert" className="mt-3 flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
-                    <AlertCircle size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/brand/accion-alerta.png" alt="" width={20} height={20} className="shrink-0 object-contain" />
                     {LIMITE}
                   </p>
                 )}
@@ -507,8 +498,9 @@ export default function Onboarding() {
             )}
             {actual === 'avisos' && (
               <>
-                <span className="inline-flex size-14 items-center justify-center rounded-full bg-[var(--chip-bg)]">
-                  <Bell size={28} color="var(--accent)" aria-hidden="true" />
+                <span className="inline-flex size-14 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/brand/aviso.png" alt="" width={28} height={28} className="object-contain" />
                 </span>
                 <h1 tabIndex={-1} className={`${titulo} mt-5`}>Déjanos recordar por ti</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">
@@ -535,7 +527,8 @@ export default function Onboarding() {
                 <div id="ayuda" role="status" aria-live="polite">
                   {error && error !== LIMITE && (
                     <p className="flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] bg-[var(--surface)] px-3 py-2 text-base font-semibold">
-                      <AlertCircle size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/brand/accion-alerta.png" alt="" width={20} height={20} className="shrink-0 object-contain" />
                       {error}
                     </p>
                   )}
@@ -596,8 +589,9 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
   }, [onListo]);
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-      <span className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--chip-bg)] motion-safe:animate-pulse">
-        <PawPrint size={32} color="var(--accent)" aria-hidden="true" />
+      <span className="inline-flex size-16 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)] motion-safe:animate-pulse">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/pata.png" alt="" width={32} height={32} className="object-contain" />
       </span>
       <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">
         Cuidar a {nombre} no tiene que depender de tu <span className="text-[var(--accent)]">memoria</span>
@@ -630,13 +624,13 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
   );
 }
 
-const ICONO_ITEM: Record<string, LucideIcon> = {
-  med: Pill,
-  com: Utensils,
-  rep: PackageOpen,
-  ctl: ShieldPlus,
-  doc: FileText,
-  eme: Siren,
+const IMAGEN_ITEM: Record<string, string> = {
+  med: '/brand/cuidado-medicamento.png',
+  com: '/brand/cuidado-comida.png',
+  rep: '/brand/paquete.png',
+  ctl: '/brand/cuidado-control.png',
+  doc: '/brand/documentos.png',
+  eme: '/brand/emergencia.png',
 };
 
 function Seccion({ nombre, children }: { nombre: string; children: React.ReactNode }) {
@@ -649,11 +643,12 @@ function Seccion({ nombre, children }: { nombre: string; children: React.ReactNo
 }
 
 function FilaInfo({ it }: { it: ItemPanel }) {
-  const Icono = ICONO_ITEM[it.id] ?? PawPrint;
+  const imagen = IMAGEN_ITEM[it.id] ?? '/brand/pata.png';
   return (
     <li className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
-      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
-        <Icono size={20} color="var(--accent)" aria-hidden="true" />
+      <span className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={imagen} alt="" width={20} height={20} className="object-contain" />
       </span>
       <span className="flex-1">
         <span className="block text-base font-semibold">{it.titulo}</span>
@@ -764,8 +759,9 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
         </li>
         {comparte && r.cuidadores && (
           <li className="flex min-h-14 items-center gap-4 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--accent-2)] p-3">
-            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--accent-2)_22%,var(--surface))]">
-              <Users size={20} color="var(--text-primary)" aria-hidden="true" />
+            <span className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--accent-2)_22%,var(--surface))]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/personas.png" alt="" width={20} height={20} className="object-contain" />
             </span>
             <span className="flex-1">
               <span className="block text-base font-semibold">{TEXTO_CUIDADORES[r.cuidadores]}</span>

@@ -12,7 +12,6 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, MotionConfig } from 'motion/react';
-import { FileText, ShieldCheck, UserPlus } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Borrar, botonPrimario, botonSecundario, Campo, campo, procesarFoto } from './Perros';
 import { entrada, PersonaCirculo } from './Hoy';
@@ -243,7 +242,8 @@ export default function Yo() {
               })}
             </ul>
             <button type="button" onClick={invitar} className="mt-3 flex min-h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--accent)] text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
-              <UserPlus size={20} aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/personas.png" alt="" width={20} height={20} className="object-contain" />
               Invitar a alguien
             </button>
           </section>
@@ -289,7 +289,8 @@ export default function Yo() {
             <div className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xl font-bold">Plan {plan.nombre}</p>
-                <ShieldCheck size={24} color="var(--accent)" aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/garantia.png" alt="" width={24} height={24} className="object-contain" />
               </div>
               <ul className="mt-3 flex flex-col gap-1 text-base">
                 <li>
@@ -339,7 +340,8 @@ export default function Yo() {
                 }}
                 className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
               >
-                <FileText size={22} color="var(--accent)" aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/documentos.png" alt="" width={22} height={22} className="object-contain" />
                 <span className="flex-1">
                   <span className="block text-base font-semibold">Descargar todos mis datos</span>
                   <span className="block text-sm text-[var(--text-secondary)]">Perros, cuidados, personas y registros</span>

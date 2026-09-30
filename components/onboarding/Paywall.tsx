@@ -8,7 +8,7 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { MotionConfig, motion } from 'motion/react';
-import { ArrowLeft, Bell, Check, CreditCard, Lock, ShieldCheck, Sparkles } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { addDays, CONDICIONES, formatFecha, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { urlCheckout, type PeriodoPago } from '@/lib/hotmart';
 import { actualizar, armarPanel, contarRespuestas, obtener, planRecomendado, suscribir, VACIAS, type IdPlan, type Respuestas } from '@/lib/onboarding';
@@ -86,7 +86,8 @@ function TarjetaPeriodo({
     >
       {insignia && (
         <span className="absolute -top-3 left-3 inline-flex items-center gap-1 rounded-full bg-[var(--accent-2)] px-3 py-1 text-sm font-bold text-[var(--text-primary)]">
-          <Sparkles size={14} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/destello.png" alt="" width={14} height={14} className="object-contain" />
           {insignia}
         </span>
       )}
@@ -121,14 +122,14 @@ function LineaTiempo({ importe, unidad }: { importe: string; unidad: string }) {
   const dias = CONDICIONES.prueba.dias;
   const avisoDia = Math.max(dias - 2, 1);
   const pasos = [
-    { icono: Sparkles, cuando: 'Hoy · US$0', texto: 'Acceso completo al cuidado de tu perro.' },
+    { imagen: '/brand/destello.png', cuando: 'Hoy · US$0', texto: 'Acceso completo al cuidado de tu perro.' },
     {
-      icono: Bell,
+      imagen: '/brand/aviso.png',
       cuando: `Día ${avisoDia} · Te avisamos`,
       texto: `Te recordamos que tu prueba está por terminar${inicio ? ` (${formatFecha(addDays(inicio, avisoDia))})` : ''}.`,
     },
     {
-      icono: CreditCard,
+      imagen: '/brand/tarjeta.png',
       cuando: `${inicio ? formatFecha(addDays(inicio, dias)) : `Día ${dias + 1}`} · ${importe}${unidad}`,
       texto: 'Solo si decides continuar. Si cancelas antes, no pagas nada.',
     },
@@ -138,12 +139,12 @@ function LineaTiempo({ importe, unidad }: { importe: string; unidad: string }) {
       <h2 className="text-lg font-bold">Cómo funciona tu prueba</h2>
       <ol className="mt-3 flex flex-col">
         {pasos.map((p, i) => {
-          const Icono = p.icono;
           return (
             <li key={p.cuando} className="relative flex gap-4 pb-4 last:pb-0">
               {i < pasos.length - 1 && <span aria-hidden="true" className="absolute left-5 top-11 bottom-1 w-0.5 bg-[var(--border-ui)]" />}
-              <span className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]">
-                <Icono size={20} color="var(--accent)" aria-hidden="true" />
+              <span className="relative inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.imagen} alt="" width={20} height={20} className="object-contain" />
               </span>
               <span>
                 <span className="block text-base font-semibold">{p.cuando}</span>
@@ -232,7 +233,8 @@ export default function Paywall() {
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
       <div className="flex items-center gap-2">
         <Link href="/onboarding" className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)]" aria-label="Volver">
-          <ArrowLeft size={22} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-volver.png" alt="" width={22} height={22} className="object-contain" />
         </Link>
         <Marca />
       </div>
@@ -322,7 +324,8 @@ export default function Paywall() {
         <section aria-label="Tu tranquilidad" className="borde-degradado mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
           {hayGarantia() && (
             <div className="flex items-start gap-3">
-              <ShieldCheck size={24} color="var(--accent)" className="mt-0.5 shrink-0" aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/garantia.png" alt="" width={24} height={24} className="mt-0.5 shrink-0 object-contain" />
               <p className="text-base">
                 <strong className="font-semibold">
                   {hayPrueba() ? `${CONDICIONES.prueba.dias} días gratis + ` : ''}
@@ -335,7 +338,8 @@ export default function Paywall() {
             </div>
           )}
           <div className="flex items-center gap-3">
-            <Lock size={20} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/candado.png" alt="" width={20} height={20} className="shrink-0 object-contain" />
             <p className="text-base font-medium">Pago seguro procesado por Hotmart</p>
           </div>
         </section>

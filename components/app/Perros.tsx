@@ -13,7 +13,8 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
-import { Cpu, FileText, Phone, User } from 'lucide-react';
+import type { Cpu } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { FilaNota, FormNota } from './Bitacora';
 import { Avatar, ChipIcono, entrada, textoDias, tono } from './Hoy';
@@ -581,7 +582,7 @@ function Identificacion({ perro, onEditar }: { perro: Perro; onEditar: () => voi
       <dl className="flex flex-col gap-3">
         {perro.chip && (
           <div className="flex items-center gap-3">
-            <ChipDato icono={Cpu} />
+            <ChipDato imagen="/brand/chip.png" />
             <div className="min-w-0 flex-1">
               <dt className="text-sm text-[var(--text-secondary)]">Microchip</dt>
               <dd className="text-base font-semibold tabular-nums">{perro.chip.replace(/(\d{3})(?=\d)/g, '$1 ')}</dd>
@@ -602,27 +603,28 @@ function Identificacion({ perro, onEditar }: { perro: Perro; onEditar: () => voi
           </div>
         )}
         {perro.telefono && (
-          <div className="flex items-center gap-3">
-            <ChipDato icono={Phone} />
+          <a href={`tel:${perro.telefono.replace(/[\s()-]/g, '')}`} aria-label={`Llamar al ${perro.telefono}`} className="flex items-center gap-3">
+            <ChipDato imagen="/brand/accion-llamar.png" />
             <div className="min-w-0 flex-1">
               <dt className="text-sm text-[var(--text-secondary)]">Teléfono</dt>
               <dd className="text-base font-semibold tabular-nums">{perro.telefono}</dd>
             </div>
-            <a href={`tel:${perro.telefono.replace(/[\s()-]/g, '')}`} aria-label={`Llamar al ${perro.telefono}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--accent)] text-[var(--accent)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/accion-llamar.png" alt="" width={20} height={20} className="object-contain" />
-            </a>
-          </div>
+          </a>
         )}
       </dl>
     </section>
   );
 }
 
-function ChipDato({ icono: Icono }: { icono: typeof Cpu }) {
+function ChipDato({ icono: Icono, imagen }: { icono?: typeof Cpu; imagen?: string }) {
   return (
-    <span aria-hidden="true" className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
-      <Icono size={20} color="var(--accent)" />
+    <span aria-hidden="true" className="inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+      {imagen ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={imagen} alt="" width={24} height={24} className="size-6 object-contain" />
+      ) : (
+        Icono && <Icono size={20} color="var(--accent)" />
+      )}
     </span>
   );
 }
@@ -816,7 +818,8 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
       <Identificacion perro={perro} onEditar={() => onHoja({ kind: 'perro', perro })} />
 
       <Link href={`/app/resumen?perro=${perro.id}`} className="flex min-h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-[var(--accent)] text-base font-semibold text-[var(--accent)] active:scale-[0.98]">
-        <FileText size={20} aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/documentos.png" alt="" width={20} height={20} className="object-contain" />
         Resumen para el veterinario
       </Link>
 
