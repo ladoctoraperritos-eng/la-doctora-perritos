@@ -52,11 +52,11 @@ export const ICONO: Record<Tipo, LucideIcon> = {
   control: Stethoscope,
 };
 
-/** Ilustraciones propias del usuario (2026-09-29), a color: reemplazan el ícono de línea cuando existen.
- * «comida» aún no tiene la suya, así que sigue con el ícono de línea + color de categoría. */
+/** Ilustraciones propias del usuario (2026-09-29), a color: reemplazan el ícono de línea cuando existen. */
 const IMAGEN_TIPO: Partial<Record<Tipo, string>> = {
   medicamento: '/brand/cuidado-medicamento.png',
   suplemento: '/brand/cuidado-suplemento.png',
+  comida: '/brand/cuidado-comida.png',
   antiparasitario: '/brand/cuidado-antiparasitario.png',
   bano: '/brand/cuidado-bano.png',
   control: '/brand/cuidado-control.png',

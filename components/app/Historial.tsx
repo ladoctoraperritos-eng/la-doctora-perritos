@@ -11,7 +11,8 @@
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
-import { ClipboardList, NotebookPen, Thermometer, X } from 'lucide-react';
+import { ClipboardList, X } from 'lucide-react';
+import { IMAGEN_NOTA } from './Bitacora';
 import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
 import { ChipIcono, entrada, PersonaCirculo, tono } from './Hoy';
 import { Hoja } from './Hoja';
@@ -271,8 +272,9 @@ function Contenido({
                           {f.cuidado ? (
                             <ChipIcono tipo={f.cuidado.tipo} />
                           ) : (
-                            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
-                              {f.nota?.tipo === 'sintoma' ? <Thermometer size={22} color="var(--accent)" aria-hidden="true" /> : <NotebookPen size={22} color="var(--accent)" aria-hidden="true" />}
+                            <span className="inline-flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--surface-2)]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={IMAGEN_NOTA[f.nota?.tipo ?? 'nota']} alt="" width={40} height={40} className="size-[80%] object-contain" />
                             </span>
                           )}
                           <span className="min-w-0 flex-1">

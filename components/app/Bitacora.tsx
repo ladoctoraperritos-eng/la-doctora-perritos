@@ -5,7 +5,13 @@
 
 import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { ChevronRight, NotebookPen, Thermometer } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+
+// Ilustraciones propias del usuario (2026-09-29): reemplazan los íconos de línea de síntoma/nota.
+export const IMAGEN_NOTA: Record<Nota['tipo'], string> = {
+  sintoma: '/brand/bitacora-sintoma.png',
+  nota: '/brand/bitacora-nota.png',
+};
 import { Borrar, botonPrimario, Campo, campo } from './Perros';
 import { entrada, tono } from './Hoy';
 import { claveDia, diasHasta, eliminarNota, guardarNota, horaTexto, nuevoId, type Intensidad, type Nota } from '@/lib/app';
@@ -176,7 +182,6 @@ export function FormNota({ perroId, nota, quien, onListo }: { perroId: string; n
 
 export function FilaNota({ n, i, onAbrir }: { n: Nota; i: number; onAbrir: () => void }) {
   const ahora = new Date();
-  const Icono = n.tipo === 'sintoma' ? Thermometer : NotebookPen;
   const urgente = n.intensidad === 'fuerte' || n.intensidad === 'moderado';
   const bordeIzq = n.intensidad === 'fuerte' ? 'border-l-[var(--danger)]' : n.intensidad === 'moderado' ? 'border-l-[var(--warn)]' : 'border-l-[var(--border-ui)]';
   return (
@@ -187,8 +192,9 @@ export function FilaNota({ n, i, onAbrir }: { n: Nota; i: number; onAbrir: () =>
         aria-label={`Abrir ${n.tipo === 'sintoma' ? 'síntoma' : 'nota'} del ${diaCorto(n.dia, ahora)}`}
         className={`flex min-h-16 w-full items-start gap-4 rounded-[var(--radius-card)] border border-l-4 border-[var(--border-ui)] ${bordeIzq} bg-[var(--surface)] p-4 text-left ${urgente ? 'shadow-[var(--shadow-2)]' : 'shadow-[var(--shadow-1)]'} transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]`}
       >
-        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)]" style={{ background: 'color-mix(in oklab, var(--cat-bitacora) 18%, var(--surface))' }}>
-          <Icono size={22} color="var(--cat-bitacora)" aria-hidden="true" />
+        <span className="inline-flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[var(--radius-button)] bg-[var(--surface-2)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={IMAGEN_NOTA[n.tipo]} alt="" width={40} height={40} className="size-[80%] object-contain" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">

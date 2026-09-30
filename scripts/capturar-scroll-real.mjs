@@ -13,4 +13,5 @@ await p.screenshot({ path: 'docs/revisiones/cuidados-scroll-salud.png' });
 await p.getByRole('heading', { name: 'Botiquín' }).scrollIntoViewIfNeeded();
 await p.waitForTimeout(400);
 await p.screenshot({ path: 'docs/revisiones/cuidados-scroll-botiquin.png' });
+const b2 = await chromium.launch();
 process.exit(0);
