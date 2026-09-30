@@ -5,7 +5,6 @@
 
 import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { ChevronRight } from 'lucide-react';
 
 // Ilustraciones propias del usuario (2026-09-29): reemplazan los íconos de línea de síntoma/nota.
 export const IMAGEN_NOTA: Record<Nota['tipo'], string> = {
@@ -205,7 +204,8 @@ export function FilaNota({ n, i, onAbrir }: { n: Nota; i: number; onAbrir: () =>
           </span>
           <span className="mt-1 block text-base">{n.texto}</span>
         </span>
-        <ChevronRight size={20} color="var(--text-secondary)" className="mt-1 shrink-0" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/accion-avanzar.png" alt="" width={20} height={20} className="mt-1 shrink-0 object-contain" />
       </button>
     </motion.li>
   );

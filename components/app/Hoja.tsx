@@ -5,7 +5,6 @@
 
 import { useEffect, useRef, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { X } from 'lucide-react';
 
 export function Hoja({ abierta, titulo, onCerrar, children }: { abierta: boolean; titulo: string; onCerrar: () => void; children: ReactNode }) {
   const titular = useRef<HTMLHeadingElement>(null);
@@ -37,7 +36,8 @@ export function Hoja({ abierta, titulo, onCerrar, children }: { abierta: boolean
                 {titulo}
               </h2>
               <button type="button" onClick={onCerrar} aria-label="Cerrar" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]">
-                <X size={22} aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/accion-cerrar.png" alt="" width={22} height={22} className="object-contain" />
               </button>
             </div>
             <div className="overflow-y-auto px-6 pb-8 pt-2">{children}</div>

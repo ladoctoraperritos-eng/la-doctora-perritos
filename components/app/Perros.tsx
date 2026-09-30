@@ -13,7 +13,7 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
-import { AlertCircle, ArrowLeft, Camera, Check, ChevronRight, Copy, Cpu, FileText, Phone, Pencil, Plus, Trash2, User } from 'lucide-react';
+import { Cpu, FileText, Phone, User } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { FilaNota, FormNota } from './Bitacora';
 import { Avatar, ChipIcono, entrada, textoDias, tono } from './Hoy';
@@ -86,7 +86,8 @@ export function Campo({ id, etiqueta, opcional, error, children }: { id: string;
       {children}
       {error && (
         <p role="alert" className="mt-2 flex items-center gap-2 text-base font-semibold">
-          <AlertCircle size={18} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-alerta.png" alt="" width={18} height={18} className="shrink-0 object-contain" />
           {error}
         </p>
       )}
@@ -191,7 +192,8 @@ export function Borrar({ etiqueta, aviso, onConfirmar }: { etiqueta: string; avi
   if (!seguro) {
     return (
       <button type="button" onClick={() => setSeguro(true)} className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 text-base font-semibold text-[var(--danger)] [touch-action:manipulation]">
-        <Trash2 size={18} aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/accion-borrar.png" alt="" width={18} height={18} className="object-contain" />
         {etiqueta}
       </button>
     );
@@ -463,7 +465,8 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
         <div className="flex flex-col items-start gap-1">
           <input ref={entradaFoto} id="foto-perro" type="file" accept="image/*" className="sr-only" onChange={(ev) => { void elegirFoto(ev.target.files?.[0]); ev.target.value = ''; }} />
           <button type="button" onClick={() => entradaFoto.current?.click()} disabled={cargandoFoto} className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] px-4 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
-            <Camera size={20} aria-hidden="true" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/accion-camara.png" alt="" width={20} height={20} className="object-contain" />
             {cargandoFoto ? 'Preparando…' : foto ? 'Cambiar foto' : 'Agregar foto'}
           </button>
           {foto && (
@@ -475,7 +478,8 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
       </div>
       {errores.foto && (
         <p role="alert" className="mt-2 flex items-center gap-2 text-base font-semibold">
-          <AlertCircle size={18} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-alerta.png" alt="" width={18} height={18} className="shrink-0 object-contain" />
           {errores.foto}
         </p>
       )}
@@ -544,7 +548,8 @@ function FilaCuidado({ c, i, onAbrir }: { c: Cuidado; i: number; onAbrir: () => 
             </span>
           )}
         </span>
-        <ChevronRight size={20} color="var(--text-secondary)" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/accion-avanzar.png" alt="" width={20} height={20} className="object-contain" />
       </button>
     </motion.li>
   );
@@ -564,7 +569,8 @@ function Identificacion({ perro, onEditar }: { perro: Perro; onEditar: () => voi
   if (!perro.chip && !perro.responsable && !perro.telefono) {
     return (
       <button type="button" onClick={onEditar} className="flex min-h-16 w-full items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--border-ui)] p-4 text-left text-base text-[var(--text-secondary)] [touch-action:manipulation]">
-        <Plus size={20} color="var(--accent)" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/accion-agregar.png" alt="" width={20} height={20} className="object-contain" />
         Agrega el chip y un teléfono de contacto por si se pierde
       </button>
     );
@@ -581,7 +587,8 @@ function Identificacion({ perro, onEditar }: { perro: Perro; onEditar: () => voi
               <dd className="text-base font-semibold tabular-nums">{perro.chip.replace(/(\d{3})(?=\d)/g, '$1 ')}</dd>
             </div>
             <button type="button" onClick={copiar} aria-label={copiado ? 'Número copiado' : 'Copiar número de microchip'} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--accent)] text-[var(--accent)] [touch-action:manipulation]">
-              {copiado ? <Check size={20} aria-hidden="true" /> : <Copy size={20} aria-hidden="true" />}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={copiado ? '/brand/accion-marcar.png' : '/brand/accion-copiar.png'} alt="" width={20} height={20} className="object-contain" />
             </button>
           </div>
         )}
@@ -602,7 +609,8 @@ function Identificacion({ perro, onEditar }: { perro: Perro; onEditar: () => voi
               <dd className="text-base font-semibold tabular-nums">{perro.telefono}</dd>
             </div>
             <a href={`tel:${perro.telefono.replace(/[\s()-]/g, '')}`} aria-label={`Llamar al ${perro.telefono}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--accent)] text-[var(--accent)]">
-              <Phone size={20} aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/accion-llamar.png" alt="" width={20} height={20} className="object-contain" />
             </a>
           </div>
         )}
@@ -625,7 +633,8 @@ function Seccion({ titulo, onAgregar, vacio, destacada, children }: { titulo: st
       <div className="mb-2 flex items-center justify-between gap-2">
         <h2 className={destacada ? 'text-lg font-bold text-[var(--accent)]' : 'text-lg font-bold'}>{titulo}</h2>
         <button type="button" onClick={onAgregar} className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
-          <Plus size={18} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-agregar.png" alt="" width={18} height={18} className="object-contain" />
           Agregar
         </button>
       </div>
@@ -635,7 +644,8 @@ function Seccion({ titulo, onAgregar, vacio, destacada, children }: { titulo: st
           onClick={onAgregar}
           className="flex min-h-16 w-full items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--border-ui)] p-4 text-left text-base text-[var(--text-secondary)] [touch-action:manipulation]"
         >
-          <Plus size={20} color="var(--accent)" aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-agregar.png" alt="" width={20} height={20} className="object-contain" />
           {vacio}
         </button>
       ) : (
@@ -744,7 +754,8 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
                     {vencidos > 0 && <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono.atrasado}`}>{vencidos === 1 ? '1 vencido' : `${vencidos} vencidos`}</span>}
                   </span>
                 </span>
-                <ChevronRight size={22} color="var(--text-secondary)" aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/accion-avanzar.png" alt="" width={22} height={22} className="object-contain" />
               </button>
             </motion.li>
           );
@@ -755,7 +766,8 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
         onClick={onAgregar}
         className="flex min-h-16 w-full items-center justify-center gap-2 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--accent)] text-lg font-semibold text-[var(--accent)] [touch-action:manipulation]"
       >
-        <Plus size={22} aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/accion-agregar.png" alt="" width={22} height={22} className="object-contain" />
         Agregar mascota
       </button>
     </>
@@ -774,7 +786,8 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
   return (
     <>
       <button type="button" onClick={onVolver} className="-ml-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--text-secondary)] [touch-action:manipulation]">
-        <ArrowLeft size={20} aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/accion-volver.png" alt="" width={20} height={20} className="object-contain" />
         Perros
       </button>
       <motion.header {...entrada(0)} className="flex items-center gap-4">
@@ -790,7 +803,8 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
           aria-label={`Editar datos de ${perro.nombre}`}
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)] [touch-action:manipulation]"
         >
-          <Pencil size={18} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-editar.png" alt="" width={18} height={18} className="object-contain" />
         </button>
       </motion.header>
       {perro.notas && (

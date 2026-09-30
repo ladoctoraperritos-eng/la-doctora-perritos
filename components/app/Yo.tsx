@@ -12,7 +12,7 @@ import { useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, MotionConfig } from 'motion/react';
-import { AlertCircle, Camera, Download, FileText, Mail, Pencil, ShieldCheck, UserPlus } from 'lucide-react';
+import { FileText, ShieldCheck, UserPlus } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Borrar, botonPrimario, botonSecundario, Campo, campo, procesarFoto } from './Perros';
 import { entrada, PersonaCirculo } from './Hoy';
@@ -115,7 +115,8 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
         <div className="flex flex-col items-start gap-1">
           <input ref={entradaFoto} id="foto-tutor" type="file" accept="image/*" className="sr-only" onChange={(ev) => { void elegirFoto(ev.target.files?.[0]); ev.target.value = ''; }} />
           <button type="button" onClick={() => entradaFoto.current?.click()} disabled={cargandoFoto} className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] px-4 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
-            <Camera size={20} aria-hidden="true" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/accion-camara.png" alt="" width={20} height={20} className="object-contain" />
             {cargandoFoto ? 'Preparando…' : foto ? 'Cambiar foto' : 'Agregar foto'}
           </button>
           {foto && (
@@ -127,7 +128,8 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
       </div>
       {errores.foto && (
         <p role="alert" className="mt-2 flex items-center gap-2 text-base font-semibold">
-          <AlertCircle size={18} color="var(--accent)" className="shrink-0" aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-alerta.png" alt="" width={18} height={18} className="shrink-0 object-contain" />
           {errores.foto}
         </p>
       )}
@@ -200,7 +202,8 @@ export default function Yo() {
               <p className="mt-1 break-words text-base text-[var(--text-secondary)]">{e.correo ?? 'Sin correo de acceso todavía'}</p>
             </div>
             <button type="button" onClick={() => setHoja({ kind: 'tutor', tutor: yo, esYo: true })} aria-label="Cambiar mi nombre" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)] [touch-action:manipulation]">
-              <Pencil size={18} aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/accion-editar.png" alt="" width={18} height={18} className="object-contain" />
             </button>
           </motion.section>
 
@@ -230,7 +233,10 @@ export default function Yo() {
                           <span className="block text-sm text-[var(--text-secondary)]">{t.correo ?? (esYo ? 'Administras la cuenta' : 'Sin correo')}</span>
                         )}
                       </span>
-                      {!esYo && <Pencil size={18} color="var(--text-secondary)" aria-hidden="true" />}
+                      {!esYo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src="/brand/accion-editar.png" alt="" width={18} height={18} className="shrink-0 object-contain" />
+                      )}
                     </button>
                   </motion.li>
                 );
@@ -299,7 +305,8 @@ export default function Yo() {
                 </Link>
               )}
               <a href={`mailto:${CONDICIONES.contacto}?subject=Mi%20suscripci%C3%B3n`} className="mt-3 inline-flex min-h-11 items-center gap-2 text-base font-semibold text-[var(--accent)]">
-                <Mail size={18} aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/accion-correo.png" alt="" width={18} height={18} className="object-contain" />
                 Cambiar o cancelar mi suscripción
               </a>
             </div>
@@ -317,7 +324,8 @@ export default function Yo() {
                 }}
                 className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
               >
-                <Download size={22} color="var(--accent)" aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/accion-descargar.png" alt="" width={22} height={22} className="object-contain" />
                 <span className="flex-1">
                   <span className="block text-base font-semibold">Descargar el historial</span>
                   <span className="block text-sm text-[var(--text-secondary)]">Archivo CSV: se abre en Excel o Google Sheets</span>

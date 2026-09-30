@@ -411,6 +411,14 @@ export default function Hoy() {
                 <h1 className="mt-1 text-2xl font-bold leading-tight">{titulo}</h1>
               </div>
             </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/doctora-perritos.png"
+              alt="La Doctora Perritos"
+              width={40}
+              height={40}
+              className="size-10 shrink-0 rounded-full bg-[var(--surface-2)] object-contain"
+            />
           </header>
 
           {total > 0 && (

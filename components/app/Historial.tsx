@@ -11,7 +11,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
-import { ClipboardList, X } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 import { IMAGEN_NOTA } from './Bitacora';
 import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
 import { ChipIcono, entrada, PersonaCirculo, tono } from './Hoy';
@@ -201,7 +201,8 @@ function Contenido({
             </button>
             {hayFiltros && (
               <button type="button" onClick={limpiar} className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
-                <X size={18} aria-hidden="true" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/accion-cerrar.png" alt="" width={18} height={18} className="object-contain" />
                 Quitar
               </button>
             )}

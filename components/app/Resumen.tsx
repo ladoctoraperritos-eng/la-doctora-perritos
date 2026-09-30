@@ -8,7 +8,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { diasHasta, edadTexto, obtenerApp, suscribirApp, type Cuidado, type EstadoApp, type Perro, type Tipo } from '@/lib/app';
 import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
 import { tono } from './Hoy';
@@ -126,7 +126,8 @@ export default function Resumen() {
     <div className="mx-auto w-full max-w-md px-6 pb-12 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)] print:max-w-none print:px-0">
       <div className="mb-4 flex items-center justify-between gap-2 print:hidden">
         <Link href="/app/perros" className="-ml-3 inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--text-secondary)]">
-          <ArrowLeft size={20} aria-hidden="true" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-volver.png" alt="" width={20} height={20} className="object-contain" />
           Volver
         </Link>
         <div className="flex items-center gap-3">
