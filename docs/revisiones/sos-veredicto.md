@@ -1,14 +1,14 @@
 # VEREDICTO revisor-visual — SOS
 Fecha: 2026-10-02 00:00
 Screenshot: docs/revisiones/sos-375.png
-Usabilidad: 31/40
-Craft: 15/20
+Usabilidad: 30/40
+Craft: 14/20
 Copy (si vende): N-A
 Fidelidad (si hubo referencia): N-A
 Veredicto: NO LISTA
 Top defectos:
-1. [Pantalla de detalle, p.ej. "Golpe de calor"] Sin teléfono de veterinario guardado, el botón "Llamar a tu veterinario" directamente NO EXISTE en el detalle (Sos.tsx L216-225 renderiza condicional a `telefono`) — en una emergencia real el usuario queda sin salida rápida y debe volver a la lista para cargarlo → mostrar siempre un CTA de llamada (al vet guardado si existe, o a una línea de emergencia/CTA "Agregar teléfono" con el mismo peso visual) en el detalle.
-2. [Lista "¿Qué pasó?"] 7 situaciones en una sola lista sin agrupar por nivel de urgencia, mientras la sección "¿Qué tan urgente es?" (con esa misma clasificación) vive aparte y más abajo — el usuario en pánico no puede escanear qué es más grave de un vistazo → ordenar/agrupar las tarjetas por nivel de triage (emergencia primero) o agregar un indicador de color por card.
-3. [Card "Qué hacer" en detalle] El `borde-degradado` (hairline) declarado en código no se percibe en el screenshot — la tarjeta se ve como una card blanca más, igual a "Señales de alarma" — pierde la jerarquía de "esto es lo más importante" que el copy ya le da con el color de acento en el título → subir el contraste del degradado o reforzar con un fondo ligeramente teñido.
-4. [Lista, arriba del fold] Banner de aviso legal (rosa) + card punteada "Guarda el teléfono…" compiten por atención antes de llegar al contenido accionable ("¿Qué pasó?") — dos bloques de igual peso visual sin jerarquía entre sí → bajar el peso del aviso legal (más chico/gris) y dejar el acento solo en la acción de guardar el teléfono.
-5. [Íconos de las tarjetas de situación] El ícono (sirena) es el mismo para las 7 situaciones — no ayuda a diferenciar/reconocer de un vistazo cuál es cuál (heurística 6, reconocer vs recordar) → usar un ícono distinto por tipo de emergencia (asfixia, convulsión, intoxicación, herida, calor, paro, atasco).
+1. [Lista y Detalle, CTA "Agregar teléfono de tu veterinario"] Ambas variantes dashed (TarjetaVeterinario en Sos.tsx L67-76, y el botón fallback de Detalle L243-251) NO tienen `active:scale`/`transition` como sí tiene el botón "Llamar a..." (L236) — es justo el estado que ve TODO usuario nuevo (sin teléfono guardado), y al tocarlo no se siente ninguna respuesta → agregar `transition-transform duration-150 active:scale-[0.97]` a los dos.
+2. [Lista "¿Qué pasó?"] La pantalla obliga a leer el aviso legal + la tarjeta del veterinario + las 3 categorías de triage (con sus listas de ejemplos) ANTES de llegar a las 7 situaciones accionables — en un contexto de pánico/emergencia esto es scroll y lectura de más antes de tocar algo útil → colapsar el bloque de Triage en un acordeón cerrado por defecto o resumirlo a 1 línea con enlace "ver niveles".
+3. [Tarjeta de veterinario sin teléfono, vista Lista] Usa borde punteado gris/teal tenue, de bajo contraste y sin urgencia — mismo propósito que el CTA del detalle (que sí quedó rojo y prominente) pero con tratamiento visual distinto → unificar: usar el mismo rojo prominente en la lista que en el detalle para la misma acción.
+4. [Pantalla completa] Fondo totalmente plano (sin tinte/gradiente sutil) e íconos genéricos de librería Lucide en chips de color estándar — nada en esta pantalla distingue la app de cualquier otra app de salud hecha con shadcn+Lucide; el dispositivo ownable de la ficha (hairline degradado/duotone) no aparece acá → aplicar un tinte sutil al fondo y/o el hairline degradado en algún elemento clave (p.ej. el encabezado o el chip de nivel de triage).
+5. [Formulario "Tu veterinario", Hoja] `CampoTelefono` soporta `error` pero `FormVeterinario` en Sos.tsx nunca lo usa ni valida formato antes de `guardarVeterinario` — se puede guardar un número inválido sin aviso, y en la emergencia real el botón `tel:` fallaría en silencio → validar formato al enviar y mostrar el error inline, igual que en el formulario de Perros.

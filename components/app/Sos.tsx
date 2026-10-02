@@ -45,18 +45,29 @@ function FilaSituacion({ s, i, onAbrir }: { s: SituacionSos; i: number; onAbrir:
 }
 
 function Triage() {
+  const [abierto, setAbierto] = useState(false);
   return (
     <section aria-label="¿Qué tan urgente es?" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
-      <h2 className="text-lg font-bold">¿Qué tan urgente es?</h2>
-      <div className="mt-3 flex flex-col gap-3">
-        {NIVELES_TRIAGE.map((n) => (
-          <div key={n.nivel}>
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-sm font-semibold ${tono[TONO_NIVEL[n.nivel]]}`}>{n.titulo}</span>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">{n.detalle}</p>
-            <p className="mt-1 text-sm">{n.ejemplos.slice(0, 4).join(' · ')}</p>
-          </div>
-        ))}
-      </div>
+      <button
+        type="button"
+        onClick={() => setAbierto((v) => !v)}
+        aria-expanded={abierto}
+        className="flex w-full items-center justify-between gap-2 text-left [touch-action:manipulation]"
+      >
+        <span className="text-base font-bold">¿Qué tan urgente es? <span className="font-normal text-[var(--text-secondary)]">Emergencia, urgencia o control</span></span>
+        <span className="shrink-0 text-sm font-semibold text-[var(--accent)]">{abierto ? 'Ocultar' : 'Ver niveles'}</span>
+      </button>
+      {abierto && (
+        <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="mt-3 flex flex-col gap-3">
+          {NIVELES_TRIAGE.map((n) => (
+            <div key={n.nivel}>
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-sm font-semibold ${tono[TONO_NIVEL[n.nivel]]}`}>{n.titulo}</span>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">{n.detalle}</p>
+              <p className="mt-1 text-sm">{n.ejemplos.slice(0, 4).join(' · ')}</p>
+            </div>
+          ))}
+        </motion.div>
+      )}
     </section>
   );
 }
@@ -67,16 +78,15 @@ function TarjetaVeterinario({ nombre, telefono, onEditar }: { nombre?: string; t
       <button
         type="button"
         onClick={onEditar}
-        className="flex min-h-16 w-full items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--border-ui)] p-4 text-left text-base text-[var(--text-secondary)] [touch-action:manipulation]"
+        className="flex min-h-16 w-full items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--danger)] p-4 text-left text-base font-semibold text-[var(--danger)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/accion-agregar.png" alt="" width={20} height={20} className="object-contain" />
+        <Phone size={20} className="shrink-0" aria-hidden="true" />
         Guarda el teléfono de tu veterinario de urgencia
       </button>
     );
   }
   return (
-    <section aria-label="Tu veterinario" className="flex items-center gap-3 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
+    <section aria-label="Tu veterinario" className="borde-degradado flex items-center gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]">
       <div className="min-w-0 flex-1">
         <p className="text-sm text-[var(--text-secondary)]">Tu veterinario</p>
         <p className="text-base font-semibold">{nombre || 'Sin nombre guardado'}</p>
@@ -101,10 +111,16 @@ function TarjetaVeterinario({ nombre, telefono, onEditar }: { nombre?: string; t
 function FormVeterinario({ nombre, telefono, onListo }: { nombre?: string; telefono?: string; onListo: () => void }) {
   const [n, setN] = useState(nombre ?? '');
   const [t, setT] = useState(telefono ?? '');
+  const [errorTelefono, setErrorTelefono] = useState<string | null>(null);
   return (
     <form
       onSubmit={(ev) => {
         ev.preventDefault();
+        const soloTel = t.replace(/[\s()-]/g, '');
+        if (soloTel && !/^\+?\d{7,15}$/.test(soloTel)) {
+          setErrorTelefono('Escribe un teléfono válido, por ejemplo +56 9 1234 5678.');
+          return;
+        }
         guardarVeterinario({ nombre: n.trim() || undefined, telefono: t.trim() || undefined });
         onListo();
       }}
@@ -113,7 +129,15 @@ function FormVeterinario({ nombre, telefono, onListo }: { nombre?: string; telef
       <Campo id="nombre-vet" etiqueta="Nombre de tu veterinario o clínica" opcional>
         <input id="nombre-vet" value={n} maxLength={60} onChange={(e) => setN(e.target.value)} placeholder="Por ejemplo, Clínica San Roque" className={campo} />
       </Campo>
-      <CampoTelefono id="telefono-vet" valor={t} onCambiar={setT} />
+      <CampoTelefono
+        id="telefono-vet"
+        valor={t}
+        onCambiar={(v) => {
+          setT(v);
+          setErrorTelefono(null);
+        }}
+        error={errorTelefono}
+      />
       <div className="mt-8">
         <button type="submit" className={botonPrimario}>
           Guardar
@@ -243,7 +267,7 @@ function Detalle({
         <button
           type="button"
           onClick={onEditarVet}
-          className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-button)] border-2 border-dashed border-[var(--danger)] px-4 text-base font-semibold text-[var(--danger)] [touch-action:manipulation]"
+          className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-button)] border-2 border-dashed border-[var(--danger)] px-4 text-base font-semibold text-[var(--danger)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]"
         >
           <Phone size={20} className="shrink-0" aria-hidden="true" />
           Agregar teléfono de tu veterinario
