@@ -52,7 +52,7 @@ function Triage() {
         type="button"
         onClick={() => setAbierto((v) => !v)}
         aria-expanded={abierto}
-        className="flex w-full items-center justify-between gap-2 text-left [touch-action:manipulation]"
+        className="flex w-full items-center justify-between gap-2 text-left transition-transform duration-150 active:scale-[0.99] [touch-action:manipulation]"
       >
         <span className="text-base font-bold">¿Qué tan urgente es? <span className="font-normal text-[var(--text-secondary)]">Emergencia, urgencia o control</span></span>
         <span className="shrink-0 text-sm font-semibold text-[var(--accent)]">{abierto ? 'Ocultar' : 'Ver niveles'}</span>
@@ -92,14 +92,19 @@ function TarjetaVeterinario({ nombre, telefono, onEditar }: { nombre?: string; t
         <p className="text-base font-semibold">{nombre || 'Sin nombre guardado'}</p>
         <p className="text-base font-semibold tabular-nums text-[var(--text-secondary)]">{telefono}</p>
       </div>
-      <button type="button" onClick={onEditar} aria-label="Editar datos del veterinario" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)] [touch-action:manipulation]">
+      <button
+        type="button"
+        onClick={onEditar}
+        aria-label="Editar datos del veterinario"
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)] transition-transform duration-150 active:scale-[0.95] [touch-action:manipulation]"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/accion-editar.png" alt="" width={18} height={18} className="object-contain" />
       </button>
       <a
         href={`tel:${telefono.replace(/[\s()-]/g, '')}`}
         aria-label={`Llamar a ${nombre || 'tu veterinario'}`}
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--danger)] text-[var(--bg)] [touch-action:manipulation]"
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--danger)] text-[var(--bg)] transition-transform duration-150 active:scale-[0.95] [touch-action:manipulation]"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/accion-llamar.png" alt="" width={20} height={20} className="object-contain" />
@@ -191,7 +196,11 @@ function Detalle({
 }) {
   return (
     <>
-      <button type="button" onClick={onVolver} className="-ml-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--text-secondary)] [touch-action:manipulation]">
+      <button
+        type="button"
+        onClick={onVolver}
+        className="-ml-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--text-secondary)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/accion-volver.png" alt="" width={20} height={20} className="object-contain" />
         SOS
