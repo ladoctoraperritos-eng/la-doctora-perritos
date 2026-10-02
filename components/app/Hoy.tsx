@@ -141,16 +141,17 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
   );
 }
 
-export function Avatar({ perro, grande = false }: { perro: Perro; grande?: boolean }) {
-  const tam = grande ? 'size-24' : 'size-14';
+export function Avatar({ perro, grande = false, tam, iconoTam }: { perro: Perro; grande?: boolean; tam?: string; iconoTam?: number }) {
+  const clase = tam ?? (grande ? 'size-24' : 'size-14');
+  const icono = iconoTam ?? (grande ? 40 : 28);
   return perro.foto ? (
-    <span className={`borde-degradado ${tam} shrink-0 overflow-hidden rounded-full border-2 shadow-[var(--shadow-1)]`}>
+    <span className={`borde-degradado ${clase} shrink-0 overflow-hidden rounded-full border-2 shadow-[var(--shadow-1)]`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={perro.foto} alt={`Foto de ${perro.nombre}`} width={96} height={96} className="size-full object-cover" />
     </span>
   ) : (
-    <span aria-hidden="true" className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]`}>
-      <PawPrint size={grande ? 40 : 28} color="var(--accent)" />
+    <span aria-hidden="true" className={`inline-flex ${clase} shrink-0 items-center justify-center rounded-full bg-[var(--chip-bg)]`}>
+      <PawPrint size={icono} color="var(--accent)" />
     </span>
   );
 }
@@ -281,13 +282,28 @@ function FilaPendiente({ fila, varios, onHecho, i }: { fila: FilaHoy; varios: bo
 
 function FilaHecha({ fila, varios, onDeshacer }: { fila: FilaHoy; varios: boolean; onDeshacer: () => void }) {
   return (
-    <li className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] bg-[var(--elevated)] p-4">
-      <span aria-hidden="true" className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]">
-        <Check size={18} color="var(--bg)" strokeWidth={3} />
+    <motion.li
+      layout
+      initial={{ opacity: 0, scale: 0.96, y: -4 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] bg-[var(--elevated)] p-4"
+    >
+      <span className="relative inline-flex shrink-0">
+        <ChipIcono tipo={fila.cuidado.tipo} tam="size-11" />
+        <motion.span
+          aria-hidden="true"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 20, delay: 0.1 }}
+          className="absolute -bottom-1 -right-1 inline-flex size-5 items-center justify-center rounded-full bg-[var(--accent)] ring-2 ring-[var(--elevated)]"
+        >
+          <Check size={11} color="var(--bg)" strokeWidth={3.5} />
+        </motion.span>
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-base font-semibold">{fila.cuidado.nombre}</span>
-        <span className="block text-sm text-[var(--text-secondary)]">
+        <span className="block text-base font-semibold text-[var(--text-secondary)] line-through decoration-2">{fila.cuidado.nombre}</span>
+        <span className="block text-sm text-[var(--text-tertiary)]">
           {varios ? `${fila.perro.nombre} · ` : ''}
           {fila.registro?.quien} · {fila.registro?.hora}
         </span>
@@ -300,7 +316,7 @@ function FilaHecha({ fila, varios, onDeshacer }: { fila: FilaHoy; varios: boolea
       >
         <Undo2 size={20} aria-hidden="true" />
       </button>
-    </li>
+    </motion.li>
   );
 }
 
@@ -403,9 +419,9 @@ export default function Hoy() {
           </p>
         )}
         <main className="flex flex-1 flex-col gap-6 px-6 pb-24 pt-6">
-          <header className="flex items-start justify-between gap-4">
+          <header className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-4">
-              <Avatar perro={activo ?? e.perros[0]} />
+              <Avatar perro={activo ?? e.perros[0]} tam="size-20" iconoTam={36} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[var(--text-secondary)]">{fechaLarga(ahora)}</p>
                 <h1 className="mt-1 text-2xl font-bold leading-tight">{titulo}</h1>
@@ -415,9 +431,9 @@ export default function Hoy() {
             <img
               src="/brand/logo.png"
               alt="La Doctora Perritos"
-              width={40}
-              height={40}
-              className="size-10 shrink-0 rounded-full bg-[var(--surface-2)] object-cover object-top"
+              width={36}
+              height={36}
+              className="size-9 shrink-0 self-start rounded-full bg-[var(--surface-2)] object-cover object-top"
             />
           </header>
 
