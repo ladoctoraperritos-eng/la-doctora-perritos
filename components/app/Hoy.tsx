@@ -117,24 +117,30 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hechos, reduce]);
   return (
-    <div className="relative size-16 shrink-0" role="img" aria-label={`${hechos} de ${total} cuidados hechos hoy`}>
-      <svg viewBox="0 0 96 96" className="size-16 -rotate-90">
-        <circle cx="48" cy="48" r="40" fill="none" strokeWidth="8" className="stroke-[color-mix(in_oklab,var(--border-ui)_40%,var(--surface-2))]" />
+    <div className="relative size-20 shrink-0" role="img" aria-label={`${hechos} de ${total} cuidados hechos hoy`}>
+      <svg viewBox="0 0 96 96" className="size-20 -rotate-90">
+        <defs>
+          <linearGradient id="anillo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--accent)" />
+            <stop offset="100%" stopColor="var(--accent-2)" />
+          </linearGradient>
+        </defs>
+        <circle cx="48" cy="48" r="40" fill="none" strokeWidth="9" className="stroke-[color-mix(in_oklab,var(--accent)_10%,var(--surface-2))]" />
         <motion.circle
           cx="48"
           cy="48"
           r="40"
           fill="none"
-          strokeWidth="8"
+          strokeWidth="9"
           strokeLinecap="round"
-          className="stroke-[var(--accent)]"
+          stroke="url(#anillo-grad)"
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: fraccion, opacity: fraccion > 0 ? 1 : 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl font-bold tabular-nums leading-none">{reduce ? hechos : visto}</span>
+        <span className="text-2xl font-bold tabular-nums leading-none">{reduce ? hechos : visto}</span>
         <span className="text-sm text-[var(--text-secondary)]">/{total}</span>
       </div>
     </div>
@@ -438,12 +444,17 @@ export default function Hoy() {
           </header>
 
           {total > 0 && (
-            <div className="flex items-center gap-4">
+            <motion.div {...entrada(0)} className="flex items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
               <Anillo hechos={hechos.length} total={total} />
-              <p className="text-base font-semibold">
-                {hechos.length === total ? 'Todos los cuidados de hoy están hechos' : `${total - hechos.length} por hacer hoy`}
-              </p>
-            </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-semibold leading-snug">
+                  {hechos.length === total ? 'Todos los cuidados de hoy están hechos' : `${total - hechos.length} por hacer hoy`}
+                </p>
+                <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
+                  {hechos.length} de {total} cuidados de {varios ? 'tus perros' : (activo ?? e.perros[0]).nombre}
+                </p>
+              </div>
+            </motion.div>
           )}
 
           {e.perros.length > 1 && <Selector e={e} activo={perroId} onElegir={setPerroId} />}

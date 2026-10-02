@@ -18,7 +18,12 @@ const base = sharp(fuente).extract({ left: 0, top: 0, width: 853, height: ALTO_R
 const { data, info } = await base.raw().toBuffer({ resolveWithObject: true });
 const { width: W, height: H, channels } = info;
 
-const esBlanco = (k) => data[k] > 244 && data[k + 1] > 244 && data[k + 2] > 244;
+// El JPEG fuente tiene ruido de compresión: unos pocos píxeles sueltos quedan casi blancos dentro del
+// dibujo (p. ej. en el pelo) y, sin querer, conectan el blanco interior con el exterior por un hilo de 1px,
+// lo que agujerea el dibujo. Se detecta el blanco sobre una copia con filtro de mediana (quita ese ruido
+// puntual sin mover los bordes reales) y el resultado se aplica al alfa de la imagen ORIGINAL (sin filtrar).
+const { data: maskData } = await sharp(data, { raw: { width: W, height: H, channels } }).median(5).raw().toBuffer({ resolveWithObject: true });
+const esBlanco = (k) => maskData[k] > 247 && maskData[k + 1] > 247 && maskData[k + 2] > 247;
 const visto = new Uint8Array(W * H);
 const cola = [];
 const meter = (x, y) => {
@@ -53,9 +58,40 @@ for (let y = 0; y < H; y++) {
   }
 }
 
-const w = maxX - minX + 1;
-const h = maxY - minY + 1;
-const recortado = sharp(data, { raw: { width: W, height: H, channels } }).extract({ left: minX, top: minY, width: w, height: h });
+// El recorte deja el borde del círculo con alfa 0/255 "duro" (sin antialiasing): se ve dentado/pixelado
+// al mostrarse chico (insignia de 36px). Se suaviza con un box blur casero sobre el canal alfa nada más
+// (el color no se toca), aplicado directo en el buffer crudo — evita los líos de unir canales con sharp.
+const alfa = new Float32Array(W * H);
+for (let i = 0; i < W * H; i++) alfa[i] = data[i * channels + 3];
+const boxBlur1D = (src, horizontal) => {
+  const out = new Float32Array(W * H);
+  const r = 2;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      let suma = 0, n = 0;
+      for (let d = -r; d <= r; d++) {
+        const xx = horizontal ? x + d : x;
+        const yy = horizontal ? y : y + d;
+        if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+        suma += src[yy * W + xx];
+        n++;
+      }
+      out[y * W + x] = suma / n;
+    }
+  }
+  return out;
+};
+const alfaSuave = boxBlur1D(boxBlur1D(alfa, true), false);
+for (let i = 0; i < W * H; i++) data[i * channels + 3] = Math.round(alfaSuave[i]);
+
+const margen = 3;
+const left = Math.max(0, minX - margen);
+const top = Math.max(0, minY - margen);
+const right = Math.min(W - 1, maxX + margen);
+const bottom = Math.min(H - 1, maxY + margen);
+const w = right - left + 1;
+const h = bottom - top + 1;
+const recortado = sharp(data, { raw: { width: W, height: H, channels } }).extract({ left, top, width: w, height: h });
 
 const anchoLogo = 800;
 const altoLogo = Math.round(h * (anchoLogo / w));
