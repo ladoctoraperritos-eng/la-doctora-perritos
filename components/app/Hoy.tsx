@@ -427,7 +427,7 @@ export default function Hoy() {
         <main className="flex flex-1 flex-col gap-6 px-6 pb-24 pt-6">
           <header className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-4">
-              <Avatar perro={activo ?? e.perros[0]} tam="size-20" iconoTam={36} />
+              <Avatar perro={activo ?? e.perros[0]} tam={varios ? 'size-14' : 'size-28'} iconoTam={varios ? 28 : 48} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[var(--text-secondary)]">{fechaLarga(ahora)}</p>
                 <h1 className="mt-1 text-2xl font-bold leading-tight">{titulo}</h1>
