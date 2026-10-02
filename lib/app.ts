@@ -77,6 +77,12 @@ export interface Nota {
   quien: string;
 }
 
+/** Veterinario de confianza de la familia (uno por cuenta): para llamar directo desde el SOS. */
+export interface Veterinario {
+  nombre?: string;
+  telefono?: string;
+}
+
 export interface EstadoApp {
   plan: IdPlan;
   notas: Nota[];
@@ -89,6 +95,7 @@ export interface EstadoApp {
   yo: string;
   cuidados: Cuidado[];
   registros: Registro[];
+  veterinario?: Veterinario;
 }
 
 // ── Fechas ──
@@ -389,6 +396,11 @@ export function eliminarTutor(id: string): void {
 export function guardarAjustes(parcial: Partial<Ajustes>): void {
   const e = obtenerApp();
   cambiar({ ...e, ajustes: { ...e.ajustes, ...parcial } });
+}
+/** Guarda el nombre y/o teléfono del veterinario de confianza (para el botón «Llamar» del SOS). */
+export function guardarVeterinario(parcial: Partial<Veterinario>): void {
+  const e = obtenerApp();
+  cambiar({ ...e, veterinario: { ...e.veterinario, ...parcial } });
 }
 
 // ── Exportar ──

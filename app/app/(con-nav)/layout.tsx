@@ -10,6 +10,7 @@ import { Menu, type SeccionApp } from '@/components/app/Menu';
 const SECCION_POR_RUTA: { prefijo: string; seccion: SeccionApp }[] = [
   { prefijo: '/app/perros', seccion: 'perros' },
   { prefijo: '/app/historial', seccion: 'historial' },
+  { prefijo: '/app/sos', seccion: 'sos' },
   { prefijo: '/app/yo', seccion: 'yo' },
 ];
 
