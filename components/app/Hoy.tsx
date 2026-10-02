@@ -413,11 +413,11 @@ export default function Hoy() {
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/doctora-perritos.png"
+              src="/brand/logo.png"
               alt="La Doctora Perritos"
               width={40}
               height={40}
-              className="size-10 shrink-0 rounded-full bg-[var(--surface-2)] object-contain"
+              className="size-10 shrink-0 rounded-full bg-[var(--surface-2)] object-cover object-top"
             />
           </header>
 
