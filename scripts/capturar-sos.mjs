@@ -1,0 +1,13 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, reducedMotion: 'reduce' });
+await p.goto('http://localhost:3000/app/sos', { waitUntil: 'load' });
+await p.waitForSelector('text=SOS');
+await p.waitForTimeout(300);
+await p.screenshot({ path: 'docs/revisiones/sos-375.png' });
+await p.getByRole('button', { name: /Ver qué hacer: Golpe de calor/ }).click();
+await p.waitForSelector('text=Qué hacer');
+await p.waitForTimeout(300);
+await p.screenshot({ path: 'docs/revisiones/sos-detalle-375.png' });
+console.log('scrollWidth', await p.evaluate(() => document.documentElement.scrollWidth));
+process.exit(0);

@@ -11,6 +11,7 @@
 
 import { useState, useSyncExternalStore } from 'react';
 import { MotionConfig, motion } from 'motion/react';
+import { Phone } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Campo, CampoTelefono, botonPrimario, campo } from './Perros';
 import { entrada, tono } from './Hoy';
@@ -20,17 +21,17 @@ import { NIVELES_TRIAGE, SITUACIONES, type NivelTriage, type SituacionSos } from
 const TONO_NIVEL: Record<NivelTriage, keyof typeof tono> = { emergencia: 'atrasado', urgencia: 'pronto', control: 'normal' };
 
 function FilaSituacion({ s, i, onAbrir }: { s: SituacionSos; i: number; onAbrir: () => void }) {
+  const Icono = s.icono;
   return (
     <motion.li {...entrada(i)}>
       <button
         type="button"
         onClick={onAbrir}
         aria-label={`Ver qué hacer: ${s.titulo}`}
-        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-l-4 border-[var(--border-ui)] border-l-[var(--danger)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
       >
         <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)]" style={{ background: 'color-mix(in oklab, var(--danger) 14%, var(--surface))' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/emergencia.png" alt="" width={24} height={24} className="size-6 object-contain" />
+          <Icono size={22} color="var(--danger)" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-base font-semibold">{s.titulo}</span>
@@ -128,15 +129,16 @@ function Lista({ e, onAbrir, onEditarVet }: { e: ReturnType<typeof obtenerApp>; 
       <header>
         <h1 className="text-3xl font-bold leading-tight">SOS</h1>
         <p className="mt-1 text-base text-[var(--text-secondary)]">Qué hacer ahora mismo, antes de llegar al veterinario.</p>
+        <p className="mt-2 flex items-start gap-1.5 text-sm text-[var(--text-tertiary)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/accion-alerta.png" alt="" width={14} height={14} className="mt-0.5 shrink-0 object-contain" />
+          Esta guía no reemplaza a tu veterinario. Ante cualquier duda, llama o ve directo a una clínica.
+        </p>
       </header>
 
-      <div className="flex items-start gap-3 rounded-[var(--radius-card)] p-4" style={{ background: 'color-mix(in oklab, var(--danger) 10%, var(--surface))' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/accion-alerta.png" alt="" width={20} height={20} className="mt-0.5 shrink-0 object-contain" />
-        <p className="text-sm font-semibold text-[var(--text-primary)]">Esta guía no reemplaza a tu veterinario. Ante cualquier duda, llama o ve directo a una clínica.</p>
-      </div>
-
       <TarjetaVeterinario nombre={e.veterinario?.nombre} telefono={e.veterinario?.telefono} onEditar={onEditarVet} />
+
+      <Triage />
 
       <section aria-label="Situaciones de emergencia">
         <h2 className="mb-2 text-lg font-bold">¿Qué pasó?</h2>
@@ -146,13 +148,23 @@ function Lista({ e, onAbrir, onEditarVet }: { e: ReturnType<typeof obtenerApp>; 
           ))}
         </ul>
       </section>
-
-      <Triage />
     </>
   );
 }
 
-function Detalle({ s, telefono, nombreVet, onVolver }: { s: SituacionSos; telefono?: string; nombreVet?: string; onVolver: () => void }) {
+function Detalle({
+  s,
+  telefono,
+  nombreVet,
+  onVolver,
+  onEditarVet,
+}: {
+  s: SituacionSos;
+  telefono?: string;
+  nombreVet?: string;
+  onVolver: () => void;
+  onEditarVet: () => void;
+}) {
   return (
     <>
       <button type="button" onClick={onVolver} className="-ml-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--text-secondary)] [touch-action:manipulation]">
@@ -177,7 +189,12 @@ function Detalle({ s, telefono, nombreVet, onVolver }: { s: SituacionSos; telefo
         </ul>
       </motion.section>
 
-      <motion.section {...entrada(2)} aria-label="Qué hacer" className="borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]">
+      <motion.section
+        {...entrada(2)}
+        aria-label="Qué hacer"
+        className="borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]"
+        style={{ background: 'color-mix(in oklab, var(--accent) 6%, var(--surface))' }}
+      >
         <h2 className="text-base font-bold text-[var(--accent)]">Qué hacer</h2>
         <ol className="mt-3 flex flex-col gap-3">
           {s.pasos.map((p, i) => (
@@ -213,7 +230,7 @@ function Detalle({ s, telefono, nombreVet, onVolver }: { s: SituacionSos; telefo
         </ul>
       </motion.section>
 
-      {telefono && (
+      {telefono ? (
         <a
           href={`tel:${telefono.replace(/[\s()-]/g, '')}`}
           className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-[var(--danger)] text-lg font-semibold text-[var(--bg)] shadow-[var(--shadow-2)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]"
@@ -222,6 +239,15 @@ function Detalle({ s, telefono, nombreVet, onVolver }: { s: SituacionSos; telefo
           <img src="/brand/accion-llamar.png" alt="" width={22} height={22} className="object-contain" />
           Llamar a {nombreVet || 'tu veterinario'}
         </a>
+      ) : (
+        <button
+          type="button"
+          onClick={onEditarVet}
+          className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-button)] border-2 border-dashed border-[var(--danger)] px-4 text-base font-semibold text-[var(--danger)] [touch-action:manipulation]"
+        >
+          <Phone size={20} className="shrink-0" aria-hidden="true" />
+          Agregar teléfono de tu veterinario
+        </button>
       )}
     </>
   );
@@ -252,7 +278,13 @@ export default function Sos() {
           {!situacion ? (
             <Lista e={e} onAbrir={setSituacionId} onEditarVet={() => setEditandoVet(true)} />
           ) : (
-            <Detalle s={situacion} telefono={e.veterinario?.telefono} nombreVet={e.veterinario?.nombre} onVolver={() => setSituacionId(null)} />
+            <Detalle
+              s={situacion}
+              telefono={e.veterinario?.telefono}
+              nombreVet={e.veterinario?.nombre}
+              onVolver={() => setSituacionId(null)}
+              onEditarVet={() => setEditandoVet(true)}
+            />
           )}
         </main>
 

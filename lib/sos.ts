@@ -2,9 +2,13 @@
 // y 5), para que se lea en segundos en una emergencia real en vez de buscar en un PDF de 90 páginas.
 // No es contenido generado: son los mismos pasos de su ebook, resumidos a formato de pantalla.
 
+import { Activity, Droplet, FlaskConical, HeartPulse, Thermometer, Wind, Zap, type LucideIcon } from 'lucide-react';
+
 export interface SituacionSos {
   id: string;
   titulo: string;
+  /** Ícono distinto por situación: en la lista, las 7 tarjetas deben distinguirse de un vistazo. */
+  icono: LucideIcon;
   resumen: string;
   senales: string[];
   pasos: string[];
@@ -16,6 +20,7 @@ export const SITUACIONES: SituacionSos[] = [
   {
     id: 'atragantamiento',
     titulo: 'Atragantamiento o asfixia',
+    icono: Wind,
     resumen: 'Un objeto bloquea parcial o totalmente sus vías respiratorias.',
     senales: ['Arcadas sin vómito', 'Dificultad para respirar', 'Tos intensa', 'Lengua o encías azuladas', 'Agitación o colapso repentino'],
     pasos: [
@@ -30,6 +35,7 @@ export const SITUACIONES: SituacionSos[] = [
   {
     id: 'convulsiones',
     titulo: 'Convulsiones',
+    icono: Zap,
     resumen: 'Descargas eléctricas anormales en el cerebro: epilepsia, fiebre, intoxicación o golpe.',
     senales: ['Pérdida de consciencia', 'Movimientos espasmódicos', 'Rigidez muscular', 'Salivación excesiva', 'Pérdida de orina o heces'],
     pasos: [
@@ -44,6 +50,7 @@ export const SITUACIONES: SituacionSos[] = [
   {
     id: 'intoxicacion',
     titulo: 'Envenenamiento o intoxicación',
+    icono: FlaskConical,
     resumen: 'Comió algo tóxico: chocolate, cebolla, uvas, una planta, un producto de limpieza o un medicamento humano.',
     senales: ['Vómitos o diarrea', 'Temblores o convulsiones', 'Pupilas dilatadas', 'Babeo excesivo', 'Colapso'],
     pasos: [
@@ -59,6 +66,7 @@ export const SITUACIONES: SituacionSos[] = [
   {
     id: 'heridas',
     titulo: 'Heridas abiertas y hemorragias',
+    icono: Droplet,
     resumen: 'Cortes, raspones, mordeduras o heridas punzantes con sangrado.',
     senales: ['Sangrado visible', 'Cojera o dolor al tocar la zona', 'El perro lame la zona insistentemente'],
     pasos: [
@@ -73,6 +81,7 @@ export const SITUACIONES: SituacionSos[] = [
   {
     id: 'golpe-calor',
     titulo: 'Golpe de calor',
+    icono: Thermometer,
     resumen: 'Temperatura muy alta por ejercicio intenso, sol directo o quedar encerrado en un auto.',
     senales: ['Jadeo excesivo', 'Temperatura mayor a 40 °C', 'Encías rojas brillantes', 'Temblores o debilidad', 'Desmayo'],
     pasos: [
@@ -87,6 +96,7 @@ export const SITUACIONES: SituacionSos[] = [
   {
     id: 'rcp',
     titulo: 'RCP canina (reanimación)',
+    icono: HeartPulse,
     resumen: 'Solo cuando el perro NO respira y NO tiene pulso.',
     senales: ['No respira y no tiene pulso', 'Está inconsciente, no responde a estímulos', 'Encías grisáceas o azuladas'],
     pasos: [
@@ -102,6 +112,7 @@ export const SITUACIONES: SituacionSos[] = [
   {
     id: 'heimlich',
     titulo: 'Maniobra de Heimlich adaptada',
+    icono: Activity,
     resumen: 'Solo si no respira en absoluto por un objeto atascado (comida, juguete, hueso).',
     senales: ['No puede inhalar nada de aire', 'No logra expulsar el objeto por sí solo'],
     pasos: [
