@@ -11,7 +11,7 @@
 
 import { useState, useSyncExternalStore } from 'react';
 import { MotionConfig, motion } from 'motion/react';
-import { Phone } from 'lucide-react';
+import { ChevronDown, Phone } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Campo, CampoTelefono, botonPrimario, campo } from './Perros';
 import { entrada, tono } from './Hoy';
@@ -55,7 +55,10 @@ function Triage() {
         className="flex w-full items-center justify-between gap-2 text-left transition-transform duration-150 active:scale-[0.99] [touch-action:manipulation]"
       >
         <span className="text-base font-bold">¿Qué tan urgente es? <span className="font-normal text-[var(--text-secondary)]">Emergencia, urgencia o control</span></span>
-        <span className="shrink-0 text-sm font-semibold text-[var(--accent)]">{abierto ? 'Ocultar' : 'Ver niveles'}</span>
+        <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-[var(--accent)]">
+          {abierto ? 'Ocultar' : 'Ver niveles'}
+          <ChevronDown size={16} className={`transition-transform duration-200 ${abierto ? 'rotate-180' : ''}`} aria-hidden="true" />
+        </span>
       </button>
       {abierto && (
         <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="mt-3 flex flex-col gap-3">
@@ -86,7 +89,15 @@ function TarjetaVeterinario({ nombre, telefono, onEditar }: { nombre?: string; t
     );
   }
   return (
-    <section aria-label="Tu veterinario" className="borde-degradado flex items-center gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]">
+    <section
+      aria-label="Tu veterinario"
+      className="flex items-center gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]"
+      style={{
+        border: '1px solid transparent',
+        background:
+          'linear-gradient(color-mix(in oklab, var(--accent) 7%, var(--surface)), color-mix(in oklab, var(--accent) 7%, var(--surface))) padding-box, linear-gradient(135deg, color-mix(in oklab, var(--accent) 60%, transparent), transparent 60%) border-box',
+      }}
+    >
       <div className="min-w-0 flex-1">
         <p className="text-sm text-[var(--text-secondary)]">Tu veterinario</p>
         <p className="text-base font-semibold">{nombre || 'Sin nombre guardado'}</p>

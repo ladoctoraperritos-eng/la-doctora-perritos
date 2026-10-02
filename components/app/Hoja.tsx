@@ -35,7 +35,12 @@ export function Hoja({ abierta, titulo, onCerrar, children }: { abierta: boolean
               <h2 id="titulo-hoja" ref={titular} tabIndex={-1} className="text-2xl font-bold leading-tight outline-none">
                 {titulo}
               </h2>
-              <button type="button" onClick={onCerrar} aria-label="Cerrar" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]">
+              <button
+                type="button"
+                onClick={onCerrar}
+                aria-label="Cerrar"
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--text-secondary)] transition-transform duration-150 active:scale-[0.95] [touch-action:manipulation]"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/accion-cerrar.png" alt="" width={22} height={22} className="object-contain" />
               </button>
