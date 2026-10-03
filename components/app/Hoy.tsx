@@ -147,6 +147,20 @@ function Anillo({ hechos, total }: { hechos: number; total: number }) {
   );
 }
 
+/** Insignia de marca (esquina superior derecha de cada pestaña): el mismo logo en todos los paneles. */
+export function LogoMarca() {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/brand/logo.png"
+      alt="La Doctora Perritos"
+      width={36}
+      height={36}
+      className="size-9 shrink-0 self-start rounded-full bg-[var(--surface-2)] object-cover object-top"
+    />
+  );
+}
+
 export function Avatar({ perro, grande = false, tam, iconoTam }: { perro: Perro; grande?: boolean; tam?: string; iconoTam?: number }) {
   const clase = tam ?? (grande ? 'size-24' : 'size-14');
   const icono = iconoTam ?? (grande ? 40 : 28);
@@ -433,14 +447,7 @@ export default function Hoy() {
                 <h1 className="mt-1 text-2xl font-bold leading-tight">{titulo}</h1>
               </div>
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/logo.png"
-              alt="La Doctora Perritos"
-              width={36}
-              height={36}
-              className="size-9 shrink-0 self-start rounded-full bg-[var(--surface-2)] object-cover object-top"
-            />
+            <LogoMarca />
           </header>
 
           {total > 0 && (

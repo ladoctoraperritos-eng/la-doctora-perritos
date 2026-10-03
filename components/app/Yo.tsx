@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { motion, MotionConfig } from 'motion/react';
 import { Hoja } from './Hoja';
 import { Borrar, botonPrimario, botonSecundario, Campo, campo, procesarFoto } from './Perros';
-import { entrada, PersonaCirculo } from './Hoy';
+import { entrada, LogoMarca, PersonaCirculo } from './Hoy';
 import {
   guardarAjustes,
   guardarTutor,
@@ -190,8 +190,9 @@ export default function Yo() {
     <MotionConfig reducedMotion="user">
       <>
         <main className="flex flex-1 flex-col gap-8 px-6 pb-6 pt-6">
-          <header>
+          <header className="flex items-start justify-between gap-4">
             <h1 className="text-3xl font-bold leading-tight">Yo</h1>
+            <LogoMarca />
           </header>
 
           <motion.section {...entrada(0)} aria-label="Mi cuenta" className="borde-degradado flex items-center gap-4 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]">

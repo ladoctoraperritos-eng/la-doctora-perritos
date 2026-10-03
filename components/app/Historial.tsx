@@ -14,7 +14,7 @@ import { motion, MotionConfig } from 'motion/react';
 import { ClipboardList } from 'lucide-react';
 import { IMAGEN_NOTA } from './Bitacora';
 import { NOMBRE_INTENSIDAD, TONO_INTENSIDAD } from './Bitacora';
-import { ChipIcono, entrada, PersonaCirculo, tono } from './Hoy';
+import { ChipIcono, entrada, LogoMarca, PersonaCirculo, tono } from './Hoy';
 import { Hoja } from './Hoja';
 import { SlidersHorizontal } from 'lucide-react';
 import { diasHasta, obtenerApp, suscribirApp, type EstadoApp, type Perro, type Registro, type Cuidado, type Nota, type Tipo } from '@/lib/app';
@@ -160,9 +160,12 @@ function Contenido({
     <MotionConfig reducedMotion="user">
       <>
         <main className="flex flex-1 flex-col gap-6 px-6 pb-6 pt-6">
-          <header>
-            <h1 className="text-3xl font-bold leading-tight">Historial</h1>
-            <p className="mt-1 text-base text-[var(--text-secondary)]">Quién hizo qué y cuándo.</p>
+          <header className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="text-3xl font-bold leading-tight">Historial</h1>
+              <p className="mt-1 text-base text-[var(--text-secondary)]">Quién hizo qué y cuándo.</p>
+            </div>
+            <LogoMarca />
           </header>
 
           {totalSemana > 0 && e.tutores.length > 1 && (

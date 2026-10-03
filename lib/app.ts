@@ -77,11 +77,14 @@ export interface Nota {
   quien: string;
 }
 
-/** Veterinario de confianza de la familia (uno por cuenta): para llamar directo desde el SOS. */
+/** Un veterinario de contacto de la familia: para llamar directo desde el SOS. */
 export interface Veterinario {
   nombre?: string;
   telefono?: string;
 }
+/** Tipo de veterinario: el de siempre (horario normal) y el de urgencias (24/7, para cuando el de
+ * cabecera no atiende). Muchas clínicas no dan servicio 24 horas, así que suelen ser dos contactos distintos. */
+export type TipoVeterinario = 'habitual' | 'urgencia';
 
 export interface EstadoApp {
   plan: IdPlan;
@@ -95,7 +98,8 @@ export interface EstadoApp {
   yo: string;
   cuidados: Cuidado[];
   registros: Registro[];
-  veterinario?: Veterinario;
+  veterinarioHabitual?: Veterinario;
+  veterinarioUrgencia?: Veterinario;
 }
 
 // ── Fechas ──
@@ -397,10 +401,11 @@ export function guardarAjustes(parcial: Partial<Ajustes>): void {
   const e = obtenerApp();
   cambiar({ ...e, ajustes: { ...e.ajustes, ...parcial } });
 }
-/** Guarda el nombre y/o teléfono del veterinario de confianza (para el botón «Llamar» del SOS). */
-export function guardarVeterinario(parcial: Partial<Veterinario>): void {
+/** Guarda el nombre y/o teléfono de un veterinario (habitual o de urgencia) para el botón «Llamar» del SOS. */
+export function guardarVeterinario(tipo: TipoVeterinario, parcial: Partial<Veterinario>): void {
   const e = obtenerApp();
-  cambiar({ ...e, veterinario: { ...e.veterinario, ...parcial } });
+  const clave = tipo === 'habitual' ? 'veterinarioHabitual' : 'veterinarioUrgencia';
+  cambiar({ ...e, [clave]: { ...e[clave], ...parcial } });
 }
 
 // ── Exportar ──

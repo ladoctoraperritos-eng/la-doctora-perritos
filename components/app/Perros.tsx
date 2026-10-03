@@ -17,7 +17,7 @@ import type { Cpu } from 'lucide-react';
 import { User } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { FilaNota, FormNota } from './Bitacora';
-import { Avatar, ChipIcono, entrada, textoDias, tono } from './Hoy';
+import { Avatar, ChipIcono, entrada, LogoMarca, textoDias, tono } from './Hoy';
 import {
   claveDia,
   diasHasta,
@@ -729,11 +729,14 @@ export default function Perros() {
 function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: Date; limite: number; onAbrir: (id: string) => void; onAgregar: () => void }) {
   return (
     <>
-      <header>
-        <h1 className="text-3xl font-bold leading-tight">Tus mascotas</h1>
-        <p className="mt-1 text-base text-[var(--text-secondary)]">
-          {e.perros.length} de {limite} · Plan {PLANES[e.plan].nombre}
-        </p>
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold leading-tight">Tus mascotas</h1>
+          <p className="mt-1 text-base text-[var(--text-secondary)]">
+            {e.perros.length} de {limite} · Plan {PLANES[e.plan].nombre}
+          </p>
+        </div>
+        <LogoMarca />
       </header>
       <ul className="flex flex-col gap-3">
         {e.perros.map((p, i) => {

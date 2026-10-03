@@ -14,11 +14,17 @@ import { MotionConfig, motion } from 'motion/react';
 import { ChevronDown, Phone } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Campo, CampoTelefono, botonPrimario, campo } from './Perros';
-import { entrada, tono } from './Hoy';
-import { guardarVeterinario, obtenerApp, suscribirApp } from '@/lib/app';
+import { entrada, LogoMarca, tono } from './Hoy';
+import { guardarVeterinario, obtenerApp, suscribirApp, type TipoVeterinario, type Veterinario } from '@/lib/app';
 import { NIVELES_TRIAGE, SITUACIONES, type NivelTriage, type SituacionSos } from '@/lib/sos';
 
 const TONO_NIVEL: Record<NivelTriage, keyof typeof tono> = { emergencia: 'atrasado', urgencia: 'pronto', control: 'normal' };
+
+/** Muchas clínicas no dan atención 24 horas: se guardan dos contactos, el de siempre y el de urgencias. */
+const COPY_VET: Record<TipoVeterinario, { etiqueta: string; vacio: string; tituloHoja: string }> = {
+  urgencia: { etiqueta: 'Veterinario de urgencia (24/7)', vacio: 'Guarda el teléfono de tu veterinario de urgencia (24/7)', tituloHoja: 'Veterinario de urgencia (24/7)' },
+  habitual: { etiqueta: 'Veterinario de cabecera', vacio: 'Guarda el teléfono de tu veterinario de cabecera', tituloHoja: 'Veterinario de cabecera' },
+};
 
 function FilaSituacion({ s, i, onAbrir }: { s: SituacionSos; i: number; onAbrir: () => void }) {
   const Icono = s.icono;
@@ -75,38 +81,49 @@ function Triage() {
   );
 }
 
-function TarjetaVeterinario({ nombre, telefono, onEditar }: { nombre?: string; telefono?: string; onEditar: () => void }) {
+/** Tarjeta de un contacto veterinario. El de urgencia va destacado (es el que importa en el SOS); el de
+ * cabecera va en tono neutro, como dato de respaldo. */
+function TarjetaVeterinario({ tipo, nombre, telefono, onEditar }: { tipo: TipoVeterinario; nombre?: string; telefono?: string; onEditar: () => void }) {
+  const destacado = tipo === 'urgencia';
+  const { etiqueta, vacio } = COPY_VET[tipo];
   if (!telefono) {
     return (
       <button
         type="button"
         onClick={onEditar}
-        className="flex min-h-16 w-full items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--danger)] p-4 text-left text-base font-semibold text-[var(--danger)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        className={`flex min-h-16 w-full items-center gap-3 rounded-[var(--radius-card)] border-2 border-dashed p-4 text-left text-base font-semibold transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation] ${
+          destacado ? 'border-[var(--danger)] text-[var(--danger)]' : 'border-[var(--border-ui)] text-[var(--text-secondary)]'
+        }`}
       >
         <Phone size={20} className="shrink-0" aria-hidden="true" />
-        Guarda el teléfono de tu veterinario de urgencia
+        {vacio}
       </button>
     );
   }
   return (
     <section
-      aria-label="Tu veterinario"
-      className="flex items-center gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]"
-      style={{
-        border: '1px solid transparent',
-        background:
-          'linear-gradient(color-mix(in oklab, var(--accent) 7%, var(--surface)), color-mix(in oklab, var(--accent) 7%, var(--surface))) padding-box, linear-gradient(135deg, color-mix(in oklab, var(--accent) 60%, transparent), transparent 60%) border-box',
-      }}
+      aria-label={etiqueta}
+      className="flex items-center gap-3 rounded-[var(--radius-card)] p-4"
+      style={
+        destacado
+          ? {
+              border: '1px solid transparent',
+              boxShadow: 'var(--shadow-2)',
+              background:
+                'linear-gradient(color-mix(in oklab, var(--accent) 7%, var(--surface)), color-mix(in oklab, var(--accent) 7%, var(--surface))) padding-box, linear-gradient(135deg, color-mix(in oklab, var(--accent) 60%, transparent), transparent 60%) border-box',
+            }
+          : { border: '1px solid var(--border-ui)', boxShadow: 'var(--shadow-1)', background: 'var(--surface)' }
+      }
     >
       <div className="min-w-0 flex-1">
-        <p className="text-sm text-[var(--text-secondary)]">Tu veterinario</p>
+        <p className="text-sm text-[var(--text-secondary)]">{etiqueta}</p>
         <p className="text-base font-semibold">{nombre || 'Sin nombre guardado'}</p>
         <p className="text-base font-semibold tabular-nums text-[var(--text-secondary)]">{telefono}</p>
       </div>
       <button
         type="button"
         onClick={onEditar}
-        aria-label="Editar datos del veterinario"
+        aria-label={`Editar ${etiqueta.toLowerCase()}`}
         className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)] transition-transform duration-150 active:scale-[0.95] [touch-action:manipulation]"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -114,8 +131,10 @@ function TarjetaVeterinario({ nombre, telefono, onEditar }: { nombre?: string; t
       </button>
       <a
         href={`tel:${telefono.replace(/[\s()-]/g, '')}`}
-        aria-label={`Llamar a ${nombre || 'tu veterinario'}`}
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--danger)] text-[var(--bg)] transition-transform duration-150 active:scale-[0.95] [touch-action:manipulation]"
+        aria-label={`Llamar a ${nombre || etiqueta}`}
+        className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full transition-transform duration-150 active:scale-[0.95] [touch-action:manipulation] ${
+          destacado ? 'bg-[var(--danger)] text-[var(--bg)]' : 'border-2 border-[var(--accent)] text-[var(--accent)]'
+        }`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/accion-llamar.png" alt="" width={20} height={20} className="object-contain" />
@@ -124,7 +143,7 @@ function TarjetaVeterinario({ nombre, telefono, onEditar }: { nombre?: string; t
   );
 }
 
-function FormVeterinario({ nombre, telefono, onListo }: { nombre?: string; telefono?: string; onListo: () => void }) {
+function FormVeterinario({ tipo, nombre, telefono, onListo }: { tipo: TipoVeterinario; nombre?: string; telefono?: string; onListo: () => void }) {
   const [n, setN] = useState(nombre ?? '');
   const [t, setT] = useState(telefono ?? '');
   const [errorTelefono, setErrorTelefono] = useState<string | null>(null);
@@ -137,16 +156,16 @@ function FormVeterinario({ nombre, telefono, onListo }: { nombre?: string; telef
           setErrorTelefono('Escribe un teléfono válido, por ejemplo +56 9 1234 5678.');
           return;
         }
-        guardarVeterinario({ nombre: n.trim() || undefined, telefono: t.trim() || undefined });
+        guardarVeterinario(tipo, { nombre: n.trim() || undefined, telefono: t.trim() || undefined });
         onListo();
       }}
       noValidate
     >
-      <Campo id="nombre-vet" etiqueta="Nombre de tu veterinario o clínica" opcional>
-        <input id="nombre-vet" value={n} maxLength={60} onChange={(e) => setN(e.target.value)} placeholder="Por ejemplo, Clínica San Roque" className={campo} />
+      <Campo id={`nombre-vet-${tipo}`} etiqueta="Nombre del veterinario o clínica" opcional>
+        <input id={`nombre-vet-${tipo}`} value={n} maxLength={60} onChange={(e) => setN(e.target.value)} placeholder="Por ejemplo, Clínica San Roque" className={campo} />
       </Campo>
       <CampoTelefono
-        id="telefono-vet"
+        id={`telefono-vet-${tipo}`}
         valor={t}
         onCambiar={(v) => {
           setT(v);
@@ -163,20 +182,26 @@ function FormVeterinario({ nombre, telefono, onListo }: { nombre?: string; telef
   );
 }
 
-function Lista({ e, onAbrir, onEditarVet }: { e: ReturnType<typeof obtenerApp>; onAbrir: (id: string) => void; onEditarVet: () => void }) {
+function Lista({ e, onAbrir, onEditarVet }: { e: ReturnType<typeof obtenerApp>; onAbrir: (id: string) => void; onEditarVet: (tipo: TipoVeterinario) => void }) {
   return (
     <>
-      <header>
-        <h1 className="text-3xl font-bold leading-tight">SOS</h1>
-        <p className="mt-1 text-base text-[var(--text-secondary)]">Qué hacer ahora mismo, antes de llegar al veterinario.</p>
-        <p className="mt-2 flex items-start gap-1.5 text-sm text-[var(--text-tertiary)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/accion-alerta.png" alt="" width={14} height={14} className="mt-0.5 shrink-0 object-contain" />
-          Esta guía no reemplaza a tu veterinario. Ante cualquier duda, llama o ve directo a una clínica.
-        </p>
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold leading-tight">SOS</h1>
+          <p className="mt-1 text-base text-[var(--text-secondary)]">Qué hacer ahora mismo, antes de llegar al veterinario.</p>
+          <p className="mt-2 flex items-start gap-1.5 text-sm text-[var(--text-tertiary)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/accion-alerta.png" alt="" width={14} height={14} className="mt-0.5 shrink-0 object-contain" />
+            Esta guía no reemplaza a tu veterinario. Ante cualquier duda, llama o ve directo a una clínica.
+          </p>
+        </div>
+        <LogoMarca />
       </header>
 
-      <TarjetaVeterinario nombre={e.veterinario?.nombre} telefono={e.veterinario?.telefono} onEditar={onEditarVet} />
+      <div className="flex flex-col gap-2">
+        <TarjetaVeterinario tipo="urgencia" nombre={e.veterinarioUrgencia?.nombre} telefono={e.veterinarioUrgencia?.telefono} onEditar={() => onEditarVet('urgencia')} />
+        <TarjetaVeterinario tipo="habitual" nombre={e.veterinarioHabitual?.nombre} telefono={e.veterinarioHabitual?.telefono} onEditar={() => onEditarVet('habitual')} />
+      </div>
 
       <Triage />
 
@@ -194,17 +219,16 @@ function Lista({ e, onAbrir, onEditarVet }: { e: ReturnType<typeof obtenerApp>; 
 
 function Detalle({
   s,
-  telefono,
-  nombreVet,
+  vetParaLlamar,
   onVolver,
   onEditarVet,
 }: {
   s: SituacionSos;
-  telefono?: string;
-  nombreVet?: string;
+  vetParaLlamar?: Veterinario;
   onVolver: () => void;
-  onEditarVet: () => void;
+  onEditarVet: (tipo: TipoVeterinario) => void;
 }) {
+  const telefono = vetParaLlamar?.telefono;
   return (
     <>
       <button
@@ -251,7 +275,7 @@ function Detalle({
       </motion.section>
 
       {s.evitar && (
-        <motion.section {...entrada(3)} aria-label="Qué evitar" className="rounded-[var(--radius-card)] p-4" style={{ background: 'color-mix(in oklab, var(--warn) 10%, var(--surface))' }}>
+        <motion.section {...entrada(3)} aria-label="Qué evitar" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] p-4" style={{ background: 'color-mix(in oklab, var(--warn) 10%, var(--surface))' }}>
           <h2 className="text-base font-bold text-[var(--warn)]">Qué evitar</h2>
           <ul className="mt-2 flex flex-col gap-1">
             {s.evitar.map((x) => (
@@ -263,7 +287,7 @@ function Detalle({
         </motion.section>
       )}
 
-      <motion.section {...entrada(4)} aria-label="Cuándo ir al veterinario" className="rounded-[var(--radius-card)] p-4" style={{ background: 'color-mix(in oklab, var(--danger) 10%, var(--surface))' }}>
+      <motion.section {...entrada(4)} aria-label="Cuándo ir al veterinario" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] p-4" style={{ background: 'color-mix(in oklab, var(--danger) 10%, var(--surface))' }}>
         <h2 className="text-base font-bold text-[var(--danger)]">Ve al veterinario si…</h2>
         <ul className="mt-2 flex flex-col gap-1">
           {s.veterinarioSi.map((x) => (
@@ -281,12 +305,12 @@ function Detalle({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/accion-llamar.png" alt="" width={22} height={22} className="object-contain" />
-          Llamar a {nombreVet || 'tu veterinario'}
+          Llamar a {vetParaLlamar?.nombre || 'tu veterinario'}
         </a>
       ) : (
         <button
           type="button"
-          onClick={onEditarVet}
+          onClick={() => onEditarVet('urgencia')}
           className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[var(--radius-button)] border-2 border-dashed border-[var(--danger)] px-4 text-base font-semibold text-[var(--danger)] transition-transform duration-150 active:scale-[0.97] [touch-action:manipulation]"
         >
           <Phone size={20} className="shrink-0" aria-hidden="true" />
@@ -300,7 +324,7 @@ function Detalle({
 export default function Sos() {
   const e = useSyncExternalStore(suscribirApp, obtenerApp, () => null);
   const [situacionId, setSituacionId] = useState<string | null>(null);
-  const [editandoVet, setEditandoVet] = useState(false);
+  const [editandoVet, setEditandoVet] = useState<TipoVeterinario | null>(null);
 
   if (!e) {
     return (
@@ -314,26 +338,29 @@ export default function Sos() {
   }
 
   const situacion = SITUACIONES.find((s) => s.id === situacionId) ?? null;
+  // En una emergencia, el de urgencia (24/7) es a quien se llama primero; si no está guardado, el de cabecera.
+  const vetParaLlamar = e.veterinarioUrgencia?.telefono ? e.veterinarioUrgencia : e.veterinarioHabitual;
 
   return (
     <MotionConfig reducedMotion="user">
       <>
         <main className="flex flex-1 flex-col gap-6 px-6 pb-6 pt-6">
           {!situacion ? (
-            <Lista e={e} onAbrir={setSituacionId} onEditarVet={() => setEditandoVet(true)} />
+            <Lista e={e} onAbrir={setSituacionId} onEditarVet={setEditandoVet} />
           ) : (
-            <Detalle
-              s={situacion}
-              telefono={e.veterinario?.telefono}
-              nombreVet={e.veterinario?.nombre}
-              onVolver={() => setSituacionId(null)}
-              onEditarVet={() => setEditandoVet(true)}
-            />
+            <Detalle s={situacion} vetParaLlamar={vetParaLlamar} onVolver={() => setSituacionId(null)} onEditarVet={setEditandoVet} />
           )}
         </main>
 
-        <Hoja abierta={editandoVet} titulo="Tu veterinario de urgencia" onCerrar={() => setEditandoVet(false)}>
-          <FormVeterinario nombre={e.veterinario?.nombre} telefono={e.veterinario?.telefono} onListo={() => setEditandoVet(false)} />
+        <Hoja abierta={editandoVet !== null} titulo={editandoVet ? COPY_VET[editandoVet].tituloHoja : ''} onCerrar={() => setEditandoVet(null)}>
+          {editandoVet && (
+            <FormVeterinario
+              tipo={editandoVet}
+              nombre={e[editandoVet === 'urgencia' ? 'veterinarioUrgencia' : 'veterinarioHabitual']?.nombre}
+              telefono={e[editandoVet === 'urgencia' ? 'veterinarioUrgencia' : 'veterinarioHabitual']?.telefono}
+              onListo={() => setEditandoVet(null)}
+            />
+          )}
         </Hoja>
       </>
     </MotionConfig>
