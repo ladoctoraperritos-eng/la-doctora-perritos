@@ -338,3 +338,9 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - WhatsApp (Cloud API): cobro por mensaje según país y categoría; plantillas aprobadas por Meta; los avisos tipo "utility" deben ser no promocionales y pedidos o esenciales para la persona; requiere consentimiento explícito. Tarifas para Chile y México: NO confirmadas, verificar en la tabla oficial de Meta antes de decidir.
 - Recomendación propuesta (no aprobada aún): web push (Android/escritorio, con guía de instalación para iPhone) + WhatsApp para recordatorios críticos + correo (Resend) como respaldo.
 - Pendiente: confirmar tarifas LATAM de WhatsApp y decidir presupuesto. Va después de conectar Supabase.
+
+## Plan de prueba de notificaciones (decidido por la creadora, 2026-10-03)
+- Antes de integrar WhatsApp: probar con 5-10 personas con iPhone. Pedirles instalar la app en la pantalla de inicio, dar permiso de notificaciones y revisar si les llegan avisos de prueba.
+- Preguntarles qué esperarían de un aviso, en qué horario les sirve y si prefieren WhatsApp o correo.
+- Decisión según resultados: si la mayoría recibe los avisos, web push puede bastar por ahora. Si no los reciben o no instalan la app, integrar WhatsApp (después de conectar Supabase).
+- Mientras tanto: pedir el permiso de notificaciones de forma clara en el onboarding, para no rehacerlo después.
