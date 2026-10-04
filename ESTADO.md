@@ -332,3 +332,9 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Pedido del usuario: que el logo de «La Doctora Perritos» (ya en el header de «Hoy») aparezca también en Mascotas, Historial, SOS y Yo — las 5 pestañas, no solo una.
 - Se extrajo `LogoMarca` (componente compartido, exportado desde `Hoy.tsx`, donde ya viven `Avatar`/`PersonaCirculo`/`entrada`/etc.) y se agregó al `<header>` de `Perros.tsx` (lista «Tus mascotas»), `Historial.tsx`, `Yo.tsx` y `Sos.tsx`, con el mismo tratamiento (size-9, circular, recortado arriba) que ya tenía Hoy. La ficha individual de un perro (`Perros.tsx` → `Ficha`) NO lo lleva: ya tiene su propio header con foto del perro + botón de editar, y es una sub-pantalla, no una de las 5 pestañas nombradas.
 - Verificado: tsc ✓ · eslint ✓ · `npm run build` ✓; revisado a 375px en las 5 pestañas.
+
+## Notificaciones: canales (investigado 2026-10-03, pendiente de decisión)
+- Web push en iPhone solo funciona con la app instalada en la pantalla de inicio (iOS 16.4+); desde Safari no llega. En Android/Chrome funciona sin instalar. Riesgo: muchas usuarias en iPhone no recibirían los recordatorios, que son el valor central de la app.
+- WhatsApp (Cloud API): cobro por mensaje según país y categoría; plantillas aprobadas por Meta; los avisos tipo "utility" deben ser no promocionales y pedidos o esenciales para la persona; requiere consentimiento explícito. Tarifas para Chile y México: NO confirmadas, verificar en la tabla oficial de Meta antes de decidir.
+- Recomendación propuesta (no aprobada aún): web push (Android/escritorio, con guía de instalación para iPhone) + WhatsApp para recordatorios críticos + correo (Resend) como respaldo.
+- Pendiente: confirmar tarifas LATAM de WhatsApp y decidir presupuesto. Va después de conectar Supabase.
