@@ -4,11 +4,15 @@
 
 import { Activity, Droplet, FlaskConical, HeartPulse, Thermometer, Wind, Zap, type LucideIcon } from 'lucide-react';
 
+export type NivelTriage = 'emergencia' | 'urgencia' | 'control';
+
 export interface SituacionSos {
   id: string;
   titulo: string;
   /** Ícono distinto por situación: en la lista, las 7 tarjetas deben distinguirse de un vistazo. */
   icono: LucideIcon;
+  /** Gravedad según la tabla de triage del ebook (módulo 7); colorea el borde de la tarjeta. */
+  nivel: NivelTriage;
   resumen: string;
   senales: string[];
   pasos: string[];
@@ -21,6 +25,7 @@ export const SITUACIONES: SituacionSos[] = [
     id: 'atragantamiento',
     titulo: 'Atragantamiento o asfixia',
     icono: Wind,
+    nivel: 'emergencia',
     resumen: 'Un objeto bloquea parcial o totalmente sus vías respiratorias.',
     senales: ['Arcadas sin vómito', 'Dificultad para respirar', 'Tos intensa', 'Lengua o encías azuladas', 'Agitación o colapso repentino'],
     pasos: [
@@ -36,6 +41,7 @@ export const SITUACIONES: SituacionSos[] = [
     id: 'convulsiones',
     titulo: 'Convulsiones',
     icono: Zap,
+    nivel: 'emergencia',
     resumen: 'Descargas eléctricas anormales en el cerebro: epilepsia, fiebre, intoxicación o golpe.',
     senales: ['Pérdida de consciencia', 'Movimientos espasmódicos', 'Rigidez muscular', 'Salivación excesiva', 'Pérdida de orina o heces'],
     pasos: [
@@ -51,6 +57,7 @@ export const SITUACIONES: SituacionSos[] = [
     id: 'intoxicacion',
     titulo: 'Envenenamiento o intoxicación',
     icono: FlaskConical,
+    nivel: 'emergencia',
     resumen: 'Comió algo tóxico: chocolate, cebolla, uvas, una planta, un producto de limpieza o un medicamento humano.',
     senales: ['Vómitos o diarrea', 'Temblores o convulsiones', 'Pupilas dilatadas', 'Babeo excesivo', 'Colapso'],
     pasos: [
@@ -67,6 +74,7 @@ export const SITUACIONES: SituacionSos[] = [
     id: 'heridas',
     titulo: 'Heridas abiertas y hemorragias',
     icono: Droplet,
+    nivel: 'emergencia',
     resumen: 'Cortes, raspones, mordeduras o heridas punzantes con sangrado.',
     senales: ['Sangrado visible', 'Cojera o dolor al tocar la zona', 'El perro lame la zona insistentemente'],
     pasos: [
@@ -82,6 +90,7 @@ export const SITUACIONES: SituacionSos[] = [
     id: 'golpe-calor',
     titulo: 'Golpe de calor',
     icono: Thermometer,
+    nivel: 'emergencia',
     resumen: 'Temperatura muy alta por ejercicio intenso, sol directo o quedar encerrado en un auto.',
     senales: ['Jadeo excesivo', 'Temperatura mayor a 40 °C', 'Encías rojas brillantes', 'Temblores o debilidad', 'Desmayo'],
     pasos: [
@@ -97,6 +106,7 @@ export const SITUACIONES: SituacionSos[] = [
     id: 'rcp',
     titulo: 'RCP canina (reanimación)',
     icono: HeartPulse,
+    nivel: 'emergencia',
     resumen: 'Solo cuando el perro NO respira y NO tiene pulso.',
     senales: ['No respira y no tiene pulso', 'Está inconsciente, no responde a estímulos', 'Encías grisáceas o azuladas'],
     pasos: [
@@ -113,6 +123,7 @@ export const SITUACIONES: SituacionSos[] = [
     id: 'heimlich',
     titulo: 'Maniobra de Heimlich adaptada',
     icono: Activity,
+    nivel: 'emergencia',
     resumen: 'Solo si no respira en absoluto por un objeto atascado (comida, juguete, hueso).',
     senales: ['No puede inhalar nada de aire', 'No logra expulsar el objeto por sí solo'],
     pasos: [
@@ -125,8 +136,6 @@ export const SITUACIONES: SituacionSos[] = [
     veterinarioSi: ['Siempre, incluso si logra expulsar el objeto.'],
   },
 ];
-
-export type NivelTriage = 'emergencia' | 'urgencia' | 'control';
 
 export const NIVELES_TRIAGE: { nivel: NivelTriage; titulo: string; detalle: string; ejemplos: string[] }[] = [
   {

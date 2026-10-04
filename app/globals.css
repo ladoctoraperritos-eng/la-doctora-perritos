@@ -20,6 +20,14 @@ body {
     linear-gradient(135deg, color-mix(in oklab, var(--accent) 40%, transparent), transparent 60%) border-box;
 }
 
+/* Variante destacada de .borde-degradado: borde más marcado y tinte de fondo del acento (tarjeta protagonista). */
+.borde-destacado {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(color-mix(in oklab, var(--accent) 7%, var(--surface)), color-mix(in oklab, var(--accent) 7%, var(--surface))) padding-box,
+    linear-gradient(135deg, color-mix(in oklab, var(--accent) 60%, transparent), transparent 60%) border-box;
+}
+
 /* Dispositivo ownable de marca (FICHA-ARTE): duotone del acento sobre la foto real del perro. */
 .foto-duotone {
   position: relative;

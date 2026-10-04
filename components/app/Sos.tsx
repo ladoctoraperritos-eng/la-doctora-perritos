@@ -11,7 +11,7 @@
 
 import { useState, useSyncExternalStore } from 'react';
 import { MotionConfig, motion } from 'motion/react';
-import { ChevronDown, Phone } from 'lucide-react';
+import { ChevronDown, ChevronRight, Phone } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { Campo, CampoTelefono, botonPrimario, campo } from './Perros';
 import { entrada, LogoMarca, tono } from './Hoy';
@@ -26,25 +26,28 @@ const COPY_VET: Record<TipoVeterinario, { etiqueta: string; vacio: string; titul
   habitual: { etiqueta: 'Veterinario de cabecera', vacio: 'Guarda el teléfono de tu veterinario de cabecera', tituloHoja: 'Veterinario de cabecera' },
 };
 
+const COLOR_NIVEL: Record<NivelTriage, string> = { emergencia: 'var(--danger)', urgencia: 'var(--warn)', control: 'var(--accent)' };
+
 function FilaSituacion({ s, i, onAbrir }: { s: SituacionSos; i: number; onAbrir: () => void }) {
   const Icono = s.icono;
+  const color = COLOR_NIVEL[s.nivel];
   return (
     <motion.li {...entrada(i)}>
       <button
         type="button"
         onClick={onAbrir}
         aria-label={`Ver qué hacer: ${s.titulo}`}
-        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-l-4 border-[var(--border-ui)] border-l-[var(--danger)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        style={{ boxShadow: `inset 4px 0 0 ${color}, var(--shadow-1)` }}
       >
-        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)]" style={{ background: 'color-mix(in oklab, var(--danger) 14%, var(--surface))' }}>
-          <Icono size={22} color="var(--danger)" aria-hidden="true" />
+        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)]" style={{ background: `color-mix(in oklab, ${color} 14%, var(--surface))` }}>
+          <Icono size={22} color={color} aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-base font-semibold">{s.titulo}</span>
           <span className="block text-sm text-[var(--text-secondary)]">{s.resumen}</span>
         </span>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/accion-avanzar.png" alt="" width={20} height={20} className="shrink-0 object-contain" />
+        <ChevronRight size={20} color="var(--accent)" aria-hidden="true" className="shrink-0" />
       </button>
     </motion.li>
   );
@@ -103,17 +106,9 @@ function TarjetaVeterinario({ tipo, nombre, telefono, onEditar }: { tipo: TipoVe
   return (
     <section
       aria-label={etiqueta}
-      className="flex items-center gap-3 rounded-[var(--radius-card)] p-4"
-      style={
-        destacado
-          ? {
-              border: '1px solid transparent',
-              boxShadow: 'var(--shadow-2)',
-              background:
-                'linear-gradient(color-mix(in oklab, var(--accent) 7%, var(--surface)), color-mix(in oklab, var(--accent) 7%, var(--surface))) padding-box, linear-gradient(135deg, color-mix(in oklab, var(--accent) 60%, transparent), transparent 60%) border-box',
-            }
-          : { border: '1px solid var(--border-ui)', boxShadow: 'var(--shadow-1)', background: 'var(--surface)' }
-      }
+      className={`flex items-center gap-3 rounded-[var(--radius-card)] p-4 ${
+        destacado ? 'borde-destacado shadow-[var(--shadow-2)]' : 'border border-[var(--border-ui)] bg-[var(--surface)] shadow-[var(--shadow-1)]'
+      }`}
     >
       <div className="min-w-0 flex-1">
         <p className="text-sm text-[var(--text-secondary)]">{etiqueta}</p>
@@ -275,7 +270,7 @@ function Detalle({
       </motion.section>
 
       {s.evitar && (
-        <motion.section {...entrada(3)} aria-label="Qué evitar" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] p-4" style={{ background: 'color-mix(in oklab, var(--warn) 10%, var(--surface))' }}>
+        <motion.section {...entrada(3)} aria-label="Qué evitar" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
           <h2 className="text-base font-bold text-[var(--warn)]">Qué evitar</h2>
           <ul className="mt-2 flex flex-col gap-1">
             {s.evitar.map((x) => (
@@ -287,7 +282,7 @@ function Detalle({
         </motion.section>
       )}
 
-      <motion.section {...entrada(4)} aria-label="Cuándo ir al veterinario" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] p-4" style={{ background: 'color-mix(in oklab, var(--danger) 10%, var(--surface))' }}>
+      <motion.section {...entrada(4)} aria-label="Cuándo ir al veterinario" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
         <h2 className="text-base font-bold text-[var(--danger)]">Ve al veterinario si…</h2>
         <ul className="mt-2 flex flex-col gap-1">
           {s.veterinarioSi.map((x) => (
