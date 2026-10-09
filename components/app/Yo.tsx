@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, MotionConfig } from 'motion/react';
 import { Hoja } from './Hoja';
-import { Borrar, botonPrimario, botonSecundario, Campo, campo, procesarFoto } from './Perros';
+import { Borrar, botonPrimario, botonSecundario, Campo, campo, ENCUADRE_INICIAL, EncuadreFoto, type Encuadre, leerFoto, recortarFoto } from './Perros';
 import { entrada, LogoMarca, PersonaCirculo } from './Hoy';
 import {
   guardarAjustes,
@@ -29,10 +29,11 @@ import {
   type Ajustes,
   type Tutor,
 } from '@/lib/app';
-import { correoValido } from '@/lib/auth';
+import { correoValido, enviarEnlaceDeAcceso } from '@/lib/auth';
 import { CONDICIONES } from '@/lib/oferta';
 import { reiniciar as reiniciarOnboarding } from '@/lib/onboarding';
 import { PLANES } from '@/lib/planes';
+import { invitarCuidador } from '@/lib/sincronizar';
 
 function descargar(nombre: string, contenido: string, tipo: string) {
   const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
@@ -50,7 +51,7 @@ function Interruptor({ activo, onCambiar, etiqueta, detalle }: { activo: boolean
       role="switch"
       aria-checked={activo}
       onClick={() => onCambiar(!activo)}
-      className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
+      className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
     >
       <span className="flex-1">
         <span className="block text-base font-semibold">{etiqueta}</span>
@@ -67,16 +68,20 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
   const [nombre, setNombre] = useState(tutor?.nombre ?? '');
   const [correo, setCorreo] = useState(tutor?.correo ?? '');
   const [foto, setFoto] = useState<string | undefined>(tutor?.foto);
+  const [original, setOriginal] = useState<string | undefined>(undefined);
+  const [enfoque, setEnfoque] = useState<Encuadre>(ENCUADRE_INICIAL);
   const [cargandoFoto, setCargandoFoto] = useState(false);
   const entradaFoto = useRef<HTMLInputElement>(null);
   const [errores, setErrores] = useState<Record<string, string>>({});
+  const [invitando, setInvitando] = useState(false);
 
   const elegirFoto = async (archivo: File | undefined) => {
     if (!archivo) return;
     setCargandoFoto(true);
     setErrores((x) => ({ ...x, foto: '' }));
     try {
-      setFoto(await procesarFoto(archivo));
+      setOriginal(await leerFoto(archivo));
+      setEnfoque(ENCUADRE_INICIAL);
     } catch (err) {
       setErrores((x) => ({ ...x, foto: err instanceof Error ? err.message : 'No pudimos cargar la foto.' }));
     } finally {
@@ -90,15 +95,38 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
     if (!esYo && correo.trim() && !correoValido(correo)) e.correo = 'Escribe un correo válido, por ejemplo nombre@correo.com.';
     setErrores(e);
     if (Object.keys(e).length) return;
-    guardarTutor({
-      ...tutor,
-      id: tutor?.id ?? nuevoId('t'),
-      nombre: nombre.trim(),
-      correo: esYo ? tutor?.correo : correo.trim() || undefined,
-      pendiente: esYo ? undefined : tutor ? tutor.pendiente : true,
-      foto,
-    });
+    void (async () => {
+      let fotoFinal = foto;
+      if (original) {
+        try {
+          fotoFinal = await recortarFoto(original, enfoque);
+        } catch {
+          setErrores((x) => ({ ...x, foto: 'No pudimos recortar la foto. Prueba con otra.' }));
+          return;
+        }
+      }
+      guardarTutor({
+        ...tutor,
+        id: tutor?.id ?? nuevoId('t'),
+        nombre: nombre.trim(),
+        correo: esYo ? tutor?.correo : correo.trim() || undefined,
+        pendiente: esYo ? undefined : tutor ? tutor.pendiente : true,
+        foto: fotoFinal,
+      });
+      if (!esYo && correo.trim()) {
+        setInvitando(true);
+        try {
+          await invitarCuidador(correo.trim());
+          await enviarEnlaceDeAcceso(correo.trim());
+        } catch {
+          // La persona ya quedó guardada en «Quienes cuidan contigo»; si el correo de acceso falla,
+          // se reintenta solo al volver a guardar (el upsert de la invitación no duplica nada).
+        } finally {
+          setInvitando(false);
+        }
+      }
     onListo();
+    })();
   };
 
   return (
@@ -116,15 +144,16 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
           <button type="button" onClick={() => entradaFoto.current?.click()} disabled={cargandoFoto} className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] px-4 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/accion-camara.png" alt="" width={20} height={20} className="object-contain" />
-            {cargandoFoto ? 'Preparando…' : foto ? 'Cambiar foto' : 'Agregar foto'}
+            {cargandoFoto ? 'Preparando…' : foto || original ? 'Cambiar foto' : 'Agregar foto'}
           </button>
-          {foto && (
-            <button type="button" onClick={() => setFoto(undefined)} className="inline-flex min-h-11 items-center px-2 text-base font-medium text-[var(--text-secondary)] [touch-action:manipulation]">
+          {(foto || original) && (
+            <button type="button" onClick={() => { setFoto(undefined); setOriginal(undefined); }} className="inline-flex min-h-11 items-center px-2 text-base font-medium text-[var(--text-secondary)] [touch-action:manipulation]">
               Quitar foto
             </button>
           )}
         </div>
       </div>
+      {original && <EncuadreFoto fuente={original} enfoque={enfoque} onCambiar={setEnfoque} nombre={nombre || (esYo ? 'tu foto' : 'esta persona')} />}
       {errores.foto && (
         <p role="alert" className="mt-2 flex items-center gap-2 text-base font-semibold">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -142,8 +171,8 @@ function FormTutor({ tutor, esYo, onListo }: { tutor?: Tutor; esYo: boolean; onL
         </Campo>
       )}
       <div className="mt-8">
-        <button type="submit" className={botonPrimario}>
-          {tutor ? 'Guardar cambios' : 'Agregar persona'}
+        <button type="submit" disabled={invitando} className={`${botonPrimario} disabled:opacity-60`}>
+          {invitando ? 'Enviando su acceso…' : tutor ? 'Guardar cambios' : 'Agregar persona'}
         </button>
       </div>
       {tutor && !esYo && (
@@ -191,14 +220,14 @@ export default function Yo() {
       <>
         <main className="flex flex-1 flex-col gap-8 px-6 pb-6 pt-6">
           <header className="flex items-start justify-between gap-4">
-            <h1 className="text-3xl font-bold leading-tight">Yo</h1>
+            <h1 className="text-2xl font-semibold leading-tight tracking-[-0.01em]">Yo</h1>
             <LogoMarca />
           </header>
 
           <motion.section {...entrada(0)} aria-label="Mi cuenta" className="borde-degradado flex items-center gap-4 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]">
             <PersonaCirculo nombre={yo.nombre} foto={yo.foto} esYo tam="size-14" textoTam="text-2xl" />
             <div className="min-w-0 flex-1">
-              <p className="text-xl font-bold leading-tight">{yo.nombre}</p>
+              <p className="text-lg font-semibold leading-tight">{yo.nombre}</p>
               <p className="mt-1 break-words text-base text-[var(--text-secondary)]">{e.correo ?? 'Sin correo de acceso todavía'}</p>
             </div>
             <button type="button" onClick={() => setHoja({ kind: 'tutor', tutor: yo, esYo: true })} aria-label="Cambiar mi nombre" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)] [touch-action:manipulation]">
@@ -209,7 +238,7 @@ export default function Yo() {
 
           <section aria-label="Quienes cuidan contigo">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 className="text-lg font-bold">Quienes cuidan contigo</h2>
+              <h2 className="text-lg font-semibold">Quienes cuidan contigo</h2>
               <span className="text-sm font-semibold text-[var(--text-secondary)]">
                 {e.tutores.length} de {limitePersonas}
               </span>
@@ -222,7 +251,7 @@ export default function Yo() {
                     <button
                       type="button"
                       onClick={() => setHoja({ kind: 'tutor', tutor: t, esYo })}
-                      className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] active:scale-[0.98] [touch-action:manipulation]"
+                      className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] active:scale-[0.98] [touch-action:manipulation]"
                     >
                       <PersonaCirculo nombre={t.nombre} foto={t.foto} esYo={esYo} tam="size-11" textoTam="text-lg" />
                       <span className="min-w-0 flex-1">
@@ -251,10 +280,10 @@ export default function Yo() {
 
           <section aria-label="Avisos" className="flex flex-col gap-4">
             <div>
-              <h2 className="mb-2 text-lg font-bold">Avisos</h2>
+              <h2 className="mb-2 text-lg font-semibold">Avisos</h2>
               <Interruptor activo={e.ajustes.avisoHora} onCambiar={(v) => ajuste({ avisoHora: v })} etiqueta="A la hora de cada cuidado" detalle="Medicamentos y suplementos, justo a la hora que fijaste" />
             </div>
-            <div className="rounded-[var(--radius-card)] border border-[var(--border-ui)] p-3">
+            <div className="rounded-[var(--radius-card)] border border-[var(--border-suave)] p-3">
               <p className="mb-2 text-base font-semibold">Avisos anticipados</p>
               <div className="flex flex-col gap-2">
                 <Interruptor activo={e.ajustes.avisoStock} onCambiar={(v) => ajuste({ avisoStock: v })} etiqueta="Antes de que se acabe algo" detalle="Alimento y medicamentos" />
@@ -286,10 +315,10 @@ export default function Yo() {
           </section>
 
           <section aria-label="Tu plan">
-            <h2 className="mb-2 text-lg font-bold">Tu plan</h2>
-            <div className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
+            <h2 className="mb-2 text-lg font-semibold">Tu plan</h2>
+            <div className="rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xl font-bold">Plan {plan.nombre}</p>
+                <p className="text-lg font-semibold">Plan {plan.nombre}</p>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/brand/garantia.png" alt="" width={24} height={24} className="object-contain" />
               </div>
@@ -315,7 +344,7 @@ export default function Yo() {
           </section>
 
           <section aria-label="Tus datos">
-            <h2 className="mb-2 text-lg font-bold">Tus datos</h2>
+            <h2 className="mb-2 text-lg font-semibold">Tus datos</h2>
             <p className="mb-3 text-base text-[var(--text-secondary)]">Son tuyos: llévatelos cuando quieras.</p>
             <div className="flex flex-col gap-2">
               <button
@@ -324,7 +353,7 @@ export default function Yo() {
                   descargar('historial-la-doctora-perritos.csv', historialCsv(e), 'text/csv;charset=utf-8');
                   setDescargado('historial');
                 }}
-                className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
+                className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/brand/accion-descargar.png" alt="" width={22} height={22} className="object-contain" />
@@ -339,7 +368,7 @@ export default function Yo() {
                   descargar('mis-datos-la-doctora-perritos.json', JSON.stringify(e, null, 2), 'application/json');
                   setDescargado('todo');
                 }}
-                className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
+                className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 text-left [touch-action:manipulation]"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/brand/documentos.png" alt="" width={22} height={22} className="object-contain" />

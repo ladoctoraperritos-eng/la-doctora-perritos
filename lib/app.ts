@@ -56,6 +56,27 @@ export interface Cuidado {
   ultima?: string;
   /** Cada cuántos días se repite: al registrarlo hoy, la próxima fecha se recalcula sola. */
   cada?: number;
+  /** Solo para alimento: cuánto se come y cuánto queda. */
+  racion?: Racion;
+}
+/** Alimento: cuánto queda en el paquete y cuánto come este perro. Si varios perros comparten la
+ * misma comida, `grupo` los une: el consumo de todos se suma y los días salen de ese total. */
+export interface Racion {
+  grupo: string;
+  /** Gramos que quedan en el paquete (se actualiza al comprar o al medir). */
+  restanteG: number;
+  /** Gramos por toma de este perro. */
+  porcionG: number;
+  /** Tomas al día de este perro. */
+  tomasDia: number;
+}
+/** Días que dura la comida del grupo, con el consumo de todos sus perros. Null si no hay datos. */
+export function diasDeComida(grupo: string, cuidados: Cuidado[]): number | null {
+  const miembros = cuidados.filter((c) => c.racion?.grupo === grupo && c.racion);
+  const consumoDia = miembros.reduce((s, c) => s + (c.racion?.porcionG ?? 0) * (c.racion?.tomasDia ?? 0), 0);
+  const restante = miembros[0]?.racion?.restanteG ?? 0;
+  if (consumoDia <= 0) return null;
+  return Math.floor(restante / consumoDia);
 }
 export interface Registro {
   id: string;
@@ -256,7 +277,23 @@ export const suscribirApp = (f: () => void) => {
     oyentes.delete(f);
   };
 };
+/** Quien quiera enterarse de cada cambio (para subirlo a la nube) se apunta aquí. */
+const oyentesCambio = new Set<(antes: EstadoApp, despues: EstadoApp) => void>();
+export function alCambiarEstado(f: (antes: EstadoApp, despues: EstadoApp) => void): () => void {
+  oyentesCambio.add(f);
+  return () => {
+    oyentesCambio.delete(f);
+  };
+}
 function cambiar(nuevo: EstadoApp) {
+  const antes = obtenerApp();
+  estado = nuevo;
+  guardar(nuevo);
+  avisar();
+  oyentesCambio.forEach((f) => f(antes, nuevo));
+}
+/** Carga datos traídos de la nube sin volver a subirlos. */
+export function cargarDesdeNube(nuevo: EstadoApp): void {
   estado = nuevo;
   guardar(nuevo);
   avisar();
@@ -335,7 +372,7 @@ export function proximos(e: EstadoApp, perroId: string | null, ahora: Date): Fil
 
 // ── Edición: perros y cuidados ──
 export const LIMITE_PERROS: Record<IdPlan, number> = { esencial: 2, familia: 5 };
-export const nuevoId = (prefijo: string): string => `${prefijo}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+export const nuevoId = (prefijo: string): string => `${prefijo}-${crypto.randomUUID()}`;
 
 export function guardarPerro(p: Perro): void {
   const e = obtenerApp();
@@ -353,19 +390,59 @@ export function guardarCuidado(c: Cuidado): void {
   const existe = e.cuidados.some((x) => x.id === c.id);
   cambiar({ ...e, cuidados: existe ? e.cuidados.map((x) => (x.id === c.id ? c : x)) : [...e.cuidados, c] });
 }
+/** Guarda un alimento y lo comparte con otros perros: todos quedan con el mismo paquete y la fecha
+ * de reposición se recalcula con el consumo de todos. A los perros que se quitan de la lista solo se
+ * les desvincula; su alimento y su fecha se conservan. */
+export function guardarComida(base: Cuidado, racion: Racion, otrosPerroIds: string[]): void {
+  const e = obtenerApp();
+  const ahora = new Date();
+  const grupo = racion.grupo;
+  const ids = new Set([base.perroId, ...otrosPerroIds]);
+  const conBase: Cuidado = { ...base, racion };
+  let cuidados = e.cuidados.map((c) => {
+    if (c.id === base.id) return conBase;
+    if (c.racion?.grupo !== grupo) return c;
+    if (ids.has(c.perroId)) return c;
+    return { ...c, racion: undefined };
+  });
+  const yaTienen = new Set(cuidados.filter((c) => c.racion?.grupo === grupo).map((c) => c.perroId));
+  for (const perroId of otrosPerroIds) {
+    if (yaTienen.has(perroId)) continue;
+    cuidados = [...cuidados, { id: nuevoId('c'), perroId, tipo: 'comida', nombre: base.nombre, detalle: base.detalle, racion: { ...racion } }];
+  }
+  cuidados = cuidados.map((c) => {
+    if (c.racion?.grupo !== grupo) return c;
+    const dias = diasDeComida(grupo, cuidados);
+    return { ...c, nombre: base.nombre, detalle: base.detalle, racion: { ...c.racion, restanteG: racion.restanteG }, proxima: dias === null ? undefined : enDias(dias, ahora) };
+  });
+  cambiar({ ...e, cuidados });
+}
+
 export function eliminarCuidado(id: string): void {
   const e = obtenerApp();
   cambiar({ ...e, cuidados: e.cuidados.filter((c) => c.id !== id), registros: e.registros.filter((r) => r.cuidadoId !== id) });
 }
 /** «Lo hice hoy»: guarda la fecha y, si se repite, recalcula la próxima. */
-export function registrarSalud(cuidadoId: string, ahora: Date): void {
+export function registrarSalud(cuidadoId: string, ahora: Date): { registroId: string; anterior: Cuidado | undefined } {
   const e = obtenerApp();
   const hoyClave = claveDia(ahora);
   const quien = e.tutores.find((t) => t.id === e.yo)?.nombre ?? 'Tú';
+  const registroId = `r-${ahora.getTime()}-${cuidadoId}`;
+  const anterior = e.cuidados.find((c) => c.id === cuidadoId);
   cambiar({
     ...e,
     cuidados: e.cuidados.map((c) => (c.id === cuidadoId ? { ...c, ultima: hoyClave, proxima: c.cada ? enDias(c.cada, ahora) : undefined } : c)),
-    registros: [...e.registros, { id: `r-${ahora.getTime()}-${cuidadoId}`, cuidadoId, dia: hoyClave, quien, hora: horaTexto(ahora) }],
+    registros: [...e.registros, { id: registroId, cuidadoId, dia: hoyClave, quien, hora: horaTexto(ahora) }],
+  });
+  return { registroId, anterior };
+}
+/** Vuelta atrás de «lo hice»: devuelve el cuidado a como estaba y quita el registro. */
+export function deshacerSalud(anterior: Cuidado | undefined, registroId: string): void {
+  const e = obtenerApp();
+  cambiar({
+    ...e,
+    cuidados: anterior ? e.cuidados.map((c) => (c.id === anterior.id ? anterior : c)) : e.cuidados,
+    registros: e.registros.filter((r) => r.id !== registroId),
   });
 }
 
