@@ -2,7 +2,7 @@
 // y 5), para que se lea en segundos en una emergencia real en vez de buscar en un PDF de 90 páginas.
 // No es contenido generado: son los mismos pasos de su ebook, resumidos a formato de pantalla.
 
-import { Activity, Droplet, FlaskConical, HeartPulse, Thermometer, Wind, Zap, type LucideIcon } from 'lucide-react';
+import { Activity, Bandage, Droplet, FlaskConical, HeartPulse, Thermometer, Wind, Zap, type LucideIcon } from 'lucide-react';
 
 export type NivelTriage = 'emergencia' | 'urgencia' | 'control';
 
@@ -63,28 +63,41 @@ export const SITUACIONES: SituacionSos[] = [
     pasos: [
       'Identifica qué sustancia ingirió y cuánto. Guarda el envase si puedes.',
       'No le induzcas el vómito sin que el veterinario te lo indique.',
-      'Contacta de inmediato a tu veterinario o a un centro de toxicología.',
-      'Si te lo indican: dale carbón activado o agua oxigenada al 3% en la dosis exacta que te digan según su peso.',
+      'Contacta de inmediato a tu veterinario o a un centro de toxicología. No le des nada por tu cuenta: sigue solo lo que te indiquen por teléfono.',
       'Conserva una muestra de vómito o heces si hay que analizarla.',
     ],
     evitar: ['Inducir el vómito sin autorización profesional', 'Automedicar con remedios humanos'],
     veterinarioSi: ['Siempre, aunque el perro se vea bien — muchos tóxicos actúan horas después.'],
   },
   {
-    id: 'heridas',
-    titulo: 'Heridas abiertas y hemorragias',
+    id: 'hemorragia',
+    titulo: 'Hemorragia o herida profunda',
     icono: Droplet,
     nivel: 'emergencia',
-    resumen: 'Cortes, raspones, mordeduras o heridas punzantes con sangrado.',
-    senales: ['Sangrado visible', 'Cojera o dolor al tocar la zona', 'El perro lame la zona insistentemente'],
+    resumen: 'Sangrado que no para, o una herida profunda, mordedura o punzante.',
+    senales: ['Sangrado activo que no se detiene', 'Herida profunda o irregular', 'Se ve músculo o hueso', 'Mordedura o herida punzante'],
     pasos: [
       'Ponte guantes. Controla el sangrado presionando con una gasa por 3 a 5 minutos.',
       'Si la gasa se empapa, no la quites: coloca otra encima.',
-      'Una vez controlado el sangrado: lava con suero fisiológico y desinfecta con clorhexidina.',
+      'Mientras presionas, no pierdas tiempo: llama a tu veterinario o ve a una clínica.',
+    ],
+    evitar: ['Coser o cerrar la herida en casa', 'Aplicar pomadas sin indicación', 'Usar alcohol directo sobre la herida'],
+    veterinarioSi: ['Siempre. El sangrado no se detiene o la herida es profunda.'],
+  },
+  {
+    id: 'heridas-superficiales',
+    titulo: 'Cortes leves y raspones',
+    icono: Bandage,
+    nivel: 'urgencia',
+    resumen: 'Herida abierta superficial, sin sangrado fuerte. Se limpia y se cubre; se revisa en pocas horas.',
+    senales: ['Corte o raspón visible', 'Sangrado leve que se controla con gasa', 'Cojera o dolor al tocar la zona', 'El perro lame la zona insistentemente'],
+    pasos: [
+      'Ponte guantes. Si sangra, presiona con gasa hasta que se controle.',
+      'Una vez controlado el sangrado: lava la zona con agua limpia o suero fisiológico.',
       'Cubre con una gasa estéril y venda sin apretar demasiado.',
     ],
     evitar: ['Aplicar pomadas sin indicación', 'Coser o cerrar la herida en casa', 'Usar alcohol directo sobre la herida'],
-    veterinarioSi: ['La herida es profunda o irregular', 'El sangrado no se detiene', 'Se ve músculo o hueso'],
+    veterinarioSi: ['Si la herida es profunda o irregular, o si el sangrado no se detiene.'],
   },
   {
     id: 'golpe-calor',

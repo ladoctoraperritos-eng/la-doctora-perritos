@@ -7,9 +7,7 @@
 
 /* Profundidad de fondo: mesh radial sutil detrás del héroe (55 gate G). */
 body {
-  background:
-    radial-gradient(900px 480px at 50% -8%, color-mix(in oklab, var(--accent) 7%, transparent), transparent 70%),
-    var(--bg);
+  background: var(--bg);
 }
 
 /* Hairline degradada de marca (55 gate G): borde de acento que se desvanece. */
@@ -17,7 +15,7 @@ body {
   border: 1px solid transparent;
   background:
     linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(135deg, color-mix(in oklab, var(--accent) 40%, transparent), transparent 60%) border-box;
+    linear-gradient(135deg, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%) border-box;
 }
 
 /* Variante destacada de .borde-degradado: borde más marcado y tinte de fondo del acento (tarjeta protagonista). */
@@ -25,7 +23,7 @@ body {
   border: 1px solid transparent;
   background:
     linear-gradient(color-mix(in oklab, var(--accent) 7%, var(--surface)), color-mix(in oklab, var(--accent) 7%, var(--surface))) padding-box,
-    linear-gradient(135deg, color-mix(in oklab, var(--accent) 60%, transparent), transparent 60%) border-box;
+    linear-gradient(135deg, color-mix(in oklab, var(--accent) 35%, transparent), transparent 60%) border-box;
 }
 
 /* Dispositivo ownable de marca (FICHA-ARTE): duotone del acento sobre la foto real del perro. */

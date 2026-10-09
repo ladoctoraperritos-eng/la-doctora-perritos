@@ -6,6 +6,8 @@
 
 import { usePathname } from 'next/navigation';
 import { Menu, type SeccionApp } from '@/components/app/Menu';
+import AvisoNube from '@/components/app/AvisoNube';
+import SincronizarNube from '@/components/app/SincronizarNube';
 
 const SECCION_POR_RUTA: { prefijo: string; seccion: SeccionApp }[] = [
   { prefijo: '/app/perros', seccion: 'perros' },
@@ -20,6 +22,8 @@ export default function LayoutApp({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
+      <SincronizarNube />
+      <AvisoNube />
       {children}
       <Menu activa={activa} />
     </div>

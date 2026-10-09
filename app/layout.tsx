@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans } from "next/font/google";
+import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
+
+const dmSerif = DM_Serif_Display({
+  variable: "--font-dm-serif",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -17,12 +24,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4f7f6",
+  themeColor: "#f8f5ee",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${dmSans.variable} antialiased`}>
+    <html lang="es" className={`${dmSans.variable} ${dmSerif.variable} antialiased`}>
       <body>{children}</body>
     </html>
   );

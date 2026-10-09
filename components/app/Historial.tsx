@@ -146,10 +146,16 @@ function Contenido({
     setGrupo('todos');
   };
 
-  // Conteo de los últimos 7 días por persona (sobre lo visible según perro y tipo).
+  // De los últimos 7 días: cuántos cuidados y cuántas personas distintas los hicieron.
   const semana = todas.filter((f) => f.cuidado && diasHasta(f.registro.dia, ahora) > -7);
   const porPersona = e.tutores.map((t) => ({ nombre: t.nombre, n: semana.filter((f) => f.registro.quien === t.nombre).length, esYo: t.nombre === yo }));
   const totalSemana = porPersona.reduce((s, p) => s + p.n, 0);
+  const cuidadoresActivos = porPersona.filter((p) => p.n > 0).length;
+  const ultimo = todas[0];
+  const textoUltimo = (f: Fila) =>
+    f.cuidado
+      ? `${f.registro.quien} registró ${f.cuidado.nombre} de ${f.perro.nombre} · ${diaTexto(f.registro.dia, ahora)}, ${f.registro.hora}`
+      : `${f.registro.quien} anotó algo de ${f.perro.nombre} · ${diaTexto(f.registro.dia, ahora)}, ${f.registro.hora}`;
 
   // Agrupado por día, mostrando `paginas` bloques de 7 días.
   const dias: string[] = [];
@@ -162,34 +168,38 @@ function Contenido({
         <main className="flex flex-1 flex-col gap-6 px-6 pb-6 pt-6">
           <header className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="text-3xl font-bold leading-tight">Historial</h1>
+              <h1 className="text-2xl font-semibold leading-tight tracking-[-0.01em]">Historial</h1>
               <p className="mt-1 text-base text-[var(--text-secondary)]">Quién hizo qué y cuándo.</p>
             </div>
             <LogoMarca />
           </header>
 
-          {totalSemana > 0 && e.tutores.length > 1 && (
-            <motion.section {...entrada(0)} aria-label="Esta semana" className="borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
+          {totalSemana > 0 && (
+            <motion.section {...entrada(0)} aria-label="Esta semana" className="rounded-[var(--radius-card)] bg-[var(--surface)] p-5 shadow-[var(--shadow-1)]">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Esta semana</h2>
-              <ul className="mt-3 flex flex-col gap-3">
-                {porPersona.map((p) => (
-                  <li key={p.nombre} className="flex items-center gap-3">
-                    <PersonaCirculo nombre={p.nombre} esYo={p.esYo} />
-                    <span className="w-24 shrink-0 truncate text-base font-semibold">{p.esYo ? `${p.nombre} (tú)` : p.nombre}</span>
-                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_40%,var(--surface-2))]" aria-hidden="true">
-                      <motion.span
-                        className={`block h-full rounded-full ${p.esYo ? 'bg-[var(--accent)]' : 'bg-[var(--accent-2)]'}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(p.n / Math.max(...porPersona.map((x) => x.n), 1)) * 100}%` }}
-                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                      />
-                    </span>
-                    <span className="w-8 shrink-0 text-right text-base font-bold tabular-nums">{p.n}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 text-sm text-[var(--text-secondary)]">Cuidados registrados en los últimos 7 días.</p>
+              <p className="mt-2 text-lg font-semibold leading-tight">{totalSemana} cuidado{totalSemana === 1 ? '' : 's'} registrado{totalSemana === 1 ? '' : 's'}</p>
+              {e.tutores.length > 1 && (
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {cuidadoresActivos} cuidador{cuidadoresActivos === 1 ? '' : 'es'} particip{cuidadoresActivos === 1 ? 'ó' : 'aron'}
+                </p>
+              )}
+              {ultimo && (
+                <div className="mt-4 border-t border-[var(--border-suave)] pt-4">
+                  <p className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Último registro</p>
+                  <p className="mt-1 text-base">{textoUltimo(ultimo)}</p>
+                </div>
+              )}
+              <p className="mt-4 text-sm text-[var(--text-secondary)]">Todo queda registrado para que nadie tenga que preguntar quién hizo qué.</p>
             </motion.section>
+          )}
+
+          {e.tutores.length > 1 && (
+            <Chips
+              titulo="Persona"
+              valor={persona}
+              onElegir={setPersona}
+              opciones={[{ valor: 'todos', texto: 'Todos' }, ...e.tutores.map((t) => ({ valor: t.nombre, texto: t.nombre === yo ? `${t.nombre} (tú)` : t.nombre }))]}
+            />
           )}
 
           <div className="flex items-center justify-between gap-2">
@@ -200,7 +210,7 @@ function Contenido({
             >
               <SlidersHorizontal size={18} aria-hidden="true" />
               Filtros
-              {nFiltros > 0 && <span className="inline-flex size-6 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-[var(--bg)]">{nFiltros}</span>}
+              {nFiltros > 0 && <span className="inline-flex size-6 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-semibold text-[var(--bg)]">{nFiltros}</span>}
             </button>
             {hayFiltros && (
               <button type="button" onClick={limpiar} className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
@@ -249,7 +259,7 @@ function Contenido({
               <span className="inline-flex size-12 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
                 <ClipboardList size={24} color="var(--accent)" aria-hidden="true" />
               </span>
-              <p className="text-xl font-bold leading-tight">Aún no hay registros</p>
+              <p className="text-lg font-semibold leading-tight">Aún no hay registros</p>
               <p className="text-base text-[var(--text-secondary)]">Cada cuidado que marques como hecho quedará aquí, con quién lo hizo y a qué hora.</p>
               <Link href="/app" className="inline-flex h-12 items-center rounded-[var(--radius-button)] bg-[var(--accent)] px-5 text-base font-semibold text-[var(--bg)]">
                 Ir a Hoy
@@ -257,7 +267,7 @@ function Contenido({
             </section>
           ) : filtradas.length === 0 ? (
             <section aria-label="Sin resultados" className="flex flex-col items-start gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--border-ui)] p-6">
-              <p className="text-xl font-bold leading-tight">Nada con estos filtros</p>
+              <p className="text-lg font-semibold leading-tight">Nada con estos filtros</p>
               <p className="text-base text-[var(--text-secondary)]">Prueba con otra persona, otro perro u otro tipo de cuidado.</p>
               <button type="button" onClick={limpiar} className="inline-flex h-12 items-center rounded-[var(--radius-button)] border-2 border-[var(--accent)] px-5 text-base font-semibold text-[var(--accent)]">
                 Quitar filtros
@@ -267,12 +277,12 @@ function Contenido({
             <div className="flex flex-col gap-6">
               {visibles.map((dia, gi) => (
                 <section key={dia} aria-label={diaTexto(dia, ahora)}>
-                  <h2 className="mb-2 text-lg font-bold">{diaTexto(dia, ahora)}</h2>
+                  <h2 className="mb-2 text-lg font-semibold">{diaTexto(dia, ahora)}</h2>
                   <ul className="flex flex-col gap-2">
                     {filtradas
                       .filter((f) => f.registro.dia === dia)
                       .map((f, i) => (
-                        <motion.li key={f.registro.id} {...entrada(gi === 0 ? i : 0)} className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4">
+                        <motion.li key={f.registro.id} {...entrada(gi === 0 ? i : 0)} className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4">
                           {f.cuidado ? (
                             <ChipIcono tipo={f.cuidado.tipo} />
                           ) : (
@@ -299,7 +309,7 @@ function Contenido({
                               </span>
                             </span>
                           </span>
-                          <span className="shrink-0 text-base font-bold tabular-nums text-[var(--accent)]">{f.registro.hora}</span>
+                          <span className="shrink-0 text-base font-semibold tabular-nums text-[var(--accent)]">{f.registro.hora}</span>
                         </motion.li>
                       ))}
                   </ul>
@@ -335,7 +345,7 @@ function AvatarChip({ nombre, foto, esYo = false, activo, onElegir }: { nombre: 
         {foto ? (
           <PersonaCirculo nombre={nombre} foto={foto} esYo={esYo} tam="size-12" />
         ) : (
-          <span aria-hidden="true" className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--chip-bg)] text-lg font-bold text-[var(--accent)]">
+          <span aria-hidden="true" className="inline-flex size-12 items-center justify-center rounded-full bg-[var(--chip-bg)] text-lg font-semibold text-[var(--accent)]">
             {nombre.charAt(0).toUpperCase()}
           </span>
         )}

@@ -26,22 +26,19 @@ const COPY_VET: Record<TipoVeterinario, { etiqueta: string; vacio: string; titul
   habitual: { etiqueta: 'Veterinario de cabecera', vacio: 'Guarda el teléfono de tu veterinario de cabecera', tituloHoja: 'Veterinario de cabecera' },
 };
 
-const COLOR_NIVEL: Record<NivelTriage, string> = { emergencia: 'var(--danger)', urgencia: 'var(--warn)', control: 'var(--accent)' };
 
 function FilaSituacion({ s, i, onAbrir }: { s: SituacionSos; i: number; onAbrir: () => void }) {
   const Icono = s.icono;
-  const color = COLOR_NIVEL[s.nivel];
   return (
     <motion.li {...entrada(i)}>
       <button
         type="button"
         onClick={onAbrir}
         aria-label={`Ver qué hacer: ${s.titulo}`}
-        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
-        style={{ boxShadow: `inset 4px 0 0 ${color}, var(--shadow-1)` }}
+        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
       >
-        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)]" style={{ background: `color-mix(in oklab, ${color} 14%, var(--surface))` }}>
-          <Icono size={22} color={color} aria-hidden="true" />
+        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--chip-bg)]">
+          <Icono size={22} color="var(--accent)" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-base font-semibold">{s.titulo}</span>
@@ -56,14 +53,14 @@ function FilaSituacion({ s, i, onAbrir }: { s: SituacionSos; i: number; onAbrir:
 function Triage() {
   const [abierto, setAbierto] = useState(false);
   return (
-    <section aria-label="¿Qué tan urgente es?" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
+    <section aria-label="¿Qué tan urgente es?" className="rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
       <button
         type="button"
         onClick={() => setAbierto((v) => !v)}
         aria-expanded={abierto}
         className="flex w-full items-center justify-between gap-2 text-left transition-transform duration-150 active:scale-[0.99] [touch-action:manipulation]"
       >
-        <span className="text-base font-bold">¿Qué tan urgente es? <span className="font-normal text-[var(--text-secondary)]">Emergencia, urgencia o control</span></span>
+        <span className="text-base font-semibold">¿Qué tan urgente es? <span className="font-normal text-[var(--text-secondary)]">Emergencia, urgencia o control</span></span>
         <span className="flex shrink-0 items-center gap-1 text-sm font-semibold text-[var(--accent)]">
           {abierto ? 'Ocultar' : 'Ver niveles'}
           <ChevronDown size={16} className={`transition-transform duration-200 ${abierto ? 'rotate-180' : ''}`} aria-hidden="true" />
@@ -107,7 +104,7 @@ function TarjetaVeterinario({ tipo, nombre, telefono, onEditar }: { tipo: TipoVe
     <section
       aria-label={etiqueta}
       className={`flex items-center gap-3 rounded-[var(--radius-card)] p-4 ${
-        destacado ? 'borde-destacado shadow-[var(--shadow-2)]' : 'border border-[var(--border-ui)] bg-[var(--surface)] shadow-[var(--shadow-1)]'
+        destacado ? 'borde-destacado shadow-[var(--shadow-2)]' : 'border border-[var(--border-suave)] bg-[var(--surface)] shadow-[var(--shadow-1)]'
       }`}
     >
       <div className="min-w-0 flex-1">
@@ -182,7 +179,7 @@ function Lista({ e, onAbrir, onEditarVet }: { e: ReturnType<typeof obtenerApp>; 
     <>
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-3xl font-bold leading-tight">SOS</h1>
+          <h1 className="text-2xl font-semibold leading-tight tracking-[-0.01em]">SOS</h1>
           <p className="mt-1 text-base text-[var(--text-secondary)]">Qué hacer ahora mismo, antes de llegar al veterinario.</p>
           <p className="mt-2 flex items-start gap-1.5 text-sm text-[var(--text-tertiary)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -201,7 +198,7 @@ function Lista({ e, onAbrir, onEditarVet }: { e: ReturnType<typeof obtenerApp>; 
       <Triage />
 
       <section aria-label="Situaciones de emergencia">
-        <h2 className="mb-2 text-lg font-bold">¿Qué pasó?</h2>
+        <h2 className="mb-2 text-lg font-semibold">¿Qué pasó?</h2>
         <ul className="flex flex-col gap-2">
           {SITUACIONES.map((s, i) => (
             <FilaSituacion key={s.id} s={s} i={i} onAbrir={() => onAbrir(s.id)} />
@@ -237,12 +234,12 @@ function Detalle({
       </button>
 
       <motion.div {...entrada(0)}>
-        <h1 className="text-2xl font-bold leading-tight">{s.titulo}</h1>
+        <h1 className="text-2xl font-semibold leading-tight">{s.titulo}</h1>
         <p className="mt-1 text-base text-[var(--text-secondary)]">{s.resumen}</p>
       </motion.div>
 
-      <motion.section {...entrada(1)} aria-label="Señales de alarma" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
-        <h2 className="text-base font-bold">Señales de alarma</h2>
+      <motion.section {...entrada(1)} aria-label="Señales de alarma" className="rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
+        <h2 className="text-base font-semibold">Señales de alarma</h2>
         <ul className="mt-2 flex flex-col gap-1">
           {s.senales.map((x) => (
             <li key={x} className="text-base text-[var(--text-secondary)]">
@@ -258,11 +255,11 @@ function Detalle({
         className="borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]"
         style={{ background: 'color-mix(in oklab, var(--accent) 6%, var(--surface))' }}
       >
-        <h2 className="text-base font-bold text-[var(--accent)]">Qué hacer</h2>
+        <h2 className="text-base font-semibold text-[var(--accent)]">Qué hacer</h2>
         <ol className="mt-3 flex flex-col gap-3">
           {s.pasos.map((p, i) => (
             <li key={p} className="flex gap-3">
-              <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-bold text-[var(--bg)]">{i + 1}</span>
+              <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-sm font-semibold text-[var(--bg)]">{i + 1}</span>
               <span className="text-base leading-snug">{p}</span>
             </li>
           ))}
@@ -270,8 +267,8 @@ function Detalle({
       </motion.section>
 
       {s.evitar && (
-        <motion.section {...entrada(3)} aria-label="Qué evitar" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
-          <h2 className="text-base font-bold text-[var(--warn)]">Qué evitar</h2>
+        <motion.section {...entrada(3)} aria-label="Qué evitar" className="rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
+          <h2 className="text-base font-semibold text-[var(--warn)]">Qué evitar</h2>
           <ul className="mt-2 flex flex-col gap-1">
             {s.evitar.map((x) => (
               <li key={x} className="text-base text-[var(--text-secondary)]">
@@ -282,8 +279,8 @@ function Detalle({
         </motion.section>
       )}
 
-      <motion.section {...entrada(4)} aria-label="Cuándo ir al veterinario" className="rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
-        <h2 className="text-base font-bold text-[var(--danger)]">Ve al veterinario si…</h2>
+      <motion.section {...entrada(4)} aria-label="Cuándo ir al veterinario" className="rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
+        <h2 className="text-base font-semibold text-[var(--danger)]">Ve al veterinario si…</h2>
         <ul className="mt-2 flex flex-col gap-1">
           {s.veterinarioSi.map((x) => (
             <li key={x} className="text-base text-[var(--text-primary)]">

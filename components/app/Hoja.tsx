@@ -32,7 +32,7 @@ export function Hoja({ abierta, titulo, onCerrar, children }: { abierta: boolean
             className="relative flex max-h-[92dvh] w-full max-w-md flex-col rounded-t-[var(--radius-card)] bg-[var(--bg)] shadow-[var(--shadow-2)]"
           >
             <div className="flex items-center justify-between gap-4 px-6 pb-2 pt-4">
-              <h2 id="titulo-hoja" ref={titular} tabIndex={-1} className="text-2xl font-bold leading-tight outline-none">
+              <h2 id="titulo-hoja" ref={titular} tabIndex={-1} className="text-2xl font-semibold leading-tight outline-none">
                 {titulo}
               </h2>
               <button

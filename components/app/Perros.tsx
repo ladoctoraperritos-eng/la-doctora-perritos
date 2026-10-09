@@ -24,6 +24,7 @@ import {
   edadTexto,
   eliminarCuidado,
   eliminarPerro,
+  guardarComida,
   guardarCuidado,
   guardarPerro,
   hoy,
@@ -215,7 +216,7 @@ export function Borrar({ etiqueta, aviso, onConfirmar }: { etiqueta: string; avi
 }
 
 // ── Formulario de cuidado ──
-function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: string; cuidado?: Cuidado; tipoInicial: Tipo; onListo: () => void }) {
+function FormCuidado({ perroId, cuidado, tipoInicial, otros, companeros, onListo }: { perroId: string; cuidado?: Cuidado; tipoInicial: Tipo; otros: Perro[]; companeros: string[]; onListo: () => void }) {
   const ahora = new Date();
   const [tipo, setTipo] = useState<Tipo>(cuidado?.tipo ?? tipoInicial);
   const [nombre, setNombre] = useState(cuidado?.nombre ?? '');
@@ -225,6 +226,10 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
   const [proxima, setProxima] = useState(cuidado?.proxima ?? '');
   const [ultima, setUltima] = useState(cuidado?.ultima ?? '');
   const [cada, setCada] = useState<number>(cuidado?.cada ?? 0);
+  const [restanteG, setRestanteG] = useState(cuidado?.racion ? String(cuidado.racion.restanteG) : '');
+  const [porcionG, setPorcionG] = useState(cuidado?.racion ? String(cuidado.racion.porcionG) : '');
+  const [tomasDia, setTomasDia] = useState<number>(cuidado?.racion?.tomasDia ?? 2);
+  const [compartir, setCompartir] = useState<string[]>(companeros);
   const [errores, setErrores] = useState<Record<string, string>>({});
 
   const diario = tipo === 'medicamento' || tipo === 'suplemento';
@@ -236,17 +241,22 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
     const e: Record<string, string> = {};
     if (!bano && !nombre.trim()) e.nombre = 'Escribe cómo se llama.';
     if (diario && !hora) e.hora = 'Elige la hora del aviso.';
-    if (comida && !(Number(dias) >= 1 && Number(dias) <= 365)) e.dias = 'Escribe un número de días entre 1 y 365.';
+    if (comida && !(Number(restanteG) >= 0 && restanteG !== '')) e.restanteG = 'Escribe cuántos gramos quedan en el paquete.';
+    if (comida && !(Number(porcionG) > 0)) e.porcionG = 'Escribe cuántos gramos come en cada toma.';
     if (diario && dias !== '' && !(Number(dias) >= 1 && Number(dias) <= 365)) e.dias = 'Escribe un número de días entre 1 y 365.';
     if (salud && !proxima) e.proxima = 'Elige la próxima fecha.';
     setErrores(e);
     if (Object.keys(e).length) return;
     const base: Cuidado = { id: cuidado?.id ?? nuevoId('c'), perroId, tipo, nombre: bano ? 'Baño' : nombre.trim(), detalle: detalle.trim() };
+    if (comida) {
+      const racion = { grupo: cuidado?.racion?.grupo ?? nuevoId('g'), restanteG: Number(restanteG), porcionG: Number(porcionG), tomasDia };
+      guardarComida(base, racion, compartir);
+      onListo();
+      return;
+    }
     if (diario) {
       base.hora = hora;
       if (dias !== '') base.proxima = claveDia(sumarDias(ahora, Number(dias)));
-    } else if (comida) {
-      base.proxima = claveDia(sumarDias(ahora, Number(dias)));
     } else {
       base.proxima = proxima;
       if (ultima) base.ultima = ultima;
@@ -321,10 +331,43 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
         </>
       )}
       {comida && (
-        <Campo id="dias-cuidado" etiqueta="¿Para cuántos días queda?" error={errores.dias}>
-          <input id="dias-cuidado" type="number" inputMode="numeric" min={1} max={365} value={dias} onChange={(e) => { setDias(e.target.value); setErrores((x) => ({ ...x, dias: '' })); }} placeholder="Por ejemplo, 7" className={campo} />
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">Un cálculo a ojo basta. Te avisamos antes de que se acabe.</p>
-        </Campo>
+        <>
+          <Campo id="restante-cuidado" etiqueta="¿Cuántos gramos quedan en el paquete?" error={errores.restanteG}>
+            <input id="restante-cuidado" type="number" inputMode="numeric" min={0} value={restanteG} onChange={(e) => { setRestanteG(e.target.value); setErrores((x) => ({ ...x, restanteG: '' })); }} placeholder="Por ejemplo, 3000" className={campo} />
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">Si el paquete es de 3 kilos y no lo has abierto, escribe 3000.</p>
+          </Campo>
+          <Campo id="porcion-cuidado" etiqueta="¿Cuántos gramos come en cada toma?" error={errores.porcionG}>
+            <input id="porcion-cuidado" type="number" inputMode="numeric" min={1} value={porcionG} onChange={(e) => { setPorcionG(e.target.value); setErrores((x) => ({ ...x, porcionG: '' })); }} placeholder="Por ejemplo, 150" className={campo} />
+          </Campo>
+          <div className="mt-5">
+            <p className="text-base font-semibold">¿Cuántas veces al día come?</p>
+            <Fichas titulo="Tomas al día" opciones={[1, 2, 3, 4].map((n) => ({ valor: n, texto: `${n} ${n === 1 ? 'vez' : 'veces'}` }))} valor={tomasDia} onElegir={setTomasDia} />
+          </div>
+          {otros.length > 0 && (
+            <div className="mt-5">
+              <p className="text-base font-semibold">¿Otro perro come de esta misma comida?</p>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">Así sumamos lo que comen los dos para calcular cuándo se acaba.</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {otros.map((p) => {
+                  const on = compartir.includes(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => setCompartir((x) => (on ? x.filter((id) => id !== p.id) : [...x, p.id]))}
+                      className={`inline-flex min-h-11 items-center rounded-full border-2 px-4 text-base font-semibold [touch-action:manipulation] ${
+                        on ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]' : 'border-[var(--border-ui)] bg-[var(--surface)]'
+                      }`}
+                    >
+                      {p.nombre}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
       {salud && (
         <>
@@ -371,29 +414,73 @@ function FormCuidado({ perroId, cuidado, tipoInicial, onListo }: { perroId: stri
   );
 }
 
-/** Recorta la foto al centro en cuadrado y la reduce (480 px): liviana para guardar y rápida de mostrar. */
-export async function procesarFoto(archivo: File): Promise<string> {
+/** Encuadre de la foto: 0–100 % en cada eje, igual que object-position. 50/30 deja la cabeza de la mayoría de los perros dentro. */
+export interface Encuadre { x: number; y: number }
+export const ENCUADRE_INICIAL: Encuadre = { x: 50, y: 30 };
+
+function cargarImagen(src: string): Promise<HTMLImageElement> {
+  return new Promise((ok, mal) => {
+    const i = new Image();
+    i.onload = () => ok(i);
+    i.onerror = () => mal(new Error('No pudimos abrir esa foto. Prueba con otra.'));
+    i.src = src;
+  });
+}
+
+/** Lee la foto y la reduce (máx. 1000 px) sin recortarla: el encuadre se elige después. */
+export async function leerFoto(archivo: File): Promise<string> {
   if (!archivo.type.startsWith('image/')) throw new Error('Elige una imagen (JPG, PNG o WEBP).');
   if (archivo.size > 15 * 1024 * 1024) throw new Error('La foto pesa demasiado. Elige una de menos de 15 MB.');
   const url = URL.createObjectURL(archivo);
   try {
-    const img = await new Promise<HTMLImageElement>((ok, mal) => {
-      const i = new Image();
-      i.onload = () => ok(i);
-      i.onerror = () => mal(new Error('No pudimos abrir esa foto. Prueba con otra.'));
-      i.src = url;
-    });
-    const lado = Math.min(img.naturalWidth, img.naturalHeight);
+    const img = await cargarImagen(url);
+    const escala = Math.min(1, 1000 / Math.max(img.naturalWidth, img.naturalHeight));
     const lienzo = document.createElement('canvas');
-    lienzo.width = 480;
-    lienzo.height = 480;
+    lienzo.width = Math.round(img.naturalWidth * escala);
+    lienzo.height = Math.round(img.naturalHeight * escala);
     const ctx = lienzo.getContext('2d');
     if (!ctx) throw new Error('No pudimos procesar esa foto. Prueba con otra.');
-    ctx.drawImage(img, (img.naturalWidth - lado) / 2, (img.naturalHeight - lado) / 2, lado, lado, 0, 0, 480, 480);
-    return lienzo.toDataURL('image/jpeg', 0.82);
+    ctx.drawImage(img, 0, 0, lienzo.width, lienzo.height);
+    return lienzo.toDataURL('image/jpeg', 0.9);
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+/** Recorta un cuadrado de 480 px siguiendo el encuadre elegido (la cabeza queda donde la persona la puso). */
+export async function recortarFoto(original: string, enc: Encuadre): Promise<string> {
+  const img = await cargarImagen(original);
+  const lado = Math.min(img.naturalWidth, img.naturalHeight);
+  const sx = ((img.naturalWidth - lado) * enc.x) / 100;
+  const sy = ((img.naturalHeight - lado) * enc.y) / 100;
+  const lienzo = document.createElement('canvas');
+  lienzo.width = 480;
+  lienzo.height = 480;
+  const ctx = lienzo.getContext('2d');
+  if (!ctx) throw new Error('No pudimos procesar esa foto. Prueba con otra.');
+  ctx.drawImage(img, sx, sy, lado, lado, 0, 0, 480, 480);
+  return lienzo.toDataURL('image/jpeg', 0.82);
+}
+
+/** Vista previa circular (como se ve en la app) con dos deslizadores para centrar la cabeza. */
+export function EncuadreFoto({ fuente, enfoque, onCambiar, nombre }: { fuente: string; enfoque: Encuadre; onCambiar: (e: Encuadre) => void; nombre: string }) {
+  return (
+    <div className="mt-4 flex flex-col items-center gap-4">
+      <div className="size-44 overflow-hidden rounded-full border-2 border-[var(--border-suave)] shadow-[var(--shadow-1)]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={fuente} alt={`Así se verá la foto de ${nombre}`} className="size-full object-cover" style={{ objectPosition: `${enfoque.x}% ${enfoque.y}%` }} />
+      </div>
+      <p className="text-center text-sm text-[var(--text-secondary)]">Mueve los deslizadores hasta que se vea la cabeza.</p>
+      <label className="flex w-full flex-col gap-1 text-base font-semibold">
+        Izquierda y derecha
+        <input type="range" min={0} max={100} value={enfoque.x} onChange={(ev) => onCambiar({ ...enfoque, x: Number(ev.target.value) })} className="w-full accent-[var(--accent)]" />
+      </label>
+      <label className="flex w-full flex-col gap-1 text-base font-semibold">
+        Arriba y abajo
+        <input type="range" min={0} max={100} value={enfoque.y} onChange={(ev) => onCambiar({ ...enfoque, y: Number(ev.target.value) })} className="w-full accent-[var(--accent)]" />
+      </label>
+    </div>
+  );
 }
 
 // ── Formulario de perro ──
@@ -408,6 +495,8 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
   const [responsable, setResponsable] = useState(perro?.responsable ?? '');
   const [telefono, setTelefono] = useState(perro?.telefono ?? '');
   const [foto, setFoto] = useState<string | undefined>(perro?.foto);
+  const [original, setOriginal] = useState<string | undefined>(undefined);
+  const [enfoque, setEnfoque] = useState<Encuadre>(ENCUADRE_INICIAL);
   const [cargandoFoto, setCargandoFoto] = useState(false);
   const entradaFoto = useRef<HTMLInputElement>(null);
   const [errores, setErrores] = useState<Record<string, string>>({});
@@ -418,7 +507,8 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
     setCargandoFoto(true);
     limpiar('foto');
     try {
-      setFoto(await procesarFoto(archivo));
+      setOriginal(await leerFoto(archivo));
+      setEnfoque(ENCUADRE_INICIAL);
     } catch (err) {
       setErrores((x) => ({ ...x, foto: err instanceof Error ? err.message : 'No pudimos cargar la foto.' }));
     } finally {
@@ -437,20 +527,31 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
     setErrores(e);
     if (Object.keys(e).length) return;
     const id = perro?.id ?? nuevoId('p');
-    guardarPerro({
-      ...perro,
-      id,
-      nombre: nombre.trim(),
-      raza: raza.trim() || undefined,
-      nacimiento: nacimiento || undefined,
-      pesoKg: peso !== '' ? Number(peso) : undefined,
-      notas: notas.trim() || undefined,
-      chip: soloChip || undefined,
-      responsable: responsable.trim() || undefined,
-      telefono: telefono.trim() || undefined,
-      foto,
-    });
-    onListo(id);
+    void (async () => {
+      let fotoFinal = foto;
+      if (original) {
+        try {
+          fotoFinal = await recortarFoto(original, enfoque);
+        } catch {
+          setErrores((x) => ({ ...x, foto: 'No pudimos recortar la foto. Prueba con otra.' }));
+          return;
+        }
+      }
+      guardarPerro({
+        ...perro,
+        id,
+        nombre: nombre.trim(),
+        raza: raza.trim() || undefined,
+        nacimiento: nacimiento || undefined,
+        pesoKg: peso !== '' ? Number(peso) : undefined,
+        notas: notas.trim() || undefined,
+        chip: soloChip || undefined,
+        responsable: responsable.trim() || undefined,
+        telefono: telefono.trim() || undefined,
+        foto: fotoFinal,
+      });
+      onListo(id);
+    })();
   };
 
   return (
@@ -468,15 +569,16 @@ function FormPerro({ perro, onListo }: { perro?: Perro; onListo: (id: string) =>
           <button type="button" onClick={() => entradaFoto.current?.click()} disabled={cargandoFoto} className="inline-flex min-h-12 items-center gap-2 rounded-[var(--radius-button)] border-2 border-[var(--accent)] px-4 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/accion-camara.png" alt="" width={20} height={20} className="object-contain" />
-            {cargandoFoto ? 'Preparando…' : foto ? 'Cambiar foto' : 'Agregar foto'}
+            {cargandoFoto ? 'Preparando…' : foto || original ? 'Cambiar foto' : 'Agregar foto'}
           </button>
-          {foto && (
-            <button type="button" onClick={() => setFoto(undefined)} className="inline-flex min-h-11 items-center px-2 text-base font-medium text-[var(--text-secondary)] [touch-action:manipulation]">
+          {(foto || original) && (
+            <button type="button" onClick={() => { setFoto(undefined); setOriginal(undefined); }} className="inline-flex min-h-11 items-center px-2 text-base font-medium text-[var(--text-secondary)] [touch-action:manipulation]">
               Quitar foto
             </button>
           )}
         </div>
       </div>
+      {original && <EncuadreFoto fuente={original} enfoque={enfoque} onCambiar={setEnfoque} nombre={nombre || 'tu perro'} />}
       {errores.foto && (
         <p role="alert" className="mt-2 flex items-center gap-2 text-base font-semibold">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -537,7 +639,7 @@ function FilaCuidado({ c, i, onAbrir }: { c: Cuidado; i: number; onAbrir: () => 
         type="button"
         onClick={onAbrir}
         aria-label={`Abrir ${c.nombre}`}
-        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
       >
         <ChipIcono tipo={c.tipo} />
         <span className="min-w-0 flex-1">
@@ -578,7 +680,7 @@ function Identificacion({ perro, onEditar }: { perro: Perro; onEditar: () => voi
   }
   return (
     <section aria-label="Identificación" className="borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
-      <h2 className="mb-3 text-lg font-bold">Identificación</h2>
+      <h2 className="mb-3 text-lg font-semibold">Identificación</h2>
       <dl className="flex flex-col gap-3">
         {perro.chip && (
           <div className="flex items-center gap-3">
@@ -633,7 +735,7 @@ function Seccion({ titulo, onAgregar, vacio, destacada, children }: { titulo: st
   return (
     <section aria-label={titulo} className={destacada ? 'borde-degradado rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-2)]' : undefined}>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className={destacada ? 'text-lg font-bold text-[var(--accent)]' : 'text-lg font-bold'}>{titulo}</h2>
+        <h2 className={destacada ? 'text-lg font-semibold text-[var(--accent)]' : 'text-lg font-semibold'}>{titulo}</h2>
         <button type="button" onClick={onAgregar} className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/accion-agregar.png" alt="" width={18} height={18} className="object-contain" />
@@ -689,7 +791,17 @@ export default function Perros() {
         </main>
 
         <Hoja abierta={hoja?.kind === 'cuidado'} titulo={hoja?.kind === 'cuidado' && hoja.cuidado ? 'Editar cuidado' : 'Agregar cuidado'} onCerrar={cerrar}>
-          {hoja?.kind === 'cuidado' && <FormCuidado key={hoja.cuidado?.id ?? hoja.tipo} perroId={hoja.perroId} cuidado={hoja.cuidado} tipoInicial={hoja.tipo} onListo={cerrar} />}
+          {hoja?.kind === 'cuidado' && (
+            <FormCuidado
+              key={hoja.cuidado?.id ?? hoja.tipo}
+              perroId={hoja.perroId}
+              cuidado={hoja.cuidado}
+              tipoInicial={hoja.tipo}
+              otros={e.perros.filter((p) => p.id !== hoja.perroId)}
+              companeros={hoja.cuidado?.racion ? e.cuidados.filter((c) => c.racion?.grupo === hoja.cuidado?.racion?.grupo && c.perroId !== hoja.perroId).map((c) => c.perroId) : []}
+              onListo={cerrar}
+            />
+          )}
         </Hoja>
         <Hoja abierta={hoja?.kind === 'perro'} titulo={hoja?.kind === 'perro' && hoja.perro ? 'Datos de tu mascota' : 'Agregar mascota'} onCerrar={cerrar}>
           {hoja?.kind === 'perro' && (
@@ -731,7 +843,7 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
     <>
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-3xl font-bold leading-tight">Tus mascotas</h1>
+          <h1 className="text-2xl font-semibold leading-tight tracking-[-0.01em]">Tus mascotas</h1>
           <p className="mt-1 text-base text-[var(--text-secondary)]">
             {e.perros.length} de {limite} · Plan {PLANES[e.plan].nombre}
           </p>
@@ -752,7 +864,7 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
               >
                 <Avatar perro={p} />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xl font-bold">{p.nombre}</span>
+                  <span className="block text-lg font-semibold">{p.nombre}</span>
                   <span className="block text-sm text-[var(--text-secondary)]">{[p.raza, edad].filter(Boolean).join(' · ') || 'Completa su ficha'}</span>
                   <span className="mt-1 flex flex-wrap gap-2">
                     <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono.normal}`}>{pendientes.length === 0 ? 'Al día hoy' : `${pendientes.length} por hacer hoy`}</span>
@@ -798,7 +910,7 @@ function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Per
       <motion.header {...entrada(0)} className="flex items-center gap-4">
         <Avatar perro={perro} grande />
         <div className="min-w-0 flex-1">
-          <h1 className="text-3xl font-bold leading-tight">{perro.nombre}</h1>
+          <h1 className="text-3xl font-normal leading-tight tracking-[-0.01em] [font-family:var(--font-serif)]">{perro.nombre}</h1>
           {perro.raza && <p className="mt-1 text-base text-[var(--text-secondary)]">{perro.raza}</p>}
           <p className={`${perro.raza ? '' : 'mt-1 '}text-base text-[var(--text-secondary)]`}>{datos.length ? datos.join(' · ') : perro.raza ? '' : 'Completa sus datos'}</p>
         </div>

@@ -29,7 +29,7 @@ function Seccion({ titulo, accion, children }: { titulo: string; accion?: React.
   return (
     <section aria-label={titulo} className="break-inside-avoid">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[var(--accent)] pb-1">
-        <h2 className="text-lg font-bold text-[var(--accent)]">{titulo}</h2>
+        <h2 className="text-lg font-semibold text-[var(--accent)]">{titulo}</h2>
         {accion}
       </div>
       <div className="mt-3">{children}</div>
@@ -102,7 +102,7 @@ export default function Resumen() {
   if (!perro) {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-6 pt-6 text-[var(--text-primary)] [font-family:var(--font-body)]">
-        <h1 className="text-3xl font-bold leading-tight">No encontramos a ese perro</h1>
+        <h1 className="text-2xl font-semibold leading-tight tracking-[-0.01em]">No encontramos a ese perro</h1>
         <p className="text-base text-[var(--text-secondary)]">Abre el resumen desde la ficha de tu perro.</p>
         <Link href="/app/perros" className="inline-flex h-14 items-center justify-center rounded-[var(--radius-button)] bg-[image:var(--accent-gradient)] text-lg font-semibold text-[var(--bg)]">
           Ir a Perros
@@ -145,10 +145,10 @@ export default function Resumen() {
         </div>
       </div>
 
-      <article className="flex flex-col gap-6 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-6 print:rounded-none print:border-0 print:p-0">
+      <article className="flex flex-col gap-6 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-6 print:rounded-none print:border-0 print:p-0">
         <header>
           <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Resumen para el veterinario</p>
-          <h1 className="mt-1 text-3xl font-bold leading-tight">{perro.nombre}</h1>
+          <h1 className="mt-1 text-3xl font-normal leading-tight tracking-[-0.01em] [font-family:var(--font-serif)]">{perro.nombre}</h1>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">Generado el {fechaLarga(ahora)} con La Doctora Perritos</p>
         </header>
 

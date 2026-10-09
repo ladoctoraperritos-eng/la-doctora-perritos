@@ -34,3 +34,17 @@
 
 ## Fotografía (2026-09-24)
 - Hero: imagen lifestyle (mujer con su perro golden y el celular, pastillero semanal en la mesa) a color natural, cuyos tonos ya coinciden con la paleta (suéter y funda de teléfono teal). Fuente: public/brand/hero-mujer-golden.jpg. Parece generada con IA: se usa como ilustración, NUNCA como testimonio ni con nombre o cita de un cliente. El duotone (.foto-duotone) queda para fotos de perros de la creadora.
+
+## ACTUALIZACIÓN 2026-10-06 — Dirección visual premium (aprobada por el usuario con imagen de referencia)
+Esta sección REEMPLAZA los valores de «Brand kit final» de arriba para la APP. La landing, onboarding y paywall siguen con sus valores anteriores hasta una pasada aparte.
+- Fondo marfil #F8F5EE (predominante) · Superficie blanco cálido #FFFCF8 · Sage #E6ECE5 (zonas suaves, pills, indicador activo)
+- Acento petróleo #0B6B63: botón principal, estados activos, checkmarks, elementos de marca. Plano, sin degradé.
+- Texto principal verde oscuro #20332F (nunca negro puro). Texto secundario #5A6A65 (ajuste AA: el #687873 pedido da 4.3:1 sobre marfil).
+- Durazno #E7A27E: SOLO formas decorativas y badges; nunca como texto (1.9:1).
+- Rojo: SOLO SOS, errores, eliminar, atrasado e intensidad fuerte. Sin decoración.
+- Tipografía: serif DM Serif Display SOLO en títulos de pantalla y nombre de la mascota (token `--font-serif`). Sans DM Sans para todo lo funcional.
+- Radios: tarjetas 22 px · controles 16 px. Sombras suaves con tinte verde oscuro. Bordes de tarjeta casi invisibles (`--border-suave`); bordes de controles con contraste (`--border-ui`).
+- Espaciado: 4·8 entre elementos cercanos, 12–16 dentro de componentes, 20–24 entre grupos, 32–40 entre secciones.
+- Iconos: NO cambian (decisión del usuario; revisión de iconografía aparte).
+- Fotografía: protagonista emocional cuando exista; sin marcos pesados.
+- Fuente de verdad técnica: `components/landing/tokens.css` (tokens globales) y `app/globals.css`.

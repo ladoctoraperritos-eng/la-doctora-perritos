@@ -1,11 +1,24 @@
-# VEREDICTO revisor-visual — Hoy (ronda 3)
-Fecha: 2026-09-24 19:40
+# VEREDICTO revisor-visual — hoy
+Fecha: 2026-10-06 00:00
 Screenshot: docs/revisiones/hoy-375.png
-Usabilidad: 29/40
-Craft: 14/20
+Usabilidad: 26/40
+Craft: 13/20
 Copy (si vende): N-A
-Fidelidad (si hubo referencia): N-A
+Fidelidad (si hubo referencia): FIEL
 Veredicto: NO LISTA
-Top defectos: 1) A 360px (hoy-360.png) la píldora "Atrasado 28 min" de la fila Probiótico se parte en 2 líneas dentro de la píldora; falta whitespace-nowrap y/o pasar hora+píldora a flex-wrap. 2) Menú inferior desalineado: en la pestaña activa "Hoy" el ícono y el label quedan más abajo (label y=1552) que en las otras (y=1540) porque las otras tienen un chip "Pronto" que empuja el contenido; además el menú sigue ~72px de alto con 3 chips "Pronto" repetidos. Fix: alinear todos con items-start/altura fija y mostrar "Pronto" solo como texto de un línea o al tocar. 3) Identidad ownable débil: el marco con hairline degradado en la foto es casi invisible a 56px y la campana del logo no aparece en la pantalla; el kit (DM Sans + teal + chips) sigue siendo intercambiable. Fix: campana como marca en la cabecera/anillo y hairline visible en la tarjeta héroe. Además el comentario SPEC de Hoy.tsx aún dice "marco duotone" (stale). 4) Etiquetado incoherente: "Después hoy" contiene ítems ya "Atrasado 28 min", y "Próximamente" vs "Pronto" del menú confunden; el toast Deshacer tapa la fila siguiente (hoy-hecho.png) y desaparece a los 6 s. Fix: "Atrasados" como grupo propio o "Siguientes"; dar padding-bottom al main para que el toast no tape contenido. 5) Anillo en 0 (hoy-onboarding.png) casi invisible: pista --surface-2 sobre fondo tinte, sin contraste 3:1; y "Todo al día" ocupa 5 líneas de texto (hoy-aldia.png, >4 por bloque). Fix: pista más oscura y recortar copy a 2 líneas.
-Verificación ronda 2: (1) texto partido en filas: CORREGIDO a 375 (Probiótico en 3 líneas limpias), REGRESIÓN en 360 (píldora partida); (2) cabecera: CORREGIDO (fecha corta y título en 1 línea, anillo 64px); (3) duotone/spring: CORREGIDO por decisión de ficha (color natural, escala 0.6→1 con ease-out, sin spring) — ownable sigue PARCIAL; (4) error de guardado y toast: CORREGIDO (banner con qué pasó + Reintentar; toast animado con AnimatePresence); (5) menú: PARCIAL (contraste mejor, sin opacity global; altura y desalineación persisten).
-Verificaciones en código: baseline de movimiento presentes (stagger, anillo pathLength + conteo, tap scale, toast animado, MotionConfig reducedMotion="user"); sin transición entre tabs (menú "Pronto"); CTA vivo (h-14, ancho completo, active:scale, nunca disabled). Flexibilidad/atajos: solo defaults y filtro por perro, sin atajos.
+
+Detalle usabilidad: h1:3 h2:3 h3:2 h4:2 h5:3 h6:3 h7:2 h8:2 h9:3 h10:3
+Detalle craft: jerarquia:2 profundidad:3 identidad:3 movimiento:2 encaje:3
+
+Fidelidad: 1 desvio de 6 como maximo (no alcanza el umbral de INFIEL). Coinciden marfil, petroleo, sage, serif DM Serif en titulo y nombre, radios de tarjeta y sombra suave. Los 5 destinos de navegacion, el relleno rosado de Urgencias y la presencia de «Siguiente cuidado» son decision de la usuaria o estructura aprobada y no cuentan.
+
+Top defectos (priorizados; archivo: components/app/Hoy.tsx):
+1. [Atrasados, fila «Vacuna anual» (vencida)] Marcar como hecho pasa por hacerVencida (linea 397) y el deshacer solo vive 6 s en el toast (linea 390). Pasado ese tiempo la vacuna no se puede revertir desde la pantalla. Fix: incluir las vencidas en «Hecho hoy» con su boton Deshacer persistente, igual que el resto de cuidados.
+2. [Atrasados, filas 1-3] Conviven dos componentes con layouts distintos en la misma lista: FilaPendiente (lineas 238-264, casilla dentro de todo el boton) y FilaFutura (lineas 313-333, casilla de 44 px separada, sin hora). Visualmente no se leen como una misma familia. Fix: un unico componente de fila para Atrasados con casilla circular a la derecha y la misma geometria en ambos casos.
+3. [Acciones rapidas, bajo la tarjeta de Urgencias] «Historial» y «Mascotas» en pildoras (lineas 530-539) duplican los destinos de la barra inferior y usan rounded-full, mientras los controles de la ficha son de 16 px (lineas 531 y 535). Fix: eliminar la fila de pildoras o dejarla solo como enlace de contexto con radius-button.
+4. [Tarjeta «Siguiente cuidado», linea 229] El CTA usa bg-[image:var(--accent-gradient)] y la ficha de la actualizacion 2026-10-06 pide acento petroleo plano, sin degradé. Fix: cambiar a bg-[var(--accent)] y quitar el degradé del CTA.
+5. [Cabecera y tarjeta, lineas 447, 214, 222, 373] La jerarquia usa mas tamanos de los tres permitidos (text-3xl, text-xl, text-lg, text-base y text-sm). El progreso es una barra (linea 459), no un anillo, y la cifra heroe «3 por hacer hoy» no tiene conteo animado. Fix: reducir a tres niveles (display, title, body/label) y animar el conteo y el progreso.
+
+Descartados como defecto (decision de la usuaria o artefacto de captura): relleno rosado de Urgencias; barra inferior fija que aparece sobre la tarjeta en la captura de pagina completa (se evalua en telefono real); ausencia de «Atrasados» en los datos de ejemplo (se evalua el codigo).
+
+Verificado en codigo: undo con toast y «Deshacer» en «Hecho hoy»; role=status en el toast y role=alert en el fallo de guardado; reduced-motion via MotionConfig (linea 424); estados vacio, cargando, sin conexion y fallo de guardado presentes. Atajos de teclado: no hay (h7 bajo).

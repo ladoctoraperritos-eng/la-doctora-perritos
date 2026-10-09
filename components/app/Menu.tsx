@@ -23,7 +23,7 @@ export type SeccionApp = (typeof ITEMS)[number]['id'];
 export function Menu({ activa }: { activa: SeccionApp }) {
   return (
     <nav aria-label="Secciones" className="sticky bottom-4 z-20 mx-4 mt-auto">
-      <ul className="grid grid-cols-5 gap-1 rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--text-tertiary)_18%,transparent)] bg-[var(--surface)] p-1.5 shadow-[var(--shadow-2)]">
+      <ul className="grid grid-cols-5 gap-1 rounded-[var(--radius-card)] border border-[var(--border-suave)] bg-[var(--surface)] p-1.5 shadow-[var(--shadow-1)]">
         {ITEMS.map(({ id, icono: Icono, imagen, texto, href }) => {
           const on = activa === id;
           return (
@@ -32,7 +32,7 @@ export function Menu({ activa }: { activa: SeccionApp }) {
                 <motion.span
                   layoutId="menu-activo"
                   transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                  className="absolute inset-0 rounded-[var(--radius-button)] bg-[var(--chip-bg)]"
+                  className="absolute inset-0 rounded-[var(--radius-button)] bg-[var(--surface-2)]"
                 />
               )}
               <Link

@@ -9,13 +9,16 @@
 //   dispositivo_ownable: foto del perro a color con marco de hairline degradado en la cabecera (decisión del usuario 2026-09-24)
 //   estados: cargando (esqueleto) · vacío · al día (éxito) · sin conexión · deshabilitado (menú «Pronto»)
 
+import Link from 'next/link';
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { AnimatePresence, MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import {
   Bug,
   Check,
+  ChevronRight,
   Droplets,
   Leaf,
+  Plus,
   PawPrint,
   Pill,
   Stethoscope,
@@ -27,6 +30,8 @@ import {
 } from 'lucide-react';
 import {
   deshacer,
+  deshacerSalud,
+  registrarSalud,
   hoy,
   huboFalloGuardado,
   manana,
@@ -35,7 +40,6 @@ import {
   proximos,
   reintentarGuardado,
   suscribirApp,
-  type EstadoApp,
   type FilaHoy,
   type Perro,
   type FilaProxima,
@@ -105,54 +109,13 @@ export const entrada = (i: number) => ({
   transition: { duration: 0.28, delay: 0.05 * i, ease: [0.16, 1, 0.3, 1] as const },
 });
 
-function Anillo({ hechos, total }: { hechos: number; total: number }) {
-  const reduce = useReducedMotion();
-  const fraccion = total === 0 ? 0 : hechos / total;
-  const [visto, setVisto] = useState(reduce ? hechos : 0);
-  useEffect(() => {
-    if (reduce) return;
-    const c = animate(visto, hechos, { duration: 0.5, ease: 'easeOut', onUpdate: (x) => setVisto(Math.round(x)) });
-    return () => c.stop();
-    // Se anima solo cuando cambia el número de hechos.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hechos, reduce]);
-  return (
-    <div className="relative size-20 shrink-0" role="img" aria-label={`${hechos} de ${total} cuidados hechos hoy`}>
-      <svg viewBox="0 0 96 96" className="size-20 -rotate-90">
-        <defs>
-          <linearGradient id="anillo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--accent)" />
-            <stop offset="100%" stopColor="var(--accent-2)" />
-          </linearGradient>
-        </defs>
-        <circle cx="48" cy="48" r="40" fill="none" strokeWidth="9" className="stroke-[color-mix(in_oklab,var(--accent)_10%,var(--surface-2))]" />
-        <motion.circle
-          cx="48"
-          cy="48"
-          r="40"
-          fill="none"
-          strokeWidth="9"
-          strokeLinecap="round"
-          stroke="url(#anillo-grad)"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: fraccion, opacity: fraccion > 0 ? 1 : 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold tabular-nums leading-none">{reduce ? hechos : visto}</span>
-        <span className="text-sm text-[var(--text-secondary)]">/{total}</span>
-      </div>
-    </div>
-  );
-}
 
 /** Insignia de marca (esquina superior derecha de cada pestaña): el mismo logo en todos los paneles. */
 export function LogoMarca() {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/brand/logo.png"
+      src="/brand/logo-marca.png"
       alt="La Doctora Perritos"
       width={36}
       height={36}
@@ -189,7 +152,7 @@ export function PersonaCirculo({ nombre, foto, esYo, tam = 'size-8', textoTam = 
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-full font-bold ${textoTam} ${
+      className={`inline-flex ${tam} shrink-0 items-center justify-center rounded-full font-semibold ${textoTam} ${
         esYo ? 'bg-[var(--accent)] text-[var(--bg)]' : 'bg-[var(--accent-2)] text-[var(--text-primary)]'
       }`}
     >
@@ -244,12 +207,12 @@ export function ChipIcono({ tipo, tam = 'size-11' }: { tipo: Tipo; tam?: string 
 function Tarjeta({ fila, onHecho, varios }: { fila: FilaHoy; onHecho: () => void; varios: boolean }) {
   const { texto, tono: t } = etiquetaFaltan(fila.faltan);
   return (
-    <motion.section {...entrada(1)} aria-label="Siguiente cuidado" className="borde-degradado rounded-[var(--radius-card)] p-6 shadow-[var(--shadow-2)]">
+    <motion.section {...entrada(1)} aria-label="Siguiente cuidado" className="rounded-[var(--radius-card)] bg-[var(--surface)] p-6 text-[var(--text-primary)] shadow-[var(--shadow-1)]">
       <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Siguiente cuidado</p>
       <div className="mt-3 flex items-start gap-4">
         <ChipIcono tipo={fila.cuidado.tipo} tam="size-12" />
         <div className="min-w-0 flex-1">
-          <p className="text-xl font-bold leading-tight">{fila.cuidado.nombre}</p>
+          <p className="text-lg font-semibold leading-tight">{fila.cuidado.nombre}</p>
           <p className="mt-1 text-base text-[var(--text-secondary)]">
             {varios ? `${fila.perro.nombre} · ` : ''}
             {fila.cuidado.detalle}
@@ -257,7 +220,7 @@ function Tarjeta({ fila, onHecho, varios }: { fila: FilaHoy; onHecho: () => void
         </div>
       </div>
       <div className="mt-4 flex items-center gap-3">
-        <span className="text-3xl font-bold tabular-nums text-[var(--accent)]">{fila.cuidado.hora}</span>
+        <span className="text-3xl font-semibold tabular-nums text-[var(--accent)]">{fila.cuidado.hora}</span>
         <span className={`rounded-full px-3 py-1 text-sm font-semibold ${tono[t]}`}>{texto}</span>
       </div>
       <button
@@ -280,7 +243,7 @@ function FilaPendiente({ fila, varios, onHecho, i }: { fila: FilaHoy; varios: bo
         type="button"
         onClick={onHecho}
         aria-label={`Marcar ${fila.cuidado.nombre} de ${fila.perro.nombre} como hecho`}
-        className="flex min-h-16 w-full items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        className="flex min-h-16 w-full items-center gap-4 py-4 text-left transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
       >
         <ChipIcono tipo={fila.cuidado.tipo} />
         <span className="min-w-0 flex-1">
@@ -290,7 +253,7 @@ function FilaPendiente({ fila, varios, onHecho, i }: { fila: FilaHoy; varios: bo
             {fila.cuidado.detalle}
           </span>
           <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-base font-bold tabular-nums text-[var(--accent)]">{fila.cuidado.hora}</span>
+            <span className="text-base font-semibold tabular-nums text-[var(--accent)]">{fila.cuidado.hora}</span>
             {t !== 'normal' && <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>}
           </span>
         </span>
@@ -307,7 +270,7 @@ function FilaHecha({ fila, varios, onDeshacer }: { fila: FilaHoy; varios: boolea
       initial={{ opacity: 0, scale: 0.96, y: -4 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] bg-[var(--elevated)] p-4"
+      className="flex min-h-16 items-center gap-4 py-4"
     >
       <span className="relative inline-flex shrink-0">
         <ChipIcono tipo={fila.cuidado.tipo} tam="size-11" />
@@ -347,10 +310,10 @@ export function textoDias(d: number): { texto: string; tono: keyof typeof tono }
   return { texto: `En ${d} días`, tono: d <= 7 ? 'pronto' : 'normal' };
 }
 
-function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i: number }) {
+function FilaFutura({ fila, varios, i, onHecho }: { fila: FilaProxima; varios: boolean; i: number; onHecho?: () => void }) {
   const { texto, tono: t } = textoDias(fila.dias);
   return (
-    <motion.li {...entrada(i)} className="flex min-h-16 items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4">
+    <motion.li {...entrada(i)} className="flex min-h-16 items-center gap-4 py-4">
       <ChipIcono tipo={fila.cuidado.tipo} />
       <span className="min-w-0 flex-1">
         <span className="block text-base font-semibold">{fila.cuidado.hora ? `Reponer ${fila.cuidado.nombre}` : fila.cuidado.nombre}</span>
@@ -360,32 +323,57 @@ function FilaFutura({ fila, varios, i }: { fila: FilaProxima; varios: boolean; i
         </span>
         <span className={`mt-1 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-semibold ${tono[t]}`}>{texto}</span>
       </span>
+      {onHecho && (
+        <button type="button" onClick={onHecho} aria-label={`Marcar ${fila.cuidado.nombre} de ${fila.perro.nombre} como hecho`} className="inline-flex size-11 shrink-0 items-center justify-center [touch-action:manipulation]">
+          <span aria-hidden="true" className="inline-flex size-8 items-center justify-center rounded-full border-2 border-[var(--border-ui)]" />
+        </button>
+      )}
     </motion.li>
   );
 }
 
-function Selector({ e, activo, onElegir }: { e: EstadoApp; activo: string | null; onElegir: (id: string | null) => void }) {
-  const opciones = [{ id: null as string | null, nombre: 'Todos' }, ...e.perros.map((p) => ({ id: p.id as string | null, nombre: p.nombre }))];
+function FilaMascotas({ perros, activo, onElegir }: { perros: Perro[]; activo: string | null; onElegir: (id: string | null) => void }) {
   return (
-    <div role="radiogroup" aria-label="Perro" className="flex gap-2 overflow-x-auto pb-1">
-      {opciones.map((o) => {
-        const on = o.id === activo;
+    <nav aria-label="Mis mascotas" className="flex gap-4 overflow-x-auto pb-1">
+      {perros.map((p) => {
+        const on = activo === p.id;
         return (
-          <button
-            key={o.id ?? 'todos'}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            onClick={() => onElegir(o.id)}
-            className={`inline-flex min-h-11 shrink-0 items-center rounded-full border-2 px-4 text-base font-semibold [touch-action:manipulation] ${
-              on ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]' : 'border-[var(--border-ui)] bg-[var(--surface)] text-[var(--text-primary)]'
-            }`}
-          >
-            {o.nombre}
+          <button key={p.id} type="button" aria-pressed={on} onClick={() => onElegir(on ? null : p.id)} className="flex min-w-16 flex-col items-center gap-2 [touch-action:manipulation]">
+            <span className={`flex rounded-full p-0.5 ${on ? 'ring-2 ring-[var(--accent)]' : ''}`}>
+              <Avatar perro={p} tam="size-16" iconoTam={24} />
+            </span>
+            <span className={`text-sm ${on ? 'font-semibold text-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}>{p.nombre}</span>
           </button>
         );
       })}
-    </div>
+      <Link href="/app/perros" className="flex min-w-16 flex-col items-center gap-2">
+        <span aria-hidden="true" className="inline-flex size-16 items-center justify-center rounded-full bg-[var(--surface-2)]">
+          <Plus size={24} color="var(--accent)" />
+        </span>
+        <span className="text-sm text-[var(--text-secondary)]">Añadir</span>
+      </Link>
+    </nav>
+  );
+}
+
+/** Mascota protagonista: la foto se funde con el petróleo, nombre grande y un subtítulo corto. */
+function BannerMascota({ perro, pendientes }: { perro: Perro; pendientes: number }) {
+  return (
+    <motion.section {...entrada(0)} aria-label={`Mascota ${perro.nombre}`} className="relative min-h-56 overflow-hidden rounded-[var(--radius-card)] bg-[var(--accent)] text-[var(--bg)] shadow-[var(--shadow-2)]">
+      {perro.foto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={perro.foto} alt={`Foto de ${perro.nombre}`} width={320} height={320} className="absolute inset-y-0 right-0 h-full w-3/5 object-cover object-top" />
+      ) : (
+        <span aria-hidden="true" className="absolute right-6 top-6 opacity-30">
+          <PawPrint size={96} color="var(--bg)" />
+        </span>
+      )}
+      <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(90deg,var(--accent)_30%,transparent_62%)]" />
+      <div className="relative flex min-h-56 flex-col justify-end p-6">
+        <p className="text-3xl leading-none [font-family:var(--font-serif)]">{perro.nombre}</p>
+        <p className="mt-2 text-base text-[var(--bg)]/85">{pendientes > 0 ? `${pendientes} por hacer hoy` : "Su cuidado, al día"}</p>
+      </div>
+    </motion.section>
   );
 }
 
@@ -395,13 +383,21 @@ export default function Hoy() {
   const conexion = useSyncExternalStore(suscribirRed, enLinea, () => true);
   const fallo = useSyncExternalStore(suscribirApp, huboFalloGuardado, () => false);
   const [perroId, setPerroId] = useState<string | null>(null);
-  const [ultimo, setUltimo] = useState<{ id: string; texto: string } | null>(null);
+  const [verTodasProximas, setVerTodasProximas] = useState(false);
+  const [ultimo, setUltimo] = useState<{ texto: string; deshacer: () => void } | null>(null);
   useEffect(() => {
     if (!ultimo) return;
     const t = setTimeout(() => setUltimo(null), 6000);
     return () => clearTimeout(t);
   }, [ultimo]);
-  const hacer = (cuidadoId: string, nombre: string) => setUltimo({ id: marcarHecho(cuidadoId, new Date()), texto: nombre });
+  const hacer = (cuidadoId: string, nombre: string) => {
+    const id = marcarHecho(cuidadoId, new Date());
+    setUltimo({ texto: nombre, deshacer: () => deshacer(id) });
+  };
+  const hacerVencida = (cuidadoId: string, nombre: string) => {
+    const r = registrarSalud(cuidadoId, new Date());
+    setUltimo({ texto: nombre, deshacer: () => deshacerSalud(r.anterior, r.registroId) });
+  };
 
   if (!e || minuto === null) {
     return (
@@ -417,9 +413,12 @@ export default function Hoy() {
   const varios = e.perros.length > 1 && perroId === null;
   const total = pendientes.length + hechos.length;
   const activo = e.perros.find((p) => p.id === perroId);
-  const titulo = activo ? `Hoy con ${activo.nombre}` : e.perros.length === 1 ? `Hoy con ${e.perros[0].nombre}` : 'Hoy con tus perros';
   const [siguiente, ...resto] = pendientes;
   const mana = manana(e, perroId);
+  const vencidas = futuros.filter((f) => f.dias < 0);
+  const restoAtrasado = resto.filter((f) => f.faltan < 0);
+  const restoAlDia = resto.filter((f) => f.faltan >= 0);
+  const proximas = futuros.filter((f) => f.dias >= 0);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -427,7 +426,7 @@ export default function Hoy() {
         {fallo && (
           <div role="alert" className="flex items-center justify-between gap-2 bg-[color-mix(in_oklab,var(--danger)_14%,var(--surface))] px-6 py-2 text-[var(--danger)]">
             <p className="text-sm font-semibold">No pudimos guardar en este aparato. Lo ves ahora, pero puede perderse al cerrar.</p>
-            <button type="button" onClick={reintentarGuardado} className="inline-flex min-h-11 shrink-0 items-center px-3 text-base font-bold underline underline-offset-4 [touch-action:manipulation]">
+            <button type="button" onClick={reintentarGuardado} className="inline-flex min-h-11 shrink-0 items-center px-3 text-base font-semibold underline underline-offset-4 [touch-action:manipulation]">
               Reintentar
             </button>
           </div>
@@ -441,35 +440,36 @@ export default function Hoy() {
         <main className="flex flex-1 flex-col gap-6 px-6 pb-24 pt-6">
           <header className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-4">
-              <Avatar perro={activo ?? e.perros[0]} tam={varios ? 'size-14' : 'size-28'} iconoTam={varios ? 28 : 48} />
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[var(--text-secondary)]">{fechaLarga(ahora)}</p>
-                <h1 className="mt-1 text-2xl font-bold leading-tight">{titulo}</h1>
+                <p className="text-sm font-semibold text-[var(--text-secondary)]">Hola, {e.tutores.find((t) => t.id === e.yo)?.nombre ?? 'Tú'}</p>
+                <p className="text-sm text-[var(--text-secondary)]">{fechaLarga(ahora)}</p>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">Cuidado que se siente cerca</p>
+                <h1 className="mt-1 text-3xl font-normal leading-tight tracking-[-0.01em] [font-family:var(--font-serif)]">Todo su cuidado, en un lugar</h1>
               </div>
             </div>
             <LogoMarca />
           </header>
 
           {total > 0 && (
-            <motion.div {...entrada(0)} className="flex items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-ui)] bg-[var(--surface)] p-4 shadow-[var(--shadow-1)]">
-              <Anillo hechos={hechos.length} total={total} />
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-semibold leading-snug">
-                  {hechos.length === total ? 'Todos los cuidados de hoy están hechos' : `${total - hechos.length} por hacer hoy`}
-                </p>
-                <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
-                  {hechos.length} de {total} cuidados de {varios ? 'tus perros' : (activo ?? e.perros[0]).nombre}
-                </p>
+            <motion.div {...entrada(0)} className="flex flex-col gap-2">
+              <p className="text-lg font-semibold leading-snug">{hechos.length === total ? "Todo listo por hoy" : `${total - hechos.length} por hacer hoy`}</p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {hechos.length} de {total} cuidados de {varios ? "tus perros" : (activo ?? e.perros[0]).nombre}
+              </p>
+              <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-[var(--surface-2)]" aria-hidden="true">
+                <div className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500" style={{ width: `${(hechos.length / total) * 100}%` }} />
               </div>
             </motion.div>
           )}
 
-          {e.perros.length > 1 && <Selector e={e} activo={perroId} onElegir={setPerroId} />}
+          <FilaMascotas perros={e.perros} activo={perroId} onElegir={setPerroId} />
+
+          {(activo ?? e.perros[0]) && <BannerMascota perro={activo ?? e.perros[0]} pendientes={pendientes.filter((p) => p.perro.id === (activo ?? e.perros[0]).id).length} />}
 
           {siguiente ? (
             <Tarjeta fila={siguiente} varios={varios} onHecho={() => hacer(siguiente.cuidado.id, siguiente.cuidado.nombre)} />
           ) : total > 0 ? (
-            <motion.section {...entrada(1)} aria-label="Todo al día" className="borde-degradado flex items-start gap-4 rounded-[var(--radius-card)] p-6 shadow-[var(--shadow-2)]">
+            <motion.section {...entrada(1)} aria-label="Todo al día" className="flex items-start gap-4 px-1 py-2">
               <motion.span
                 initial={{ scale: 0.6 }}
                 animate={{ scale: 1 }}
@@ -479,7 +479,7 @@ export default function Hoy() {
                 <Check size={26} color="var(--bg)" strokeWidth={3} aria-hidden="true" />
               </motion.span>
               <div>
-                <p className="text-xl font-bold leading-tight">Todo al día{activo ? ` con ${activo.nombre}` : ''}</p>
+                <p className="text-lg font-semibold leading-tight">Todo al día{activo ? ` con ${activo.nombre}` : ''}</p>
                 <p className="mt-1 text-base text-[var(--text-secondary)]">
                   {mana.cuantos > 0 ? `Mañana: ${mana.cuantos} cuidados, desde las ${mana.primera}.` : 'No queda nada por hoy.'}
                 </p>
@@ -493,7 +493,7 @@ export default function Hoy() {
           ) : (
             <motion.section {...entrada(1)} aria-label="Sin cuidados hoy" className="flex flex-col items-start gap-3 rounded-[var(--radius-card)] border-2 border-dashed border-[var(--border-ui)] p-6">
               <ChipIcono tipo="control" tam="size-12" />
-              <p className="text-xl font-bold leading-tight">Hoy no hay cuidados con hora</p>
+              <p className="text-lg font-semibold leading-tight">Hoy no hay cuidados con hora</p>
               <p className="text-base text-[var(--text-secondary)]">
                 {futuros[0]
                   ? `Lo próximo es ${futuros[0].cuidado.nombre.toLowerCase()}, ${textoDias(futuros[0].dias).texto.toLowerCase()}.`
@@ -502,21 +502,54 @@ export default function Hoy() {
             </motion.section>
           )}
 
-          {resto.length > 0 && (
+          {restoAtrasado.length + vencidas.length > 0 && (
+            <section aria-label="Atrasados">
+              <h2 className="mb-2 text-lg font-semibold text-[var(--danger)]">Atrasados</h2>
+              <ul className="flex flex-col divide-y divide-[var(--border-suave)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4">
+                {restoAtrasado.map((f, i) => (
+                  <FilaPendiente key={f.cuidado.id} fila={f} varios={varios} i={i + 2} onHecho={() => hacer(f.cuidado.id, f.cuidado.nombre)} />
+                ))}
+                {vencidas.map((f, i) => (
+                  <FilaFutura key={f.cuidado.id} fila={f} varios={varios} i={i + 2 + restoAtrasado.length} onHecho={() => hacerVencida(f.cuidado.id, f.cuidado.nombre)} />
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {restoAlDia.length > 0 && (
             <section aria-label="Pendiente hoy">
-              <h2 className="mb-2 text-lg font-bold">Siguientes de hoy</h2>
-              <ul className="flex flex-col gap-2">
-                {resto.map((f, i) => (
+              <h2 className="mb-2 text-lg font-semibold">Siguientes de hoy</h2>
+              <ul className="flex flex-col divide-y divide-[var(--border-suave)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4">
+                {restoAlDia.map((f, i) => (
                   <FilaPendiente key={f.cuidado.id} fila={f} varios={varios} i={i + 2} onHecho={() => hacer(f.cuidado.id, f.cuidado.nombre)} />
                 ))}
               </ul>
             </section>
           )}
 
+          <nav aria-label="Accesos rápidos" className="flex gap-3">
+            <Link href="/app/historial" className="flex flex-1 items-center justify-between gap-2 rounded-full bg-[var(--surface-2)] px-5 py-3 text-base font-semibold [touch-action:manipulation]">
+              Historial
+              <ChevronRight size={20} color="var(--accent)" aria-hidden="true" />
+            </Link>
+            <Link href="/app/perros" className="flex flex-1 items-center justify-between gap-2 rounded-full bg-[var(--surface-2)] px-5 py-3 text-base font-semibold [touch-action:manipulation]">
+              Mascotas
+              <ChevronRight size={20} color="var(--accent)" aria-hidden="true" />
+            </Link>
+          </nav>
+
+          <Link href="/app/sos" aria-label="Urgencias: qué hacer ahora" className="flex items-center justify-between gap-3 rounded-[var(--radius-card)] bg-[color-mix(in_oklab,var(--danger)_8%,var(--surface))] p-4 [touch-action:manipulation]">
+            <span>
+              <span className="block text-base font-semibold text-[var(--danger)]">Urgencias</span>
+              <span className="block text-sm text-[var(--text-secondary)]">Qué hacer ahora mismo</span>
+            </span>
+            <ChevronRight size={20} color="var(--danger)" aria-hidden="true" />
+          </Link>
+
           {hechos.length > 0 && (
             <section aria-label="Hecho hoy">
-              <h2 className="mb-2 text-lg font-bold">Hecho hoy</h2>
-              <ul className="flex flex-col gap-2">
+              <h2 className="mb-2 text-lg font-semibold">Hecho hoy</h2>
+              <ul className="flex flex-col divide-y divide-[var(--border-suave)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4">
                 {hechos.map((f) => (
                   <FilaHecha key={f.cuidado.id} fila={f} varios={varios} onDeshacer={() => f.registro && deshacer(f.registro.id)} />
                 ))}
@@ -524,14 +557,19 @@ export default function Hoy() {
             </section>
           )}
 
-          {futuros.length > 0 && (
+          {proximas.length > 0 && (
             <section aria-label="Próximamente">
-              <h2 className="mb-2 text-lg font-bold">Próximamente</h2>
-              <ul className="flex flex-col gap-2">
-                {futuros.map((f, i) => (
+              <h2 className="mb-2 text-lg font-semibold">Próximamente</h2>
+              <ul className="flex flex-col divide-y divide-[var(--border-suave)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4">
+                {(verTodasProximas ? proximas : proximas.slice(0, 3)).map((f, i) => (
                   <FilaFutura key={f.cuidado.id} fila={f} varios={varios} i={i + 3} />
                 ))}
               </ul>
+              {proximas.length > 3 && (
+                <button type="button" onClick={() => setVerTodasProximas((v) => !v)} className="mt-3 inline-flex min-h-11 items-center px-1 text-base font-semibold text-[var(--accent)] [touch-action:manipulation]">
+                  {verTodasProximas ? "Ver menos" : `Ver las ${proximas.length} próximas`}
+                </button>
+              )}
             </section>
           )}
         </main>
@@ -549,10 +587,10 @@ export default function Hoy() {
             <button
               type="button"
               onClick={() => {
-                deshacer(ultimo.id);
+                ultimo.deshacer();
                 setUltimo(null);
               }}
-              className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-bold text-[var(--accent-on-dark)] [touch-action:manipulation]"
+              className="inline-flex min-h-11 items-center gap-1 rounded-[var(--radius-button)] px-3 text-base font-semibold text-[var(--accent-on-dark)] [touch-action:manipulation]"
             >
               <Undo2 size={18} aria-hidden="true" />
               Deshacer
