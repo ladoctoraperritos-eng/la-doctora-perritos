@@ -45,6 +45,11 @@ export default function Reembolsos() {
             escribiéndonos directamente. Al cancelar, mantienes el acceso hasta el final del período que ya pagaste,
             sin cobros adicionales.
           </p>
+          <p className="mt-2">
+            <strong className="font-semibold">Ojo:</strong> el cobro lo hace Hotmart, no esta app. Borrar tu cuenta
+            desde "Tus datos" o desinstalar la app NO cancela la suscripción — si no la cancelas en Hotmart, se te
+            sigue cobrando aunque ya no uses la app. Escríbenos y te ayudamos a cancelarla ahí.
+          </p>
         </>
       ) : (
         <>

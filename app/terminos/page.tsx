@@ -52,6 +52,11 @@ export default function Terminos() {
         simple como contratar. Al cancelar, mantienes el acceso hasta el final del período ya pagado y no se te
         vuelve a cobrar.
       </p>
+      <p className="mt-2">
+        <strong className="font-semibold">Importante:</strong> el pago lo procesa Hotmart, no esta app. Borrar tu
+        cuenta o dejar de usar la app NO cancela el cobro — para que no se te vuelva a cobrar, la suscripción debe
+        quedar cancelada en Hotmart. Te ayudamos a hacerlo si nos escribes.
+      </p>
 
       <h2 className="mt-8 text-lg font-semibold">Avisos y recordatorios</h2>
       <p className="mt-2">

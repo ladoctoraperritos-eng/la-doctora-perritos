@@ -367,6 +367,11 @@ export default function Yo() {
                 <img src="/brand/accion-correo.png" alt="" width={18} height={18} className="object-contain" />
                 Cambiar o cancelar mi suscripción
               </a>
+              <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                Tu pago lo procesa Hotmart, no esta app. Escríbenos y te ayudamos, pero el cobro solo se detiene cuando
+                la suscripción queda cancelada en Hotmart — mientras no la canceles ahí, se te sigue cobrando aunque
+                dejes de usar la app o borres tu cuenta.
+              </p>
             </div>
           </section>
 
@@ -410,7 +415,7 @@ export default function Yo() {
             </p>
             <Borrar
               etiqueta={borrando ? 'Borrando…' : 'Borrar todos mis datos'}
-              aviso="Se borran tus perros, cuidados, historial y personas — de este aparato y de la nube. Esto no se puede deshacer."
+              aviso="Se borran tus perros, cuidados, historial y personas — de este aparato y de la nube. Esto no se puede deshacer. Importante: esto NO cancela tu suscripción en Hotmart. Si sigues pagando, cancélala primero ahí (o escríbenos) para que no se te vuelva a cobrar."
               onConfirmar={() => void borrarTodo()}
             />
             {errorBorrar && (
