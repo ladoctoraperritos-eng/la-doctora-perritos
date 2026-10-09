@@ -193,6 +193,7 @@ export default function Paywall() {
   const [decidido, setDecidido] = useState(false);
   const [intento, setIntento] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [aceptaLegal, setAceptaLegal] = useState(false);
   const campoCorreo = useRef<HTMLInputElement>(null);
   const correoActual = correo ?? r.correo;
   const correoOk = correoValido(correoActual);
@@ -211,6 +212,10 @@ export default function Paywall() {
       setIntento(true);
       campoCorreo.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
       campoCorreo.current?.focus();
+      return;
+    }
+    if (!aceptaLegal) {
+      setIntento(true);
       return;
     }
     actualizar({ correo: correoActual.trim() });
@@ -335,6 +340,31 @@ export default function Paywall() {
             <p id="ayuda-correo" role="status" aria-live="polite" className={`mt-2 text-sm ${intento && !correoOk ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
               {intento && !correoOk ? 'Escribe un correo válido, por ejemplo nombre@correo.com.' : 'Solo lo usamos para tu acceso y los avisos de tu prueba.'}
             </p>
+
+            <label className="mt-4 flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={aceptaLegal}
+                onChange={(e) => {
+                  setAceptaLegal(e.target.checked);
+                  setIntento(false);
+                }}
+                aria-invalid={intento && !aceptaLegal}
+                className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]"
+              />
+              <span className={`text-sm ${intento && !aceptaLegal ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+                Autorizo el tratamiento de mis datos personales según la{' '}
+                <Link href="/privacidad" className="underline underline-offset-4">
+                  Política de privacidad
+                </Link>{' '}
+                y acepto los{' '}
+                <Link href="/terminos" className="underline underline-offset-4">
+                  Términos
+                </Link>
+                .
+              </span>
+            </label>
+            {intento && !aceptaLegal && <p role="alert" className="mt-1 text-sm font-semibold text-[var(--text-primary)]">Marca la casilla para continuar.</p>}
           </motion.section>
         )}
 
@@ -383,17 +413,6 @@ export default function Paywall() {
         <button type="button" onClick={decidido ? empezar : decidir} className={boton}>
           {decidido ? 'Continuar al pago' : etiquetaBoton}
         </button>
-        <p className="text-center text-xs text-[var(--text-secondary)]">
-          Al continuar aceptas los{' '}
-          <Link href="/terminos" className="underline underline-offset-4">
-            Términos
-          </Link>{' '}
-          y la{' '}
-          <Link href="/privacidad" className="underline underline-offset-4">
-            Política de privacidad
-          </Link>
-          .
-        </p>
         {guardado && (
           <div role="status" className="flex flex-col items-center gap-1 text-center">
             <p className="text-sm font-semibold">Guardamos tu correo. El pago se activa muy pronto.</p>

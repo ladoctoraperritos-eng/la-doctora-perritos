@@ -20,11 +20,17 @@ type Estado =
 export default function Login() {
   const [correo, setCorreo] = useState('');
   const [estado, setEstado] = useState<Estado>({ tipo: 'reposo' });
+  const [aceptaLegal, setAceptaLegal] = useState(false);
+  const [intento, setIntento] = useState(false);
 
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!correoValido(correo)) {
       setEstado({ tipo: 'correo_invalido', texto: 'Revisa el correo: parece que falta algo.' });
+      return;
+    }
+    if (!aceptaLegal) {
+      setIntento(true);
       return;
     }
     setEstado({ tipo: 'enviando' });
@@ -65,6 +71,30 @@ export default function Login() {
             placeholder="nombre@correo.com"
             className="h-14 w-full rounded-[var(--radius-card)] border-2 border-[color-mix(in_oklab,var(--text-tertiary)_70%,transparent)] bg-[var(--surface)] px-4 text-lg outline-none focus:border-[var(--accent)]"
           />
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={aceptaLegal}
+              onChange={(e) => {
+                setAceptaLegal(e.target.checked);
+                setIntento(false);
+              }}
+              aria-invalid={intento && !aceptaLegal}
+              className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]"
+            />
+            <span className={`text-sm ${intento && !aceptaLegal ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+              Autorizo el tratamiento de mis datos personales según la{' '}
+              <Link href="/privacidad" className="underline underline-offset-4">
+                Política de privacidad
+              </Link>{' '}
+              y acepto los{' '}
+              <Link href="/terminos" className="underline underline-offset-4">
+                Términos
+              </Link>
+              .
+            </span>
+          </label>
+          {intento && !aceptaLegal && <p role="alert" className="text-sm font-semibold text-[var(--text-primary)]">Marca la casilla para continuar.</p>}
           <button
             type="submit"
             disabled={estado.tipo === 'enviando'}
@@ -88,17 +118,6 @@ export default function Login() {
             {estado.tipo === 'enviado' && <p className="text-base text-[var(--text-secondary)]">Listo. Revisa tu correo y toca el enlace. Si no lo ves, mira en spam.</p>}
           </div>
         </form>
-        <p className="mt-4 text-center text-xs text-[var(--text-secondary)]">
-          Al continuar aceptas los{' '}
-          <Link href="/terminos" className="underline underline-offset-4">
-            Términos
-          </Link>{' '}
-          y la{' '}
-          <Link href="/privacidad" className="underline underline-offset-4">
-            Política de privacidad
-          </Link>
-          .
-        </p>
 
         <p className="mt-auto pt-8 text-center text-base text-[var(--text-secondary)]">
           ¿Aún no tienes cuenta?{' '}

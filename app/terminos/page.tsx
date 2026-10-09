@@ -75,8 +75,19 @@ export default function Terminos() {
         monto que hayas pagado por la suscripción en los últimos 3 meses.
       </p>
 
+      <h2 className="mt-8 text-lg font-semibold">A quién ofrecemos el servicio</h2>
+      <p className="mt-2">
+        La Doctora Perritos está disponible para personas de habla hispana en cualquier país. Si las leyes de
+        protección al consumidor de tu país te dan derechos adicionales a los de este documento, esos derechos se
+        respetan igual: estos términos no los reemplazan, los complementan.
+      </p>
+
       <h2 className="mt-8 text-lg font-semibold">Ley aplicable</h2>
-      <p className="mt-2">Estos términos se rigen por las leyes de Chile. Cualquier disputa se resuelve ante los tribunales chilenos.</p>
+      <p className="mt-2">
+        Estos términos se rigen por las leyes de Chile, sin perjuicio de los derechos que te correspondan de forma
+        obligatoria según la ley de protección al consumidor de tu propio país. Cualquier disputa se resuelve ante
+        los tribunales chilenos, salvo que la ley de tu país indique otra cosa de forma obligatoria.
+      </p>
 
       <h2 className="mt-8 text-lg font-semibold">Cambios a estos términos</h2>
       <p className="mt-2">

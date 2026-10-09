@@ -2,7 +2,7 @@
 
 ## Alcance
 - Nicho: apps de recordatorios y registro compartido del cuidado de perros (medicamentos, comida, vacunas, controles)
-- Países: Chile y México · Moneda de cobro: USD (equivalente local por definir con Hotmart)
+- Países: investigación de precios original en Chile y México; AMPLIADO el 2026-10-09 por decisión de la creadora — las campañas de Meta Ads apuntan a todo el mercado hispanohablante, no solo Chile/México. La capa legal (privacidad/términos) ya cubre esto; los NÚMEROS de precio/competencia de abajo siguen siendo solo de Chile/México, pendiente de ampliar si se detectan precios muy distintos en otros países. · Moneda de cobro: USD (equivalente local por definir con Hotmart)
 - Fecha de investigación: 2026-09-23 · **Vence el:** 2027-03-23
 - Pasarela elegida: Hotmart (cuenta pendiente de crear por la creadora)
 

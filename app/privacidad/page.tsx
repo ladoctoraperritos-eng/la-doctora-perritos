@@ -85,6 +85,18 @@ export default function Privacidad() {
       <h2 className="mt-8 text-lg font-semibold">Edad mínima</h2>
       <p className="mt-2">La Doctora Perritos es para personas mayores de 18 años. No recogemos a sabiendas datos de menores de edad.</p>
 
+      <h2 className="mt-8 text-lg font-semibold">Dónde sea que estés</h2>
+      <p className="mt-2">
+        Ofrecemos la app a personas de habla hispana en distintos países, y respetamos tus derechos sobre tus datos
+        sin importar desde dónde la uses — incluyendo, cuando aplican, la Ley 1581 de Colombia, la LFPDPPP de México,
+        la Ley 25.326 de Argentina, la Ley 21.719 de Chile, y normas equivalentes de otros países. Si tienes dudas
+        sobre qué ley te protege, escríbenos a{" "}
+        <a href={`mailto:${CONTACTO}`} className="underline underline-offset-4">
+          {CONTACTO}
+        </a>{" "}
+        y te orientamos.
+      </p>
+
       <h2 className="mt-8 text-lg font-semibold">Cuánto tiempo guardamos tus datos</h2>
       <p className="mt-2">
         Mientras tu cuenta esté activa. Si cancelas tu suscripción, tus datos siguen disponibles para que puedas
