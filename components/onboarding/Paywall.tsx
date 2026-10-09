@@ -188,11 +188,22 @@ export default function Paywall() {
   const importe = periodo === 'anio' ? P.anualTotal : P.mensual;
   const unidad = periodo === 'anio' ? '/año' : '/mes';
   const [correo, setCorreo] = useState<string | null>(null);
+  // El correo se pide DESPUÉS de decidir («Empezar mis 7 días gratis»), nunca antes: primero elige
+  // plan y decide, recién ahí se le pregunta el correo para activar el acceso.
+  const [decidido, setDecidido] = useState(false);
   const [intento, setIntento] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const campoCorreo = useRef<HTMLInputElement>(null);
   const correoActual = correo ?? r.correo;
   const correoOk = correoValido(correoActual);
+  const decidir = () => {
+    setDecidido(true);
+    // El campo aparece recién ahora: le damos un instante a React para montarlo antes de enfocarlo.
+    setTimeout(() => {
+      campoCorreo.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      campoCorreo.current?.focus();
+    }, 80);
+  };
   const empezar = () => {
     setGuardado(false);
     if (!correoOk) {
@@ -290,34 +301,42 @@ export default function Paywall() {
           </div>
         </section>
 
-        <section aria-label="Tu correo de acceso" className="mt-8">
-          <h2 className="text-lg font-bold">¿A qué correo te enviamos tu acceso?</h2>
-          <p className="mt-1 text-base text-[var(--text-secondary)]">Con este correo entras al Panel de {nombre || 'tu perro'}. Sin contraseñas: te mandamos un enlace.</p>
-          <label htmlFor="correo" className="sr-only">
-            Tu correo
-          </label>
-          <input
-            id="correo"
-            ref={campoCorreo}
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={correoActual}
-            placeholder="tucorreo@ejemplo.com"
-            aria-describedby="ayuda-correo"
-            aria-invalid={intento && !correoOk}
-            onChange={(e) => {
-              setCorreo(e.target.value);
-              setIntento(false);
-            }}
-            className={`mt-3 h-14 w-full rounded-[var(--radius-card)] border-2 bg-[var(--surface)] px-4 text-lg font-semibold outline-none placeholder:font-normal placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)] ${
-              intento && !correoOk ? 'border-[var(--accent)] ring-4 ring-[color-mix(in_oklab,var(--accent)_25%,transparent)]' : 'border-[var(--border-ui)]'
-            }`}
-          />
-          <p id="ayuda-correo" role="status" aria-live="polite" className={`mt-2 text-sm ${intento && !correoOk ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
-            {intento && !correoOk ? 'Escribe un correo válido, por ejemplo nombre@correo.com.' : 'Solo lo usamos para tu acceso y los avisos de tu prueba.'}
-          </p>
-        </section>
+        {decidido && (
+          <motion.section
+            aria-label="Tu correo de acceso"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-8"
+          >
+            <h2 className="text-lg font-bold">¿A qué correo te enviamos tu acceso?</h2>
+            <p className="mt-1 text-base text-[var(--text-secondary)]">Con este correo entras al Panel de {nombre || 'tu perro'}. Sin contraseñas: te mandamos un enlace.</p>
+            <label htmlFor="correo" className="sr-only">
+              Tu correo
+            </label>
+            <input
+              id="correo"
+              ref={campoCorreo}
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              value={correoActual}
+              placeholder="tucorreo@ejemplo.com"
+              aria-describedby="ayuda-correo"
+              aria-invalid={intento && !correoOk}
+              onChange={(e) => {
+                setCorreo(e.target.value);
+                setIntento(false);
+              }}
+              className={`mt-3 h-14 w-full rounded-[var(--radius-card)] border-2 bg-[var(--surface)] px-4 text-lg font-semibold outline-none placeholder:font-normal placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)] ${
+                intento && !correoOk ? 'border-[var(--accent)] ring-4 ring-[color-mix(in_oklab,var(--accent)_25%,transparent)]' : 'border-[var(--border-ui)]'
+              }`}
+            />
+            <p id="ayuda-correo" role="status" aria-live="polite" className={`mt-2 text-sm ${intento && !correoOk ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+              {intento && !correoOk ? 'Escribe un correo válido, por ejemplo nombre@correo.com.' : 'Solo lo usamos para tu acceso y los avisos de tu prueba.'}
+            </p>
+          </motion.section>
+        )}
 
         {hayPrueba() && <LineaTiempo importe={importe} unidad={unidad} />}
 
@@ -361,8 +380,8 @@ export default function Paywall() {
           {hayPrueba() ? 'Hoy US$0' : `Hoy ${importe}`} · Luego {importe}
           {unidad} 
         </p>
-        <button type="button" onClick={empezar} className={boton}>
-          {etiquetaBoton}
+        <button type="button" onClick={decidido ? empezar : decidir} className={boton}>
+          {decidido ? 'Continuar al pago' : etiquetaBoton}
         </button>
         {guardado && (
           <div role="status" className="flex flex-col items-center gap-1 text-center">

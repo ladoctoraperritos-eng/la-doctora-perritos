@@ -11,6 +11,7 @@ import { MotionConfig, animate, motion, useReducedMotion } from 'motion/react';
 import { Check, Footprints, Heart, Home, PawPrint, User, Users, type LucideIcon } from 'lucide-react';
 import Marca from './Marca';
 import { CONDICIONES, hayGarantia, hayPrueba } from '@/lib/oferta';
+import { ENCUADRE_INICIAL, EncuadreFoto, type Encuadre, leerFoto, recortarFoto } from '@/components/app/Perros';
 import {
   actualizar,
   armarPanel,
@@ -18,6 +19,7 @@ import {
   MAX_OLVIDOS,
   obtener,
   pasosPara,
+  prioridadEfectiva,
   suscribir,
   TEXTO_CONTROL,
   TEXTO_CUIDADORES,
@@ -241,17 +243,18 @@ const CUANDO: { valor: Cuando; texto: string }[] = [
 ];
 
 /** Estos pasos se pueden saltar: el Panel simplemente no muestra ese cuidado. */
-const SALTABLES: Paso[] = ['stock', 'control', 'cuidadores'];
+const SALTABLES: Paso[] = ['control', 'cuidadores'];
 type Fase = 'preguntas' | 'armando' | 'resultado';
 
 const AYUDA: Record<Paso, string> = {
   nombre: 'Escribe su nombre para seguir.',
   olvidos: 'Elige al menos una opción para seguir.',
+  prioridad: 'Elige con cuál empezamos.',
   med: 'Elige cada cuánto y en qué momento para seguir.',
-  stock: 'Elige una opción, marca «No lo sé» o salta esta pregunta.',
   comida: 'Elige los días y la anticipación para seguir.',
   control: 'Elige cuál es y cuándo corresponde, o salta esta pregunta.',
   cuidadores: 'Elige una opción o salta esta pregunta.',
+  info: '',
   avisos: '',
 };
 const LIMITE = `Puedes elegir hasta ${MAX_OLVIDOS} por ahora. El resto lo agregas después.`;
@@ -318,19 +321,49 @@ export default function Onboarding() {
     raiz.current?.querySelector<HTMLElement>('h1')?.focus();
   }, [paso, fase]);
 
-  const nombre = r.nombre.trim() || 'tu perro';
+  const nombre = r.nombre.trim() || 'tu mascota';
   const pasos = pasosPara(r);
   const actual = pasos[Math.min(paso, pasos.length - 1)];
   const medicamento = r.medNombre.trim() || 'su medicamento';
+  const prioridad = prioridadEfectiva(r);
+
+  // Foto opcional: mismo patrón que la ficha de mascota (original sin recortar + encuadre elegido).
+  const [fotoOriginal, setFotoOriginal] = useState<string | undefined>(undefined);
+  const [fotoEnfoque, setFotoEnfoque] = useState<Encuadre>(ENCUADRE_INICIAL);
+  const [cargandoFoto, setCargandoFoto] = useState(false);
+  const entradaFoto = useRef<HTMLInputElement>(null);
+  const elegirFoto = async (archivo: File | undefined) => {
+    if (!archivo) return;
+    setCargandoFoto(true);
+    try {
+      setFotoOriginal(await leerFoto(archivo));
+      setFotoEnfoque(ENCUADRE_INICIAL);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No pudimos cargar la foto.');
+    } finally {
+      setCargandoFoto(false);
+    }
+  };
+  useEffect(() => {
+    if (!fotoOriginal) return;
+    let cancelado = false;
+    void recortarFoto(fotoOriginal, fotoEnfoque).then((foto) => {
+      if (!cancelado) actualizar({ foto });
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [fotoOriginal, fotoEnfoque]);
 
   const valido: Record<Paso, boolean> = {
     nombre: r.nombre.trim().length > 0,
     olvidos: r.olvidos.length > 0,
+    prioridad: r.prioridad !== null,
     med: r.medFrecuencia !== null && r.medHora !== null,
-    stock: r.stockDias !== null,
     comida: r.comidaDias !== null && r.comidaAviso !== null,
     control: r.controlTipo !== null && r.controlCuando !== null,
     cuidadores: r.cuidadores !== null,
+    info: true,
     avisos: true,
   };
 
@@ -378,36 +411,43 @@ export default function Onboarding() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={raiz} className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pb-8 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
-        <div className="-mt-2 mb-1 flex items-center justify-between">
-          <Marca />
+      <div ref={raiz} className="relative mx-auto flex h-dvh w-full max-w-md flex-col overflow-hidden text-[var(--text-primary)] [font-family:var(--font-body)]">
+        {/* Profundidad sutil (DESIGN-CORE): el mismo mesh del hero de la landing, muy tenue. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{ background: 'radial-gradient(700px 420px at 50% -10%, color-mix(in oklab, var(--accent) 8%, transparent) 0%, transparent 60%)' }}
+        />
+        <div className="shrink-0 px-6 pt-4">
+          <div className="-mt-2 mb-1 flex items-center justify-between">
+            <Marca />
+          </div>
+          {fase === 'preguntas' ? (
+            <Cabecera paso={paso} total={pasos.length} onAtras={atras} />
+          ) : (
+            <button
+              type="button"
+              onClick={atras}
+              aria-label="Volver"
+              className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/accion-volver.png" alt="" width={22} height={22} className="object-contain" />
+            </button>
+          )}
         </div>
-        {fase === 'preguntas' ? (
-          <Cabecera paso={paso} total={pasos.length} onAtras={atras} />
-        ) : (
-          <button
-            type="button"
-            onClick={atras}
-            aria-label="Volver"
-            className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/accion-volver.png" alt="" width={22} height={22} className="object-contain" />
-          </button>
-        )}
 
+        {/* Área con scroll PROPIO (no el de la página): así la barra de abajo queda fija detrás del
+            contenido en vez de flotar encima cuando una pregunta no entra en una pantalla. */}
+        <div className="flex-1 overflow-y-auto px-6 pb-8">
         {fase === 'preguntas' && (
           <motion.main key={actual} {...entrada} className="flex flex-1 flex-col pt-6">
             {actual === 'nombre' && (
               <>
-                <div className="mb-6 aspect-video overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/brand/perro-golden-onboarding.webp" alt="Un perro golden sonriendo en su casa" width={1672} height={941} className="size-full object-cover [object-position:50%_30%]" />
-                </div>
-                <h1 tabIndex={-1} className={titulo}>¿Cómo se llama tu perro?</h1>
-                <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos con uno; los demás los agregas después.</p>
+                <h1 tabIndex={-1} className={titulo}>¿Cómo se llama?</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos con esta mascota. Agregas las demás cuando quieras.</p>
                 <label htmlFor="nombre" className="sr-only">
-                  Nombre de tu perro
+                  Nombre de tu mascota
                 </label>
                 <input
                   id="nombre"
@@ -428,11 +468,41 @@ export default function Onboarding() {
                     error !== null && !valido.nombre ? 'border-[var(--accent)] ring-4 ring-[color-mix(in_oklab,var(--accent)_25%,transparent)]' : 'border-[var(--border-ui)]'
                   }`}
                 />
+                {fotoOriginal ? (
+                  <EncuadreFoto fuente={fotoOriginal} enfoque={fotoEnfoque} onCambiar={setFotoEnfoque} nombre={nombre} />
+                ) : (
+                  <div className="mt-6 flex flex-col items-center gap-3">
+                    <span aria-hidden="true" className="inline-flex size-24 items-center justify-center rounded-full bg-[var(--chip-bg)]">
+                      <PawPrint size={36} color="var(--accent)" />
+                    </span>
+                    <input ref={entradaFoto} id="foto-mascota" type="file" accept="image/*" className="sr-only" onChange={(e) => { void elegirFoto(e.target.files?.[0]); e.target.value = ''; }} />
+                    <button
+                      type="button"
+                      onClick={() => entradaFoto.current?.click()}
+                      disabled={cargandoFoto}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-base font-semibold [touch-action:manipulation]"
+                    >
+                      {cargandoFoto ? 'Preparando…' : 'Añade una foto (opcional)'}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+            {actual === 'prioridad' && (
+              <>
+                <h1 tabIndex={-1} className={titulo}>¿Qué quieres dejar bajo control primero?</h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">Empezamos por una. Lo demás lo puedes agregar después.</p>
+                <Lista
+                  nombreGrupo="Qué dejamos bajo control primero"
+                  opciones={OLVIDOS.filter((o) => r.olvidos.includes(o.valor))}
+                  seleccion={r.prioridad}
+                  onElegir={(v) => elegir({ prioridad: v })}
+                />
               </>
             )}
             {actual === 'olvidos' && (
               <>
-                <h1 tabIndex={-1} className="text-balance text-2xl font-bold leading-tight outline-none">¿Qué te gustaría dejar de tener que recordar?</h1>
+                <h1 tabIndex={-1} className={`${titulo} text-balance`}>¿Qué te gustaría dejar de tener que recordar?</h1>
                 <p className="mt-2 text-base text-[var(--text-secondary)]">
                   Ese «¿le di la pastilla?» que se repite. Elige hasta {MAX_OLVIDOS} para {nombre}. Llevas <strong className="font-semibold text-[var(--text-primary)]">{r.olvidos.length}</strong>.
                 </p>
@@ -464,13 +534,22 @@ export default function Onboarding() {
                 />
                 <Fichas titulo="¿Cada cuánto se lo das?" opciones={FRECUENCIA} valor={r.medFrecuencia} onElegir={(v) => elegir({ medFrecuencia: v })} columnas={3} />
                 <Fichas titulo="¿En qué momento se lo das?" opciones={HORA} valor={r.medHora} onElegir={(v) => elegir({ medHora: v })} columnas={3} />
+                <Fichas titulo={`¿Quieres que también te avisemos antes de que se acabe ${medicamento}?`} opciones={DIAS} valor={r.stockDias} onElegir={(v) => elegir({ stockDias: v })} columnas={2} />
               </>
             )}
-            {actual === 'stock' && (
+            {actual === 'info' && (
               <>
-                <h1 tabIndex={-1} className={titulo}>¿Para cuántos días le queda {medicamento}?</h1>
-                <p className="mt-2 text-base text-[var(--text-secondary)]">Un cálculo a ojo basta. Te avisamos antes de que se acabe.</p>
-                <Fichas titulo="Días aproximados" opciones={DIAS} valor={r.stockDias} onElegir={(v) => elegir({ stockDias: v })} columnas={2} />
+                <span className="inline-flex size-14 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
+                  <IconoOpcion imagen={prioridad === 'documentos' ? '/brand/documentos.png' : '/brand/emergencia.png'} tam={28} />
+                </span>
+                <h1 tabIndex={-1} className={`${titulo} mt-5`}>
+                  {prioridad === 'documentos' ? `Perfecto, ${nombre} ya tiene su lugar` : 'Perfecto, tendrás ayuda a la mano'}
+                </h1>
+                <p className="mt-2 text-base text-[var(--text-secondary)]">
+                  {prioridad === 'documentos'
+                    ? 'Podrás guardar recetas, exámenes y documentos cuando entres a la app.'
+                    : 'Tendrás acceso rápido a la guía SOS desde la app. No reemplaza a tu veterinario.'}
+                </p>
               </>
             )}
             {actual === 'comida' && (
@@ -522,6 +601,9 @@ export default function Onboarding() {
               </>
             )}
 
+            {/* Reserva el alto de la barra fija: en pantallas con varias preguntas (p. ej. medicamento +
+                stock), sin esto la barra queda flotando ENCIMA del contenido en vez de debajo. */}
+            <div className="h-36 shrink-0" aria-hidden="true" />
             <div className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-2 bg-gradient-to-t from-[var(--bg)] from-75% to-transparent px-6 pb-4 pt-8">
               {(
                 <div id="ayuda" role="status" aria-live="polite">
@@ -563,6 +645,7 @@ export default function Onboarding() {
 
         {fase === 'armando' && <Armando nombre={nombre} r={r} onListo={irAlResultado} />}
         {fase === 'resultado' && <Resultado nombre={nombre} r={r} entrada={entrada} />}
+        </div>
       </div>
     </MotionConfig>
   );
@@ -572,9 +655,9 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
   const panel = armarPanel(r);
   const primero = panel.hoy[0];
   const lineas = [
-    `Ordenando lo que necesita ${nombre}…`,
-    primero && r.avisos === 'si' ? `Poniendo el aviso de ${primero.titulo} a las ${primero.etiqueta}…` : 'Calculando cuándo toca cada cuidado…',
-    `Dejando todo listo para ${nombre}…`,
+    `Organizando el primer cuidado de ${nombre}…`,
+    primero && r.avisos === 'si' ? `Preparando el aviso de ${primero.titulo} a las ${primero.etiqueta}…` : 'Preparando su aviso…',
+    'Dejándolo todo listo…',
   ];
   const [visibles, setVisibles] = useState(0);
   useEffect(() => {
@@ -593,10 +676,8 @@ function Armando({ nombre, r, onListo }: { nombre: string; r: Respuestas; onList
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/pata.png" alt="" width={32} height={32} className="object-contain" />
       </span>
-      <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">
-        Cuidar a {nombre} no tiene que depender de tu <span className="text-[var(--accent)]">memoria</span>
-      </h1>
-      <p className="text-lg text-[var(--text-secondary)]">Estamos armando su Panel de Hoy.</p>
+      <h1 tabIndex={-1} className="text-balance text-3xl font-bold leading-tight outline-none">Estamos preparando su Panel de Hoy</h1>
+      <p className="text-lg text-[var(--text-secondary)]">Así {nombre} queda bajo control.</p>
       <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--border-ui)_55%,var(--surface-2))]" aria-hidden="true">
         <motion.div
           className="h-full rounded-full bg-[var(--accent)]"
@@ -682,9 +763,13 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
   const comparte = r.cuidadores !== null && r.cuidadores !== 'solo_yo';
   return (
     <motion.main {...entrada} className="flex flex-1 flex-col pt-4">
-      <div className="aspect-[5/2] overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--surface)] shadow-[var(--shadow-2)]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/perro-golden-onboarding.webp" alt="Un perro golden sonriendo en su casa" width={1672} height={941} className="size-full object-cover [object-position:50%_30%]" />
+      <div className="flex aspect-[5/2] items-center justify-center overflow-hidden rounded-[var(--radius-card)] border-2 border-[var(--surface)] bg-[var(--chip-bg)] shadow-[var(--shadow-2)]">
+        {r.foto ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={r.foto} alt={`Foto de ${nombre}`} width={1000} height={400} className="size-full object-cover" />
+        ) : (
+          <PawPrint size={40} color="var(--accent)" aria-hidden="true" />
+        )}
       </div>
       <h1 tabIndex={-1} className="mt-4 text-3xl font-bold leading-tight outline-none">
         Todo listo para <span className="text-[var(--accent)]">{nombre}</span>

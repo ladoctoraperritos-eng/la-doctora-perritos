@@ -1,11 +1,15 @@
 # VEREDICTO revisor-visual — onboarding
-Fecha: 2026-09-24 17:00
-Screenshot: docs/revisiones/onboarding-375.png
-Usabilidad: 29/40
-Craft: 14/20
-Copy (si vende): 13/20
+Fecha: 2026-10-08 00:00
+Screenshot: docs/revisiones/onboarding-1-nombre-375.png (serie: 1-nombre, 2-olvidos, 3-prioridad, 4-med-stock)
+Usabilidad: 36/40
+Craft: 18/20
+Copy (si vende): N-A
 Fidelidad (si hubo referencia): N-A
-Veredicto: NO LISTA
-Top defectos: 1) Copy de oferta (Onboarding.tsx l.782-789, onboarding-9b): «7 días gratis · Garantía de 15 días sobre tu primer pago» sigue sin nombre de garantía ni precio, y el CTA «Probar gratis con Toffee» no es 1ª persona; copy 13/20 (<16) y falla el sub-check de garantía nombrada -> nombrar la garantía («Garantía Tranquilidad de 15 días»), añadir precio/anclaje y CTA «Quiero mis 7 días gratis con Toffee». 2) Armando (l.581-583, onboarding-8): dice «Poniendo el aviso de Apoquel a las 20:00…» aunque la persona respondió «Ahora no» a los avisos (claim falso); además Resultado dice «Te avisamos 5 días antes» sin avisos activados -> condicionar ambas líneas a r.avisos === 'si'. 3) Encaje en rejilla de olvidos (Rejilla l.140-161, onboarding-2-olvidos): tarjetas de la misma fila con alturas distintas (Sus medicamentos termina más corta que Vacunas…) porque el motion.div/button no estira -> h-full en el wrapper y el botón. 4) Identidad (todos los pasos 2-8): el duotone aparece solo en el paso 1 y en el resultado (misma foto repetida); el resto son tarjetas blancas con borde intercambiables con cualquier app -> dispositivo firma propio en tarjetas/Panel (p. ej. huella o marco duotone recurrente, cabecera con foto en avisos) y variar la foto. 5) Resultado (onboarding-9): el CTA queda bajo el pliegue en 375px (solo se ve tras ~2 pantallas) y la pantalla final tiene 4 secciones + cuidadores, sobrecarga; dejar el CTA sticky y compactar a Hoy + Próximamente. Menores: anillo de foco del nombre se ve como doble borde (l.437-438, onboarding-1); paso «armando» sin barra de pasos y línea 2 envuelta sin alinear con el check; barra de progreso cambia de total según lo elegido (salta de segmentos).
-Resueltos de la ronda 2: duplicación «¿le di la pastilla?»: RESUELTO. Aviso de límite en el flujo (no en el footer) y titular a 2 líneas: RESUELTO (tarjetas 5-6 aún se desvanecen bajo el CTA en la 1ª vista, aceptable). Conteo animado «Armado con tus N respuestas»: RESUELTO. Género femenino en emergencia: RESUELTO. Oferta junto al CTA: RESUELTO en ubicación, NO en contenido (garantía sin nombre/precio). Foto duotone repetida / identidad tibia: NO RESUELTO. Lista de «armando» a 3 líneas: PARCIAL (envuelve). Nuevos: claim de aviso falso con «Ahora no», alturas desiguales en la rejilla, CTA final bajo el pliegue.
-Verificaciones de código: h3 Volver en cada paso y en resultado, «Saltar por ahora» en stock/control/cuidadores (sin undo pero respuestas persisten, aceptable); h5 el CTA nunca está disabled, valida al click con hint y foco (cumple CTA vivo: contraste teal/blanco alto, h-14, active:scale-[0.98]); h7 solo Enter en nombre y sin defaults preseleccionados en pasos (2); h1 aria-live presente; movimiento: stagger en opciones, conteo animado, progreso con transición, tap scale, MotionConfig reducedMotion="user" presente; sin salida animada entre pasos ni celebración (aceptable por ficha); sin conteo/anillo en hito. Ficha-arte: teal #0B5F5A, DM Sans, radios 18/14, coral solo en cuidador secundario: coinciden. Gate de carga cognitiva: 2 fallas (6 opciones en olvidos, resultado con >5 bloques); no crítico. No es clon de Capítulo/Umbral. lib/onboarding.ts revisado: lógica de pasos y panel coherente salvo el condicionamiento de avisos.
+Veredicto: LISTA
+
+Top defectos:
+1. [Onboarding.tsx paso "med", líneas 535-537] Sin indicador visual de que hay más contenido bajo el fold (chips de frecuencia/hora/stock) cuando el contenido excede el viewport → agregar una sombra/chevron sutil arriba de la barra sticky como pista de scroll.
+2. [Onboarding.tsx, heurística 7 flexibilidad] Único atajo es Enter en el campo nombre; ninguna ficha preselecciona el valor más común (p. ej. "Noche" en momento del medicamento) → bajo impacto, mejora opcional para usuarios repetidores.
+3. [Onboarding.tsx líneas 416-420, eje 2 profundidad] El mesh radial de fondo quedó al 8% de opacidad, casi imperceptible a simple vista en el screenshot → aporta menos profundidad real que el resto de la app; subir ligeramente la opacidad sin perder la calma.
+
+Defectos de rondas anteriores confirmados RESUELTOS: título de "olvidos" ahora usa la misma clase `titulo` (text-3xl) que el resto de pasos (consistencia, antes defecto #1) · fondo con mesh radial sutil agregado (antes defecto #4, plano). Ambos verificados en código (líneas 505 y 416-420) y en el screenshot.

@@ -21,7 +21,11 @@ export type Avisos = 'si' | 'no';
 
 export interface Respuestas {
   nombre: string;
+  /** Foto de la mascota (opcional): recortada y lista para mostrar, igual que en la app. */
+  foto?: string;
   olvidos: Olvido[];
+  /** Cuál de los «olvidos» se configura primero. Si solo eligió uno, es ese mismo (ver prioridadEfectiva). */
+  prioridad: Olvido | null;
   medNombre: string;
   medFrecuencia: Frecuencia | null;
   medHora: Momento | null;
@@ -40,7 +44,9 @@ export interface Respuestas {
 
 export const VACIAS: Respuestas = {
   nombre: '',
+  foto: undefined,
   olvidos: [],
+  prioridad: null,
   medNombre: '',
   medFrecuencia: null,
   medHora: null,
@@ -111,17 +117,24 @@ export const HORA_POR_MOMENTO: Record<Momento, string> = {
   noche: '20:00',
 };
 
-export type Paso = 'nombre' | 'olvidos' | 'med' | 'stock' | 'comida' | 'control' | 'cuidadores' | 'avisos';
+export type Paso = 'nombre' | 'olvidos' | 'prioridad' | 'med' | 'comida' | 'control' | 'cuidadores' | 'info' | 'avisos';
 
-/** Los pasos dependen de lo que eligió: solo se le pregunta por lo que dijo que quiere dejar de recordar. */
+/** Si eligió una sola cosa, esa es la prioridad. Si eligió varias, la que escogió en la pantalla «prioridad». */
+export function prioridadEfectiva(r: Respuestas): Olvido | null {
+  return r.olvidos.length <= 1 ? (r.olvidos[0] ?? null) : r.prioridad;
+}
+
+/** Los pasos dependen de la prioridad: se configura UNA sola cosa, nunca todo lo que marcó en «olvidos».
+ * El resto lo agrega después, dentro de la app. */
 export function pasosPara(r: Respuestas): Paso[] {
-  const o = r.olvidos;
   const pasos: Paso[] = ['nombre', 'olvidos'];
-  if (o.includes('medicamentos')) pasos.push('med');
-  if (o.includes('medicamentos')) pasos.push('stock');
-  if (o.includes('alimento')) pasos.push('comida');
-  if (o.includes('vacunas')) pasos.push('control');
-  if (o.includes('quien')) pasos.push('cuidadores');
+  if (r.olvidos.length > 1) pasos.push('prioridad');
+  const prioridad = prioridadEfectiva(r);
+  if (prioridad === 'medicamentos') pasos.push('med');
+  else if (prioridad === 'alimento') pasos.push('comida');
+  else if (prioridad === 'vacunas') pasos.push('control');
+  else if (prioridad === 'quien') pasos.push('cuidadores');
+  else if (prioridad === 'documentos' || prioridad === 'emergencia') pasos.push('info');
   pasos.push('avisos');
   return pasos;
 }

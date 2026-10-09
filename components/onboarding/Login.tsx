@@ -30,12 +30,11 @@ export default function Login() {
     setEstado({ tipo: 'enviando' });
     const r = await enviarEnlaceDeAcceso(correo);
     if (r.ok) setEstado({ tipo: 'enviado' });
-    else
-      setEstado(
-        r.motivo === 'no_configurado'
-          ? { tipo: 'sistema', texto: 'El acceso a la app se activa pronto. Todavía no podemos enviarte el enlace.' }
-          : { tipo: 'correo_invalido', texto: 'Revisa el correo: parece que falta algo.' },
-      );
+    else if (r.motivo === 'no_configurado')
+      setEstado({ tipo: 'sistema', texto: 'El acceso a la app se activa pronto. Todavía no podemos enviarte el enlace.' });
+    else if (r.motivo === 'error_envio')
+      setEstado({ tipo: 'sistema', texto: 'No pudimos enviar el enlace en este momento. Intenta de nuevo en unos minutos.' });
+    else setEstado({ tipo: 'correo_invalido', texto: 'Revisa el correo: parece que falta algo.' });
   };
 
   return (
