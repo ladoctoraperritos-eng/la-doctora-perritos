@@ -16,6 +16,8 @@ export interface FrameCarrusel {
   /** Screenshot REAL a 375px (ratio 9:19.5). Sin src → placeholder honesto. */
   src?: string;
   alt?: string;
+  /** Título corto sobre el label ("HOY", "HISTORIAL") — opcional, en acento. */
+  titulo?: string;
   /** Label bajo el frame: nombre-RESULTADO de la pantalla ("Tu semana, ya planificada"). */
   label: string;
   /** Nombre de la pantalla futura para el placeholder ("Plan del día"). */
@@ -124,9 +126,12 @@ export function AppPorDentro({
                     </div>
                   )}
                 </div>
-                <p className="mt-3 text-center text-[13px] font-medium text-[var(--text-secondary)]">
-                  {f.label}
-                </p>
+                <div className="mt-3 text-center">
+                  {f.titulo && (
+                    <p className="text-[12px] font-bold uppercase tracking-[0.06em] text-[var(--accent)]">{f.titulo}</p>
+                  )}
+                  <p className="mt-0.5 text-[13px] font-medium text-[var(--text-secondary)]">{f.label}</p>
+                </div>
               </div>
             ))}
           </div>

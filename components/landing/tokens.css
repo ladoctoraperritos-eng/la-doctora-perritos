@@ -18,46 +18,49 @@
 
 :root {
   /* ── SUPERFICIES (3 niveles: base / elevada / hundida) ── */
-  --bg: #f4f7f6;              /* ← reemplazar con FICHA-ARTE — fondo base (jamás #FFF/#000 puros) */
-  --surface: #fdfefd;         /* ← reemplazar con FICHA-ARTE — secciones elevadas y cards */
-  --surface-2: #e6eeec;
+  --bg: #f8f5ee;              /* ← reemplazar con FICHA-ARTE — fondo base (jamás #FFF/#000 puros) */
+  --surface: #fffcf8;         /* ← reemplazar con FICHA-ARTE — secciones elevadas y cards */
+  --surface-2: #e6ece5;
+  --border-suave: rgb(32 51 47 / 0.08); /* divisor y borde de tarjeta: casi invisible (dirección premium, 2026-10-06) */
   --border-ui: #74847f;        /* borde de controles (opciones, campos): ≥3:1 sobre --bg y --surface (WCAG 1.4.11) */
   --elevated: color-mix(in oklab, var(--surface-2) 60%, var(--bg)); /* fondo de secciones elevadas: separa el ritmo entre bloques */       /* ← reemplazar con FICHA-ARTE — hundido: wells, frames placeholder */
 
   /* ── TEXTO (casi-negro CON tinte, familia única de neutros) ── */
-  --text-primary: #22302c;    /* ← reemplazar con FICHA-ARTE */
-  --text-secondary: #5a6a65;  /* ← reemplazar con FICHA-ARTE */
+  --text-primary: #20332f;    /* ← reemplazar con FICHA-ARTE */
+  --text-secondary: #5a6a65;  /* el gris verdoso #687873 da 4.3:1 sobre marfil: falla AA, se usa un tono apenas más oscuro */  /* ← reemplazar con FICHA-ARTE */
   --text-tertiary: #566661;   /* ← reemplazar con FICHA-ARTE — SIEMPRE ≥4.5:1 sobre --bg/--surface/--surface-2 (audit-conversion lo verifica; este placeholder da 5.0-5.8:1) */
 
   /* ── MARCA ── */
-  --accent: #0b5f5a;          /* ← reemplazar con FICHA-ARTE — el acento del brand kit */
-  --accent-2: #e8896b;
+  --accent: #0b6b63;          /* ← reemplazar con FICHA-ARTE — el acento del brand kit */
+  --accent-2: #e7a27e;  /* durazno: SOLO formas decorativas y badges; nunca texto (1.9:1 sobre marfil) */
   --warn: #8a5300;             /* vence pronto: texto ≥4.5:1 sobre --surface; el fondo se mezcla al 14% */
   --danger: #a83232;           /* vencido o atrasado: texto ≥4.5:1 sobre --surface */
   --accent-on-dark: #7cd1c6;   /* acento legible sobre el bloque invertido (CTA final): ≥7:1 sobre --text-primary */        /* ← reemplazar con FICHA-ARTE — 2ª nota SOLO si la ficha la define;
                                  si no hay 2ª nota, repetir aquí el valor de --accent */
 
   /* ── FORMA (radios del brand kit — UNO por rol, toda la página) ── */
-  --radius-card: 24px;        /* ← reemplazar con FICHA-ARTE — cards, frames, secciones (2026-09-28: más redondeado, dirección «premium») */
-  --radius-button: 20px;      /* ← reemplazar con FICHA-ARTE — botones y chips de ícono */
+  --radius-card: 22px;        /* ← reemplazar con FICHA-ARTE — cards, frames, secciones (2026-09-28: más redondeado, dirección «premium») */
+  --radius-button: 16px;      /* ← reemplazar con FICHA-ARTE — botones y chips de ícono */
 
   /* ── TIPOGRAFÍA (2 familias de la ficha — jamás Inter/Roboto/system-ui de marca) ── */
   --font-display: var(--font-dm-sans), 'DM Sans', sans-serif;      /* ← reemplazar con FICHA-ARTE (display) */
+  /* Serif de la app (2026-10-06): SOLO títulos de pantalla, nombre de la mascota y momentos emocionales. La landing sigue con --font-display. */
+  --font-serif: var(--font-dm-serif), 'DM Serif Display', Georgia, serif;      /* ← reemplazar con FICHA-ARTE (display) */
   --font-body: var(--font-dm-sans), 'DM Sans', sans-serif;    /* ← reemplazar con FICHA-ARTE (body) */
 
   /* ── SOMBRAS con el TINTE del neutro de marca (49 Parte 2c — nunca negro puro) ── */
-  --shadow-1: 0 2px 6px rgb(10 50 46 / 0.10);          /* ← reemplazar el tinte RGB con FICHA-ARTE */
-  --shadow-2: 0 18px 40px -14px rgb(10 50 46 / 0.28);  /* ← reemplazar el tinte RGB con FICHA-ARTE (2026-09-28: más grande y cálida) */
-  --accent-gradient: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 70%, black));  /* CTA principal (2026-09-28) — nunca en toggles/badges, solo en el botón de acción */
+  --shadow-1: 0 1px 2px rgb(32 51 47 / 0.05), 0 8px 20px -12px rgb(32 51 47 / 0.12);          /* ← reemplazar el tinte RGB con FICHA-ARTE */
+  --shadow-2: 0 16px 36px -20px rgb(32 51 47 / 0.22);  /* ← reemplazar el tinte RGB con FICHA-ARTE (2026-09-28: más grande y cálida) */
+  --accent-gradient: linear-gradient(var(--accent), var(--accent));  /* petróleo plano en el botón principal: sin degradé (dirección premium); es imagen válida para bg-[image:…] */  /* CTA principal (2026-09-28) — nunca en toggles/badges, solo en el botón de acción */
 
   /* ── DERIVADOS (no se tocan: se recalculan solos desde --accent) ── */
   --chip-bg: color-mix(in oklab, var(--accent) 10%, transparent);
 
   /* ── COLOR POR CATEGORÍA (mockup «premium» en revisión — 2026-09-28, aún NO aplicado a la app real) ──
      Uso: solo en el chip/ícono secundario de cada tipo de cuidado, nunca en CTA ni precio (eso sigue siendo --accent). */
-  --cat-botiquin: #7c6aa6;   /* medicamentos y suplementos */
-  --cat-comida: #c98a2b;     /* alimento */
-  --cat-salud: #3e7cb1;      /* vacunas, antiparasitarios, baños, controles */
+  --cat-botiquin: var(--accent);   /* medicamentos y suplementos (2026-10-06: un solo color de marca; la diferencia la hace el ícono) */
+  --cat-comida: var(--accent);     /* alimento */
+  --cat-salud: var(--accent);      /* vacunas, antiparasitarios, baños, controles */
   --cat-bitacora: var(--accent-2);
 }
 

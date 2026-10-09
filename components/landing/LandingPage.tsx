@@ -79,35 +79,22 @@ export default function LandingPage() {
         logo={LOGO}
         loginHref="/login"
         h1Marked="Que cuidar a tu perro no dependa de tu [acento]memoria[/acento]"
-        subtitleMarked="Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]"
+        subtitleMarked="Medicamentos, alimento, controles y [b]quién hizo qué[/b]. Todo en un solo lugar."
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
         socialProof={<span className="text-base font-medium">{MICROCOPY}</span>}
         visual={
-          <div className="bg-[var(--surface-2)]">
-            <div className="aspect-video overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand/hero-mujer-golden.jpg"
-                alt="Una mujer acaricia a su perro golden mientras mira el celular; sobre la mesa hay un pastillero semanal"
-                width={1200}
-                height={675}
-                fetchPriority="high"
-              />
-            </div>
-            <div className="mt-6 flex max-h-[26rem] justify-center overflow-hidden px-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/screens/hoy.png"
-                alt="Pantalla Hoy con Toffee: medicamento de las 19:00, alimento para 8 días y quién dio el Omega-3"
-                width={310}
-                height={640}
-                className="relative h-auto w-full max-w-xs rounded-t-[32px] shadow-[var(--shadow-2)]"
-              />
-            </div>
-          </div>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/screens/hoy.png"
+            alt="Panel de Hoy con Toffee y Luna: sus cuidados de hoy, el siguiente medicamento y quién ya lo hizo"
+            width={375}
+            height={776}
+            fetchPriority="high"
+            className="h-auto w-full"
+          />
         }
-        visualPlaceholderSugerencia="captura de «Hoy con Toffee»: medicamento de las 19:00, alimento para ~8 días y quién dio el Omega-3"
+        visualPlaceholderSugerencia="captura del Panel de Hoy: cuidados de hoy, siguiente medicamento y quién ya lo hizo"
       />
 
       {/* Estructura canónica de 19. Problema = síntomas concretos; Agitación = consecuencias, sin repetir la carga mental. */}
@@ -137,7 +124,7 @@ export default function LandingPage() {
         pasos={[
           { titulo: 'Cuéntanos lo suyo', detalle: 'Un medicamento, su comida o una vacuna. Nosotros lo recordamos por ti.' },
           { titulo: 'Te avisamos a tiempo', detalle: 'Antes de cada dosis y antes de que algo se acabe. Tú respiras.' },
-          { titulo: 'Todos ven qué se hizo', detalle: 'Quien lo da lo marca y la familia lo ve. Nadie duda.' },
+          { titulo: 'Todos ven qué se hizo', detalle: 'Cuando alguien lo marca, los demás lo ven al instante. Sin "pensé que se lo habías dado tú".' },
         ]}
         antesDespues={{
           labelAntes: 'Antes',
@@ -150,10 +137,10 @@ export default function LandingPage() {
       <AppPorDentro
         tituloMarked="Tu perro, [acento]todo en orden[/acento]"
         frames={[
-          { label: 'Qué toca hoy', nombrePantalla: 'Hoy con Toffee', src: '/screens/hoy.png', alt: 'Pantalla Hoy con Toffee' },
-          { label: 'Quién hizo qué, sin preguntar', nombrePantalla: 'Familia', src: '/screens/familia.png', alt: 'Pantalla Familia con el registro de quién dio cada cuidado' },
-          { label: 'Su ficha con fechas y alertas', nombrePantalla: 'Ficha del perro', src: '/screens/ficha.png', alt: 'Ficha de Toffee con vacunas y controles' },
-          { label: 'Si tienes más de un perro', nombrePantalla: 'Varios perros', src: '/screens/perros.png', alt: 'Pantalla Hoy con selector de varios perros' },
+          { titulo: 'HOY', label: 'Qué necesita y qué falta.', nombrePantalla: 'Panel de Hoy', src: '/screens/hoy.png', alt: 'Panel de Hoy con los cuidados pendientes y la siguiente hora' },
+          { titulo: 'HISTORIAL', label: 'Qué se hizo, quién lo hizo y cuándo.', nombrePantalla: 'Historial', src: '/screens/historial.png', alt: 'Historial con el resumen de la semana y el registro de cada cuidado' },
+          { titulo: 'MASCOTAS', label: 'Su información y próximos cuidados, en un solo lugar.', nombrePantalla: 'Mascotas', src: '/screens/mascotas.png', alt: 'Lista de mascotas con sus próximos cuidados' },
+          { titulo: 'SOS', label: 'Qué hacer mientras buscas atención veterinaria.', nombrePantalla: 'SOS', src: '/screens/sos.png', alt: 'Guía SOS con los teléfonos del veterinario y las situaciones de emergencia' },
         ]}
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
@@ -175,8 +162,8 @@ export default function LandingPage() {
         <Oferta
           tituloMarked={
             PRUEBA
-              ? `Empieza gratis. Sigue por [acento]${P.dia} al día[/acento]`
-              : `Cuida a tu perro desde [acento]${P.dia} al día[/acento]`
+              ? `Pruébala gratis ${DIAS_PRUEBA} días. Después, desde [acento]${P.anualTotal} al año[/acento]`
+              : `Cuida a tu perro desde [acento]${P.anualTotal} al año[/acento]`
           }
           trialDias={PRUEBA ? DIAS_PRUEBA : undefined}
           anual={{
