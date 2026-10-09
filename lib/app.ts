@@ -34,14 +34,22 @@ export interface Tutor {
   foto?: string;
 }
 
+/** Racha de días seguidos con «todo al día». Vive en `ajustes` (mismo campo que ya sincroniza con
+ * la nube vía hogares.ajustes) para no necesitar una columna nueva en la base de datos. */
+export interface Racha {
+  dias: number;
+  /** Último día (YYYY-MM-DD) en que ya se contó — evita sumar dos veces el mismo día. */
+  ultimoDia?: string;
+}
 export interface Ajustes {
   avisoHora: boolean;
   avisoStock: boolean;
   avisoFechas: boolean;
   /** Días de anticipación para stock y fechas. */
   anticipacion: 3 | 5 | 7;
+  racha: Racha;
 }
-export const AJUSTES_INICIALES: Ajustes = { avisoHora: true, avisoStock: true, avisoFechas: true, anticipacion: 5 };
+export const AJUSTES_INICIALES: Ajustes = { avisoHora: true, avisoStock: true, avisoFechas: true, anticipacion: 5, racha: { dias: 0 } };
 export interface Cuidado {
   id: string;
   perroId: string;
@@ -477,6 +485,21 @@ export function eliminarTutor(id: string): void {
 export function guardarAjustes(parcial: Partial<Ajustes>): void {
   const e = obtenerApp();
   cambiar({ ...e, ajustes: { ...e.ajustes, ...parcial } });
+}
+
+/** Se llama cuando «todo está al día» por primera vez en el día. Si ayer también se logró, suma un
+ * día a la racha; si hubo un salto, la reinicia en 1. Nunca cuenta dos veces el mismo día (se puede
+ * llamar varias veces sin romper el conteo). Devuelve si ACABA de subir, para disparar la celebración
+ * solo una vez. */
+export function actualizarRacha(ahora: Date): { subio: boolean; dias: number } {
+  const e = obtenerApp();
+  const hoyClave = claveDia(ahora);
+  const r = e.ajustes.racha ?? { dias: 0 };
+  if (r.ultimoDia === hoyClave) return { subio: false, dias: r.dias };
+  const ayerClave = claveDia(new Date(ahora.getTime() - 86400000));
+  const dias = r.ultimoDia === ayerClave ? r.dias + 1 : 1;
+  cambiar({ ...e, ajustes: { ...e.ajustes, racha: { dias, ultimoDia: hoyClave } } });
+  return { subio: true, dias };
 }
 /** Guarda el nombre y/o teléfono de un veterinario (habitual o de urgencia) para el botón «Llamar» del SOS. */
 export function guardarVeterinario(tipo: TipoVeterinario, parcial: Partial<Veterinario>): void {
