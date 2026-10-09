@@ -88,6 +88,17 @@ export default function Login() {
             {estado.tipo === 'enviado' && <p className="text-base text-[var(--text-secondary)]">Listo. Revisa tu correo y toca el enlace. Si no lo ves, mira en spam.</p>}
           </div>
         </form>
+        <p className="mt-4 text-center text-xs text-[var(--text-secondary)]">
+          Al continuar aceptas los{' '}
+          <Link href="/terminos" className="underline underline-offset-4">
+            Términos
+          </Link>{' '}
+          y la{' '}
+          <Link href="/privacidad" className="underline underline-offset-4">
+            Política de privacidad
+          </Link>
+          .
+        </p>
 
         <p className="mt-auto pt-8 text-center text-base text-[var(--text-secondary)]">
           ¿Aún no tienes cuenta?{' '}

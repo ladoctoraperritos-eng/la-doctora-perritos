@@ -24,6 +24,22 @@ function clienteAnon(): SupabaseClient | null {
 
 export type VerificacionAdmin = { ok: true; user: User; admin: SupabaseClient } | { ok: false; estado: number; motivo: string };
 
+/** Verifica EN EL SERVIDOR que el token recibido pertenece a UNA SESIÓN VÁLIDA (cualquier persona
+ * con cuenta, no solo administradores) — para acciones de autoservicio como borrar la cuenta propia. */
+export async function verificarUsuario(authorizationHeader: string | null): Promise<VerificacionAdmin> {
+  const admin = clienteAdmin();
+  const anon = clienteAnon();
+  if (!admin || !anon) return { ok: false, estado: 500, motivo: 'El servidor no tiene configurada la clave de administración.' };
+
+  const token = authorizationHeader?.startsWith('Bearer ') ? authorizationHeader.slice(7) : null;
+  if (!token) return { ok: false, estado: 401, motivo: 'Falta iniciar sesión.' };
+
+  const { data, error } = await anon.auth.getUser(token);
+  if (error || !data.user) return { ok: false, estado: 401, motivo: 'Tu sesión no es válida. Entra de nuevo.' };
+
+  return { ok: true, user: data.user, admin };
+}
+
 /** Verifica EN EL SERVIDOR que el token recibido pertenece a un administrador real (tabla `admins`).
  * No ocultar un botón no es seguridad: cada ruta del panel debe llamar esto antes de leer nada. */
 export async function verificarAdmin(authorizationHeader: string | null): Promise<VerificacionAdmin> {

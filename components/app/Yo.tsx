@@ -34,6 +34,7 @@ import { CONDICIONES } from '@/lib/oferta';
 import { reiniciar as reiniciarOnboarding } from '@/lib/onboarding';
 import { PLANES } from '@/lib/planes';
 import { invitarCuidador } from '@/lib/sincronizar';
+import { clienteSupabase } from '@/lib/supabase';
 
 function descargar(nombre: string, contenido: string, tipo: string) {
   const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
@@ -195,8 +196,34 @@ export default function Yo() {
   const e = useSyncExternalStore(suscribirApp, obtenerApp, () => null);
   const [hoja, setHoja] = useState<HojaEstado>(null);
   const [descargado, setDescargado] = useState<string | null>(null);
+  const [borrando, setBorrando] = useState(false);
+  const [errorBorrar, setErrorBorrar] = useState<string | null>(null);
   const router = useRouter();
   const cerrar = () => setHoja(null);
+
+  // Borra la cuenta de VERDAD: si hay sesión en la nube, primero borra los datos sincronizados
+  // (y la cuenta de acceso) en el servidor — antes esto solo limpiaba el aparato, y los datos
+  // seguidos sincronizados a la nube quedaban vivos pese al botón "Borrar todos mis datos".
+  const borrarTodo = async () => {
+    setBorrando(true);
+    setErrorBorrar(null);
+    try {
+      const supabase = clienteSupabase();
+      const sesion = supabase ? (await supabase.auth.getSession()).data.session : null;
+      if (supabase && sesion) {
+        const res = await fetch('/api/cuenta/eliminar', { method: 'POST', headers: { Authorization: `Bearer ${sesion.access_token}` } });
+        const cuerpo = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(cuerpo.motivo ?? 'No pudimos borrar tu cuenta. Intenta de nuevo.');
+        await supabase.auth.signOut();
+      }
+      reiniciarApp();
+      reiniciarOnboarding();
+      router.push('/');
+    } catch (err) {
+      setErrorBorrar(err instanceof Error ? err.message : 'No pudimos borrar tu cuenta. Intenta de nuevo.');
+      setBorrando(false);
+    }
+  };
 
   if (!e) {
     return (
@@ -382,14 +409,15 @@ export default function Yo() {
               {descargado ? 'Listo: revisa tu carpeta de descargas.' : ''}
             </p>
             <Borrar
-              etiqueta="Borrar todos mis datos"
-              aviso="Se borran tus perros, cuidados, historial y personas de este aparato. Esto no se puede deshacer."
-              onConfirmar={() => {
-                reiniciarApp();
-                reiniciarOnboarding();
-                router.push('/');
-              }}
+              etiqueta={borrando ? 'Borrando…' : 'Borrar todos mis datos'}
+              aviso="Se borran tus perros, cuidados, historial y personas — de este aparato y de la nube. Esto no se puede deshacer."
+              onConfirmar={() => void borrarTodo()}
             />
+            {errorBorrar && (
+              <p role="alert" className="mt-2 text-sm font-semibold text-[var(--danger)]">
+                {errorBorrar}
+              </p>
+            )}
           </section>
 
           <nav aria-label="Información legal" className="flex flex-wrap gap-x-4 text-base text-[var(--text-secondary)]">

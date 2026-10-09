@@ -383,6 +383,17 @@ export default function Paywall() {
         <button type="button" onClick={decidido ? empezar : decidir} className={boton}>
           {decidido ? 'Continuar al pago' : etiquetaBoton}
         </button>
+        <p className="text-center text-xs text-[var(--text-secondary)]">
+          Al continuar aceptas los{' '}
+          <Link href="/terminos" className="underline underline-offset-4">
+            Términos
+          </Link>{' '}
+          y la{' '}
+          <Link href="/privacidad" className="underline underline-offset-4">
+            Política de privacidad
+          </Link>
+          .
+        </p>
         {guardado && (
           <div role="status" className="flex flex-col items-center gap-1 text-center">
             <p className="text-sm font-semibold">Guardamos tu correo. El pago se activa muy pronto.</p>
