@@ -14,15 +14,16 @@ const diaClave = (iso: string) => iso.slice(0, 10);
 export async function GET(req: Request) {
   const v = await verificarAdmin(req.headers.get('authorization'));
   if (!v.ok) return NextResponse.json({ motivo: v.motivo }, { status: v.estado });
-  const { admin } = v;
+  const { admin, user } = v;
 
-  const [hogares, perros, cuidados, registros, errores30d, eventos] = await Promise.all([
+  const [hogares, perros, cuidados, registros, errores30d, eventos, miAdmin] = await Promise.all([
     admin.from('hogares').select('id, creado_en'),
     admin.from('perros').select('id, hogar_id'),
     admin.from('cuidados').select('id, hogar_id'),
     admin.from('registros').select('hogar_id, creado_en').gte('creado_en', diasAtras(30)),
     admin.from('error_log').select('id, mensaje, contexto, creado_en').gte('creado_en', diasAtras(30)).order('creado_en', { ascending: false }).limit(50),
     admin.from('event_log').select('tipo, creado_en').gte('creado_en', diasAtras(30)),
+    admin.from('admins').select('nombre').eq('user_id', user.id).maybeSingle(),
   ]);
   for (const r of [hogares, perros, cuidados, registros, errores30d, eventos]) {
     if (r.error) return NextResponse.json({ motivo: 'No pudimos leer los datos: ' + r.error.message }, { status: 500 });
@@ -64,6 +65,7 @@ export async function GET(req: Request) {
   if (avisos.filter((a) => a.nivel === 'alerta').length === 0) avisos.unshift({ nivel: 'ok', texto: 'Todo en orden: no hay alertas de dinero ni de errores graves este mes.' });
 
   return NextResponse.json({
+    admin: { nombre: miAdmin.data?.nombre ?? null, correo: user.email ?? null },
     usuarios: { total: totalHogares, activos7, activos30, nuevosEstaSemana },
     uso: {
       totalPerros: perros.data?.length ?? 0,

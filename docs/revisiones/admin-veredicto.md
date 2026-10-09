@@ -1,14 +1,14 @@
-# VEREDICTO revisor-visual — Panel de administración
+# VEREDICTO revisor-visual — admin
 Fecha: 2026-10-08 00:00
 Screenshot: docs/revisiones/admin-375.png
-Usabilidad: 29/40
-Craft: 13/20
+Usabilidad: 36/40
+Craft: 17/20
 Copy (si vende): N-A
-Fidelidad (si hubo referencia): N-A
-Veredicto: NO LISTA
+Fidelidad (si hubo referencia): FIEL
+Veredicto: LISTA
 Top defectos:
-1. [Carga inicial, toda la pantalla] Solo texto "Cargando…" centrado, sin skeleton con la forma de las tarjetas → construir skeleton de Dato/Tarjeta mientras llega /api/admin/resumen y /usuarios.
-2. [Sección Usuarios y Sección Salud y errores] Listas sin paginación, orden ni exportación (código: usuarios.filter sin límite, errores.recientes.slice(0,10) fijo) → agregar orden por fecha/actividad y paginación antes de que pase de ~15-20 filas.
-3. [Header y toda la pantalla] Identidad apoyada solo en DM Serif Display + color de acento, sin el dispositivo ownable de la ficha (hairline degradado, campana del logo) → sumar un hairline degradé o el ícono de campana en el header.
-4. [Sección "Ventas y negocio" vs. los 3 avisos iniciales] El bloque SinDatosLista repite palabra por palabra lo que ya dicen los avisos de arriba ("no usa inteligencia artificial todavía, así que no hay costo que medir" aparece dos veces) → unificar en un solo lugar, no repetir el mismo texto en avisos y en la sección.
-5. [Los 3 avisos antes de las cifras reales] La dueña tiene que leer 3 cajas de aviso (ok + 2 info) antes de llegar a cualquier número real de Usuarios → colapsar los avisos informativos no urgentes en una sola línea o moverlos bajo las cifras.
+1. [Formulario "Agregar una persona a mano"] el input de correo solo valida con type="email" del navegador, sin mensaje de error inline antes del submit → agregar validación visible al perder foco con mensaje "Escribe un correo válido".
+2. [Mensajes de error genéricos, ej. pedir()] el fallback "Algo falló." no dice qué hacer más allá de "Reintentar" → dar 1 línea de causa probable (ej. "No se pudo conectar. Revisa tu internet y vuelve a intentar").
+3. [Atajo "/"] solo cubre saltar a Usuarios+foco en buscador; no hay atajo de "Escape" para volver/cerrar ni indicio visible del atajo fuera del placeholder del input → opcional, documentarlo también en un tooltip o pie de página si se amplía el set de atajos.
+4. [Sección Inicio, header] "Volver a la app" y "Salir" conviven con el contenido de la sección sin separación visual fuerte del resto de acciones de cada tarjeta → bajo impacto, mantener vigilancia si se agregan más acciones de header.
+5. [Nav mobile] el scroll horizontal con 10 secciones depende del degradé lateral para insinuar que hay más — un usuario apurado podría no notar "Configuración" al final → considerar un indicador de página (dots) o flecha explícita en mobile.

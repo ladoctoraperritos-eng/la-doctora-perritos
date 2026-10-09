@@ -3,15 +3,23 @@
 // Panel de administración — solo para el dueño de la app. El servidor verifica en cada llamada que
 // quien pregunta es un administrador real (tabla `admins`); esta pantalla no es la seguridad, es
 // solo la vista. Ver docs/sistema/21-BACKOFFICE.md y lib/supabase-admin.ts.
+// Diseño: referencia visual del usuario (dashboard premium de escritorio, barra lateral + tarjetas
+// + gráficos) — es un CONTRATO. Las secciones sin datos reales (Ventas, Suscripciones, IA,
+// Marketing) se ven con el mismo nivel de diseño pero NUNCA inventan números: la referencia traía
+// cifras de ejemplo, aquí solo se usan donde hay datos de verdad.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { MotionConfig, motion } from 'motion/react';
-import { Copy, X } from 'lucide-react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
+import { AlertTriangle, Copy, CreditCard, Megaphone, Sparkles, Receipt, X } from 'lucide-react';
 import { clienteSupabase } from '@/lib/supabase';
-import { Aviso, Barras, CONTENEDOR_PANEL, Dato, SinDatos, SinDatosLista, Tarjeta, Titulo } from '@/components/admin/ui';
+import { Aviso, BannerEstado, CONTENEDOR_PANEL, Dato, ITEM_PANEL, Tarjeta, Titulo, VacioPremium } from '@/components/admin/ui';
+import { Embudo, GraficoAreaUso, GraficoBarrasUso } from '@/components/admin/charts';
+import { Sidebar } from '@/components/admin/Sidebar';
+import type { Seccion } from '@/components/admin/secciones';
 
 interface Resumen {
+  admin: { nombre: string | null; correo: string | null };
   usuarios: { total: number; activos7: number; activos30: number; nuevosEstaSemana: number };
   uso: { totalPerros: number; totalCuidados: number; totalRegistros30d: number; usoPorDia: { dia: string; cantidad: number }[]; embudoOnboarding: { tipo: string; cantidad: number }[]; hayEventos: boolean };
   ventas: { sinDatos: true; motivo: string };
@@ -45,6 +53,10 @@ const ETIQUETA_EVENTO: Record<string, string> = {
 };
 
 const fecha = (iso: string) => new Date(iso).toLocaleDateString('es', { day: 'numeric', month: 'short' });
+const fechaHoy = () => {
+  const d = new Date().toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  return d.charAt(0).toUpperCase() + d.slice(1);
+};
 
 async function pedir<T>(ruta: string, token: string, init?: RequestInit): Promise<T> {
   const res = await fetch(ruta, { ...init, headers: { ...init?.headers, Authorization: `Bearer ${token}` } });
@@ -59,6 +71,23 @@ export default function PanelAdmin() {
   const [resumen, setResumen] = useState<Resumen | null>(null);
   const [usuarios, setUsuarios] = useState<FilaUsuario[] | null>(null);
   const [busqueda, setBusqueda] = useState('');
+  const [seccion, setSeccion] = useState<Seccion>('inicio');
+  const buscadorRef = useRef<HTMLInputElement>(null);
+
+  // Atajo "/": salta directo al buscador de usuarios, como en la mayoría de paneles. Se ignora si
+  // ya se está escribiendo en otro campo (para no robarle la tecla "/" a lo que esté tipeando).
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== '/') return;
+      const activo = document.activeElement;
+      const yaEscribiendo = activo instanceof HTMLInputElement || activo instanceof HTMLTextAreaElement;
+      if (yaEscribiendo) return;
+      e.preventDefault();
+      setSeccion('usuarios');
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   useEffect(() => {
     void (async () => {
@@ -81,7 +110,7 @@ export default function PanelAdmin() {
   }, []);
 
   if (estado.tipo === 'cargando') {
-    return <div className="mx-auto flex min-h-dvh max-w-3xl items-center justify-center px-6 text-[var(--text-secondary)]">Cargando…</div>;
+    return <EsqueletoPanel />;
   }
   if (estado.tipo === 'sin_sesion') {
     return (
@@ -121,148 +150,338 @@ export default function PanelAdmin() {
     );
   }
 
-  const filtrados = busqueda.trim() ? usuarios.filter((u) => u.correo.toLowerCase().includes(busqueda.trim().toLowerCase())) : usuarios;
+  const nombre = resumen.admin.nombre ?? 'Hola';
+  const hayAlertas = resumen.avisos.some((a) => a.nivel === 'alerta');
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className="relative mx-auto flex min-h-dvh max-w-3xl flex-col gap-8 px-6 py-8 text-[var(--text-primary)] [font-family:var(--font-body)]">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{ background: 'radial-gradient(900px 480px at 50% -10%, color-mix(in oklab, var(--accent) 7%, transparent) 0%, transparent 60%)' }}
-      />
-      <motion.div variants={CONTENEDOR_PANEL} initial="hidden" animate="visible" className="contents">
-      <header className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold uppercase tracking-wider text-[var(--accent)]">Panel de administración</p>
-          <h1 className="mt-1 text-2xl leading-tight [font-family:var(--font-serif)]">La Doctora Perritos</h1>
-        </div>
-        <nav aria-label="Salir del panel" className="flex shrink-0 items-center gap-3 pt-1">
-          <Link
-            href="/app"
-            className="inline-flex h-9 items-center rounded-[var(--radius-button)] bg-[var(--surface-2)] px-3 text-sm font-semibold text-[var(--text-primary)] active:scale-[0.96] [touch-action:manipulation]"
-          >
-            Volver a la app
-          </Link>
-          <button
-            type="button"
-            onClick={() => void clienteSupabase()?.auth.signOut().then(() => setEstado({ tipo: 'sin_sesion' }))}
-            className="h-9 px-1 text-sm font-medium text-[var(--text-secondary)] underline active:scale-[0.96] [touch-action:manipulation]"
-          >
-            Salir
-          </button>
-        </nav>
-      </header>
+      <div className="flex min-h-dvh flex-col text-[var(--text-primary)] [font-family:var(--font-body)] md:flex-row">
+        <Sidebar activa={seccion} onCambiar={setSeccion} />
 
-      <section aria-label="Avisos" className="flex flex-col gap-2">
-        {resumen.avisos.map((a, i) => (
-          <Aviso key={i} nivel={a.nivel} texto={a.texto} />
-        ))}
-      </section>
-
-      <section aria-label="Usuarios" className="flex flex-col gap-3">
-        <Titulo>Usuarios</Titulo>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Dato numero={resumen.usuarios.total} etiqueta="Familias totales" />
-          <Dato numero={resumen.usuarios.activos7} etiqueta="Activas esta semana" insight={`de ${resumen.usuarios.total} en total`} />
-          <Dato numero={resumen.usuarios.activos30} etiqueta="Activas este mes" />
-          <Dato numero={resumen.usuarios.nuevosEstaSemana} etiqueta="Nuevas esta semana" />
-        </div>
-        <FormularioInvitar token={token} />
-        <Tarjeta className="flex flex-col gap-3">
-          <div className="relative">
-            <input
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar por correo…"
-              className="h-11 w-full rounded-[var(--radius-button)] border-2 border-[var(--border-ui)] bg-[var(--bg)] px-3 pr-10 text-base outline-none focus:border-[var(--accent)]"
-            />
-            {busqueda && (
-              <motion.button
-                type="button"
-                onClick={() => setBusqueda('')}
-                aria-label="Borrar la búsqueda"
-                whileTap={{ scale: 0.9 }}
-                className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
-              >
-                <X size={16} />
-              </motion.button>
-            )}
-          </div>
-          <div className="flex flex-col divide-y divide-[var(--border-suave)]">
-            {filtrados.length === 0 && <p className="py-4 text-sm text-[var(--text-secondary)]">Sin resultados.</p>}
-            {filtrados.map((u) => (
-              <div key={u.hogarId} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <CorreoConCopiar correo={u.correo} />
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {u.perros} mascota{u.perros === 1 ? '' : 's'} · Plan {u.plan} · Desde {fecha(u.creadoEn)}
-                  </p>
+        <div className="relative flex-1 overflow-x-hidden">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10"
+            style={{ background: 'radial-gradient(900px 480px at 50% -10%, color-mix(in oklab, var(--accent) 6%, transparent) 0%, transparent 60%)' }}
+          />
+          <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-6 md:px-10 md:py-8">
+            <motion.div variants={CONTENEDOR_PANEL} initial="hidden" animate="visible" className="contents">
+              <header className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl leading-tight [font-family:var(--font-serif)] md:text-3xl">¡Hola, {nombre}!</h1>
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">Resumen de tu app · Hoy es {fechaHoy()}</p>
                 </div>
-                <span className="shrink-0 text-sm text-[var(--text-secondary)]">{u.ultimaActividad ? `Activo ${fecha(u.ultimaActividad)}` : 'Sin actividad'}</span>
-              </div>
-            ))}
+                <nav aria-label="Salir del panel" className="flex shrink-0 items-center gap-3">
+                  <Link
+                    href="/app"
+                    className="inline-flex h-9 items-center rounded-[var(--radius-button)] bg-[var(--surface-2)] px-3 text-sm font-semibold text-[var(--text-primary)] active:scale-[0.96] [touch-action:manipulation]"
+                  >
+                    Volver a la app
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => void clienteSupabase()?.auth.signOut().then(() => setEstado({ tipo: 'sin_sesion' }))}
+                    className="h-9 px-1 text-sm font-medium text-[var(--text-secondary)] underline active:scale-[0.96] [touch-action:manipulation]"
+                  >
+                    Salir
+                  </button>
+                </nav>
+              </header>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={seccion}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  onAnimationComplete={() => {
+                    if (seccion === 'usuarios') buscadorRef.current?.focus();
+                  }}
+                  className="flex flex-col gap-6"
+                >
+                  {seccion === 'inicio' && <SeccionInicio resumen={resumen} hayAlertas={hayAlertas} />}
+                  {seccion === 'ventas' && <SeccionVentas resumen={resumen} />}
+                  {seccion === 'usuarios' && <SeccionUsuarios resumen={resumen} usuarios={usuarios} token={token} busqueda={busqueda} setBusqueda={setBusqueda} buscadorRef={buscadorRef} />}
+                  {seccion === 'mascotas' && <SeccionMascotas resumen={resumen} />}
+                  {seccion === 'suscripciones' && <SeccionSuscripciones />}
+                  {seccion === 'uso' && <SeccionUso resumen={resumen} />}
+                  {seccion === 'ia' && <SeccionIa resumen={resumen} />}
+                  {seccion === 'marketing' && <SeccionMarketing />}
+                  {seccion === 'errores' && <SeccionErrores resumen={resumen} />}
+                  {seccion === 'configuracion' && <SeccionConfiguracion resumen={resumen} token={token} />}
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </MotionConfig>
+  );
+}
+
+function EsqueletoPanel() {
+  return (
+    <div className="flex min-h-dvh text-[var(--text-primary)]" aria-busy="true" aria-label="Cargando el panel">
+      <div className="hidden w-64 shrink-0 border-r border-[var(--border-suave)] bg-[var(--surface)] p-4 md:block">
+        <div className="h-8 w-40 animate-pulse rounded-[var(--radius-button)] bg-[var(--surface-2)]" />
+        <div className="mt-6 flex flex-col gap-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-9 w-full animate-pulse rounded-[var(--radius-button)] bg-[var(--surface-2)]" />
+          ))}
+        </div>
+      </div>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 py-8 md:px-10">
+        <div className="h-9 w-64 animate-pulse rounded-[var(--radius-button)] bg-[var(--surface-2)]" />
+        <div className="h-20 w-full animate-pulse rounded-[var(--radius-card)] bg-[var(--surface-2)]" />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 animate-pulse rounded-[var(--radius-card)] bg-[var(--surface-2)]" />
+          ))}
+        </div>
+        <div className="h-64 w-full animate-pulse rounded-[var(--radius-card)] bg-[var(--surface-2)]" />
+      </div>
+    </div>
+  );
+}
+
+function SeccionInicio({ resumen, hayAlertas }: { resumen: Resumen; hayAlertas: boolean }) {
+  return (
+    <>
+      <BannerEstado
+        bien={!hayAlertas}
+        titulo={hayAlertas ? 'Hay algo que revisar' : 'Todo en orden este mes.'}
+        texto={hayAlertas ? resumen.avisos.find((a) => a.nivel === 'alerta')?.texto ?? '' : 'Tus métricas se mantienen estables y dentro de lo esperado.'}
+      />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Dato numero={resumen.usuarios.total} etiqueta="Familias totales" />
+        <Dato numero={resumen.usuarios.activos7} etiqueta="Activas esta semana" insight={`de ${resumen.usuarios.total} en total`} />
+        <Dato numero={resumen.uso.totalPerros} etiqueta="Mascotas registradas" />
+        <Dato numero={resumen.uso.totalRegistros30d} etiqueta="Marcados como hechos" insight="últimos 30 días" />
+      </div>
+      <motion.div variants={ITEM_PANEL} className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <Tarjeta>
+          <Titulo>Uso de la app</Titulo>
+          <p className="mb-3 mt-1 text-sm text-[var(--text-secondary)]">Cuidados marcados como hechos por día, últimos 14 días</p>
+          <GraficoAreaUso datos={resumen.uso.usoPorDia} />
+        </Tarjeta>
+        <Tarjeta className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+            <Titulo>Avisos</Titulo>
+            <div className="flex flex-col gap-2">
+              {resumen.avisos.map((a, i) => (
+                <Aviso key={i} nivel={a.nivel} texto={a.texto} />
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 border-t border-[var(--border-suave)] pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">En resumen</p>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Cuidados configurados</span>
+              <span className="font-semibold tabular-nums">{resumen.uso.totalCuidados}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Errores este mes</span>
+              <span className="font-semibold tabular-nums">{resumen.errores.total30d}</span>
+            </div>
           </div>
         </Tarjeta>
-      </section>
+      </motion.div>
+    </>
+  );
+}
 
-      <section aria-label="Uso" className="flex flex-col gap-3">
-        <Titulo>Uso</Titulo>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-          <Dato numero={resumen.uso.totalPerros} etiqueta="Mascotas registradas" />
-          <Dato numero={resumen.uso.totalCuidados} etiqueta="Cuidados configurados" />
-          <Dato numero={resumen.uso.totalRegistros30d} etiqueta="Marcados como hechos" insight="últimos 30 días" />
+function SeccionVentas({ resumen }: { resumen: Resumen }) {
+  return (
+    <section aria-label="Ventas" className="flex flex-col gap-4">
+      <Titulo>Ventas</Titulo>
+      <div className="grid gap-4 md:grid-cols-2">
+        <VacioPremium icono={Receipt} titulo="Todavía no hay ventas registradas" texto={resumen.ventas.motivo} />
+        <VacioPremium icono={Receipt} titulo="Ganancia y valor por cliente" texto={resumen.negocio.motivo} />
+      </div>
+    </section>
+  );
+}
+
+function SeccionUsuarios({
+  resumen,
+  usuarios,
+  token,
+  busqueda,
+  setBusqueda,
+  buscadorRef,
+}: {
+  resumen: Resumen;
+  usuarios: FilaUsuario[];
+  token: string;
+  busqueda: string;
+  setBusqueda: (v: string) => void;
+  buscadorRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const filtrados = busqueda.trim() ? usuarios.filter((u) => u.correo.toLowerCase().includes(busqueda.trim().toLowerCase())) : usuarios;
+  return (
+    <section aria-label="Usuarios" className="flex flex-col gap-4">
+      <Titulo>Usuarios</Titulo>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Dato numero={resumen.usuarios.total} etiqueta="Familias totales" />
+        <Dato numero={resumen.usuarios.activos7} etiqueta="Activas esta semana" insight={`de ${resumen.usuarios.total} en total`} />
+        <Dato numero={resumen.usuarios.activos30} etiqueta="Activas este mes" />
+        <Dato numero={resumen.usuarios.nuevosEstaSemana} etiqueta="Nuevas esta semana" />
+      </div>
+      <FormularioInvitar token={token} />
+      <Tarjeta className="flex flex-col gap-3">
+        <div className="relative max-w-sm">
+          <input
+            ref={buscadorRef}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar por correo… (atajo: /)"
+            className="h-11 w-full rounded-[var(--radius-button)] border-2 border-[var(--border-ui)] bg-[var(--bg)] px-3 pr-10 text-base outline-none focus:border-[var(--accent)]"
+          />
+          {busqueda && (
+            <motion.button
+              type="button"
+              onClick={() => setBusqueda('')}
+              aria-label="Borrar la búsqueda"
+              whileTap={{ scale: 0.9 }}
+              className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-[var(--text-secondary)] [touch-action:manipulation]"
+            >
+              <X size={16} />
+            </motion.button>
+          )}
         </div>
-        <Tarjeta>
-          <p className="mb-3 text-sm text-[var(--text-secondary)]">Cuidados marcados como hechos, por día (últimos 14 días)</p>
-          <Barras datos={resumen.uso.usoPorDia} />
-        </Tarjeta>
-        {resumen.uso.hayEventos ? (
-          <Tarjeta className="flex flex-col gap-2">
-            <p className="text-sm text-[var(--text-secondary)]">Recorrido del onboarding (últimos 30 días)</p>
-            {resumen.uso.embudoOnboarding.map((e) => (
-              <div key={e.tipo} className="flex items-center justify-between text-base">
-                <span>{ETIQUETA_EVENTO[e.tipo] ?? e.tipo}</span>
-                <span className="font-semibold tabular-nums">{e.cantidad}</span>
-              </div>
-            ))}
-          </Tarjeta>
-        ) : (
-          <SinDatos motivo="Todavía no se registró ningún evento del onboarding. Empieza a contarse desde que alguien lo complete después de hoy." />
-        )}
-      </section>
-
-      <section aria-label="Ventas, negocio e inteligencia artificial" className="flex flex-col gap-3">
-        <Titulo>Ventas y negocio</Titulo>
-        <SinDatosLista
-          titulo="Ventas y negocio"
-          items={[
-            { etiqueta: 'Ventas', motivo: resumen.ventas.motivo },
-            { etiqueta: 'Ganancia y valor por cliente', motivo: resumen.negocio.motivo },
-            { etiqueta: 'Costo de inteligencia artificial', motivo: resumen.ia.motivo },
-          ]}
-        />
-      </section>
-
-      <section aria-label="Salud y errores" className="flex flex-col gap-3">
-        <Titulo>Salud y errores</Titulo>
-        <Dato numero={resumen.errores.total30d} etiqueta="Errores en los últimos 30 días" insight={resumen.errores.total30d === 0 ? 'Ninguno registrado' : undefined} />
-        {resumen.errores.recientes.length > 0 && (
-          <Tarjeta className="flex flex-col divide-y divide-[var(--border-suave)]">
-            {resumen.errores.recientes.slice(0, 10).map((e) => (
-              <div key={e.id} className="py-2">
-                <p className="text-base font-medium">{e.mensaje}</p>
+        <div className="flex flex-col divide-y divide-[var(--border-suave)]">
+          {filtrados.length === 0 && <p className="py-4 text-sm text-[var(--text-secondary)]">Sin resultados.</p>}
+          {filtrados.map((u) => (
+            <div key={u.hogarId} className="flex items-center justify-between gap-3 py-3">
+              <div className="min-w-0">
+                <CorreoConCopiar correo={u.correo} />
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {e.contexto ?? 'Sin pantalla'} · {fecha(e.creado_en)}
+                  {u.perros} mascota{u.perros === 1 ? '' : 's'} · Plan {u.plan} · Desde {fecha(u.creadoEn)}
                 </p>
               </div>
-            ))}
-          </Tarjeta>
-        )}
-      </section>
-      </motion.div>
-    </div>
-    </MotionConfig>
+              <span className="shrink-0 text-sm text-[var(--text-secondary)]">{u.ultimaActividad ? `Activo ${fecha(u.ultimaActividad)}` : 'Sin actividad'}</span>
+            </div>
+          ))}
+        </div>
+      </Tarjeta>
+    </section>
+  );
+}
+
+function SeccionMascotas({ resumen }: { resumen: Resumen }) {
+  return (
+    <section aria-label="Mascotas" className="flex flex-col gap-4">
+      <Titulo>Mascotas</Titulo>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <Dato numero={resumen.uso.totalPerros} etiqueta="Mascotas registradas" />
+        <Dato numero={resumen.uso.totalCuidados} etiqueta="Cuidados configurados" insight={`${(resumen.uso.totalCuidados / Math.max(1, resumen.uso.totalPerros)).toFixed(1)} por mascota en promedio`} />
+      </div>
+      <p className="text-sm text-[var(--text-secondary)]">
+        El detalle por raza, edad o tipo de cuidado todavía no se calcula aquí — por ahora este panel solo cuenta el total.
+      </p>
+    </section>
+  );
+}
+
+function SeccionSuscripciones() {
+  return (
+    <section aria-label="Suscripciones" className="flex flex-col gap-4">
+      <Titulo>Suscripciones</Titulo>
+      <VacioPremium
+        icono={CreditCard}
+        titulo="Todavía no hay suscripciones conectadas"
+        texto="Cuando conectes el aviso automático de Hotmart, aquí vas a ver las suscripciones nuevas, las canceladas y cuánta gente se da de baja cada mes."
+      />
+    </section>
+  );
+}
+
+function SeccionUso({ resumen }: { resumen: Resumen }) {
+  return (
+    <section aria-label="Uso de la app" className="flex flex-col gap-4">
+      <Titulo>Uso de la app</Titulo>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <Dato numero={resumen.uso.totalPerros} etiqueta="Mascotas registradas" />
+        <Dato numero={resumen.uso.totalCuidados} etiqueta="Cuidados configurados" />
+        <Dato numero={resumen.uso.totalRegistros30d} etiqueta="Marcados como hechos" insight="últimos 30 días" />
+      </div>
+      <Tarjeta>
+        <p className="mb-3 text-sm text-[var(--text-secondary)]">Cuidados marcados como hechos, por día (últimos 14 días)</p>
+        <GraficoBarrasUso datos={resumen.uso.usoPorDia} />
+      </Tarjeta>
+      {resumen.uso.hayEventos ? (
+        <Tarjeta>
+          <Titulo>Recorrido del onboarding</Titulo>
+          <p className="mb-4 mt-1 text-sm text-[var(--text-secondary)]">Últimos 30 días</p>
+          <Embudo pasos={resumen.uso.embudoOnboarding.map((e) => ({ ...e, etiqueta: ETIQUETA_EVENTO[e.tipo] ?? e.tipo }))} />
+        </Tarjeta>
+      ) : (
+        <VacioPremium
+          icono={Sparkles}
+          titulo="El recorrido del onboarding todavía no tiene datos"
+          texto="En cuanto alguien complete el onboarding de hoy en adelante, vas a ver aquí cuántos llegan a cada paso."
+        />
+      )}
+    </section>
+  );
+}
+
+function SeccionIa({ resumen }: { resumen: Resumen }) {
+  return (
+    <section aria-label="IA y costos" className="flex flex-col gap-4">
+      <Titulo>IA y costos</Titulo>
+      <VacioPremium icono={Sparkles} titulo="La app no usa inteligencia artificial todavía" texto={resumen.ia.motivo} />
+    </section>
+  );
+}
+
+function SeccionMarketing() {
+  return (
+    <section aria-label="Marketing y canales" className="flex flex-col gap-4">
+      <Titulo>Marketing y canales</Titulo>
+      <VacioPremium
+        icono={Megaphone}
+        titulo="Todavía no hay gasto de adquisición cargado"
+        texto="Cuando empieces a invertir en afiliados, anuncios o contenido, aquí vas a ver de dónde viene cada cliente nuevo y cuánto cuesta conseguirlo."
+      />
+    </section>
+  );
+}
+
+function SeccionErrores({ resumen }: { resumen: Resumen }) {
+  return (
+    <section aria-label="Errores y alertas" className="flex flex-col gap-4">
+      <Titulo>Errores y alertas</Titulo>
+      <Dato numero={resumen.errores.total30d} etiqueta="Errores en los últimos 30 días" insight={resumen.errores.total30d === 0 ? 'Ninguno registrado' : undefined} />
+      {resumen.errores.recientes.length > 0 ? (
+        <Tarjeta className="flex flex-col divide-y divide-[var(--border-suave)]">
+          {resumen.errores.recientes.slice(0, 10).map((e) => (
+            <div key={e.id} className="py-2">
+              <p className="text-base font-medium">{e.mensaje}</p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {e.contexto ?? 'Sin pantalla'} · {fecha(e.creado_en)}
+              </p>
+            </div>
+          ))}
+        </Tarjeta>
+      ) : (
+        <VacioPremium icono={AlertTriangle} titulo="Sin errores registrados" texto="Cuando algo se rompa en la app, va a quedar anotado aquí automáticamente." />
+      )}
+    </section>
+  );
+}
+
+function SeccionConfiguracion({ resumen, token }: { resumen: Resumen; token: string }) {
+  return (
+    <section aria-label="Configuración" className="flex flex-col gap-4">
+      <Titulo>Configuración</Titulo>
+      <Tarjeta className="flex flex-col gap-1">
+        <p className="text-sm text-[var(--text-secondary)]">Tu cuenta de administradora</p>
+        <p className="text-base font-semibold">{resumen.admin.correo}</p>
+      </Tarjeta>
+      <FormularioInvitar token={token} />
+    </section>
   );
 }
 

@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { animate, motion, useReducedMotion, type Variants } from 'motion/react';
-import { AlertTriangle, CheckCircle2, Info } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, PawPrint, type LucideIcon } from 'lucide-react';
 
 /** Entrada escalonada de las secciones del panel (baseline de movimiento del SO). */
 export const CONTENEDOR_PANEL: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
@@ -21,7 +21,11 @@ function ContadorAnimado({ n }: { n: number }) {
 }
 
 export function Tarjeta({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <motion.div variants={ITEM_PANEL} className={`rounded-[var(--radius-card)] bg-[var(--surface)] p-5 shadow-[var(--shadow-1)] ${className}`}>{children}</motion.div>;
+  return (
+    <motion.div variants={ITEM_PANEL} className={`rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--text-primary)_10%,transparent)] bg-[var(--surface)] p-5 shadow-[var(--shadow-2)] ${className}`}>
+      {children}
+    </motion.div>
+  );
 }
 
 export function Titulo({ children }: { children: React.ReactNode }) {
@@ -89,30 +93,40 @@ export function Aviso({ nivel, texto }: { nivel: 'alerta' | 'info' | 'ok'; texto
   );
 }
 
-/** Barras simples (sin librería) para la serie de 14 días: la tinta mínima que pide 17. */
-export function Barras({ datos }: { datos: { dia: string; cantidad: number }[] }) {
-  const maxReal = Math.max(0, ...datos.map((d) => d.cantidad));
-  if (maxReal === 0) {
-    return <p className="py-6 text-center text-sm text-[var(--text-secondary)]">Sin actividad en los últimos 14 días.</p>;
-  }
-  const max = maxReal;
-  const total = datos.reduce((s, d) => s + d.cantidad, 0);
+/** Estado vacío de nivel premium: ícono en chip + título + explicación en simple, para secciones
+ * enteras sin datos todavía (Ventas, Suscripciones, IA, Marketing) — nunca un gráfico inventado. */
+export function VacioPremium({ icono: Icono, titulo, texto }: { icono: LucideIcon; titulo: string; texto: string }) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex h-24 items-end gap-1" role="img" aria-label="Registros por día, últimos 14 días">
-        {datos.map((d) => (
-          <div key={d.dia} className="flex flex-1 flex-col items-center gap-1">
-            <motion.div
-              className="w-full rounded-t-sm bg-[var(--accent)]"
-              initial={{ height: 0 }}
-              animate={{ height: d.cantidad === 0 ? '3px' : `${Math.max(8, (d.cantidad / max) * 100)}%` }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              title={`${d.dia}: ${d.cantidad}`}
-            />
-          </div>
-        ))}
+    <motion.div variants={ITEM_PANEL} className="flex flex-col items-center gap-3 rounded-[var(--radius-card)] bg-[var(--surface-2)] px-6 py-12 text-center">
+      <span className="flex size-14 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--accent)_10%,var(--surface))]">
+        <Icono size={26} color="var(--accent)" aria-hidden="true" />
+      </span>
+      <p className="text-lg font-semibold text-[var(--text-primary)]">{titulo}</p>
+      <p className="max-w-sm text-sm text-[var(--text-secondary)]">{texto}</p>
+    </motion.div>
+  );
+}
+
+/** Banner de bienvenida al inicio: estado general del negocio en una frase, con una forma suave
+ * de marca detrás (el mismo espíritu que la huella/perro de la referencia, sin inventar mascota). */
+export function BannerEstado({ bien, titulo, texto }: { bien: boolean; titulo: string; texto: string }) {
+  return (
+    <motion.div
+      variants={ITEM_PANEL}
+      className={`relative flex items-center justify-between gap-4 overflow-hidden rounded-[var(--radius-card)] px-6 py-5 ${
+        bien ? 'bg-[color-mix(in_oklab,var(--accent)_10%,var(--surface))]' : 'bg-[color-mix(in_oklab,var(--danger)_10%,var(--surface))]'
+      }`}
+    >
+      <PawPrint size={120} className="pointer-events-none absolute -right-4 -top-6 rotate-12 opacity-[0.06]" aria-hidden="true" />
+      <div className="relative flex items-start gap-3">
+        <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface)]">
+          {bien ? <CheckCircle2 size={20} color="var(--accent)" aria-hidden="true" /> : <AlertTriangle size={20} color="var(--danger)" aria-hidden="true" />}
+        </span>
+        <div>
+          <p className="text-base font-semibold text-[var(--text-primary)]">{titulo}</p>
+          <p className="text-sm text-[var(--text-secondary)]">{texto}</p>
+        </div>
       </div>
-      <p className="text-sm text-[var(--text-secondary)]">{total} en total en los últimos 14 días.</p>
-    </div>
+    </motion.div>
   );
 }
