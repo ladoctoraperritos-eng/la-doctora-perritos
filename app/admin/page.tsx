@@ -10,7 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AnimatePresence, MotionConfig, motion } from 'motion/react';
+import { AnimatePresence, MotionConfig, motion, type Variants } from 'motion/react';
 import { AlertTriangle, Copy, CreditCard, Megaphone, Sparkles, Receipt, X } from 'lucide-react';
 import { clienteSupabase } from '@/lib/supabase';
 import { Aviso, BannerEstado, CONTENEDOR_PANEL, Dato, ITEM_PANEL, Tarjeta, Titulo, VacioPremium } from '@/components/admin/ui';
@@ -56,6 +56,15 @@ const fecha = (iso: string) => new Date(iso).toLocaleDateString('es', { day: 'nu
 const fechaHoy = () => {
   const d = new Date().toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
   return d.charAt(0).toUpperCase() + d.slice(1);
+};
+
+// Variants con ETIQUETAS (no objetos literales) para que la propagación de Motion siga llegando a
+// las tarjetas internas (`variants={ITEM_PANEL}` en ui.tsx) — un wrapper con animate={{...}} literal
+// corta esa cadena y las tarjetas se quedan invisibles (opacity:0) para siempre.
+const SECCION_TRANSICION: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1], staggerChildren: 0.05 } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } },
 };
 
 async function pedir<T>(ruta: string, token: string, init?: RequestInit): Promise<T> {
@@ -191,10 +200,10 @@ export default function PanelAdmin() {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={seccion}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  variants={SECCION_TRANSICION}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
                   onAnimationComplete={() => {
                     if (seccion === 'usuarios') buscadorRef.current?.focus();
                   }}
@@ -480,8 +489,113 @@ function SeccionConfiguracion({ resumen, token }: { resumen: Resumen; token: str
         <p className="text-sm text-[var(--text-secondary)]">Tu cuenta de administradora</p>
         <p className="text-base font-semibold">{resumen.admin.correo}</p>
       </Tarjeta>
-      <FormularioInvitar token={token} />
+      <PanelAdministradores token={token} />
+      <div>
+        <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Acceso manual a la app</p>
+        <p className="mb-3 text-sm text-[var(--text-secondary)]">
+          Esto NO da acceso al panel de administración — solo crea o reenvía el acceso a la app para una clienta a la que no le llegó el correo de Hotmart.
+        </p>
+        <FormularioInvitar token={token} />
+      </div>
     </section>
+  );
+}
+
+interface FilaAdmin {
+  userId: string;
+  nombre: string;
+  correo: string;
+  creadoEn: string;
+}
+
+/** Quién puede entrar a ESTE panel (distinto de quién puede usar la app). Pensado para que la
+ * dueña pueda sumar un puesto de administradora si en el futuro contrata a alguien. */
+function PanelAdministradores({ token }: { token: string }) {
+  const [administradores, setAdministradores] = useState<FilaAdmin[] | null>(null);
+  const [soyYo, setSoyYo] = useState<string | null>(null);
+  const [correo, setCorreo] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+
+  const cargar = () => {
+    void pedir<{ administradores: FilaAdmin[]; soyYo: string }>('/api/admin/administradores', token).then((r) => {
+      setAdministradores(r.administradores);
+      setSoyYo(r.soyYo);
+    });
+  };
+  useEffect(cargar, [token]);
+
+  useEffect(() => {
+    if (!mensaje) return;
+    const t = setTimeout(() => setMensaje(null), 5000);
+    return () => clearTimeout(t);
+  }, [mensaje]);
+
+  const agregar = async () => {
+    setEnviando(true);
+    setMensaje(null);
+    try {
+      await pedir('/api/admin/administradores', token, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ correo, nombre }) });
+      setMensaje({ tipo: 'ok', texto: `Listo: ${nombre} ya puede entrar al panel. Le mandamos su acceso por correo.` });
+      setCorreo('');
+      setNombre('');
+      cargar();
+    } catch (err) {
+      setMensaje({ tipo: 'error', texto: err instanceof Error ? err.message : 'No se pudo agregar.' });
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const quitar = async (userId: string, nombreAdmin: string) => {
+    if (!confirm(`¿Quitarle el acceso al panel a ${nombreAdmin}? Podrá seguir usando la app normalmente, pero ya no va a ver este panel.`)) return;
+    try {
+      await pedir('/api/admin/administradores', token, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId }) });
+      cargar();
+    } catch (err) {
+      setMensaje({ tipo: 'error', texto: err instanceof Error ? err.message : 'No se pudo quitar.' });
+    }
+  };
+
+  return (
+    <Tarjeta className="flex flex-col gap-4">
+      <div>
+        <p className="text-base font-semibold">Quién administra el panel</p>
+        <p className="text-sm text-[var(--text-secondary)]">Hoy eres tú. Si más adelante contratas a alguien para que te ayude, agrégala aquí — va a ver exactamente este mismo panel.</p>
+      </div>
+      <div className="flex flex-col divide-y divide-[var(--border-suave)]">
+        {administradores === null && <p className="py-2 text-sm text-[var(--text-secondary)]">Cargando…</p>}
+        {administradores?.map((a) => (
+          <div key={a.userId} className="flex items-center justify-between gap-3 py-3">
+            <div className="min-w-0">
+              <p className="text-base font-semibold">
+                {a.nombre} {a.userId === soyYo && <span className="font-normal text-[var(--text-secondary)]">(tú)</span>}
+              </p>
+              <p className="truncate text-sm text-[var(--text-secondary)]">{a.correo}</p>
+            </div>
+            {a.userId !== soyYo && (
+              <button type="button" onClick={() => void quitar(a.userId, a.nombre)} className="shrink-0 text-sm font-medium text-[var(--danger)] underline [touch-action:manipulation]">
+                Quitar acceso
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-col gap-2 border-t border-[var(--border-suave)] pt-4 sm:flex-row">
+        <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre" className="h-11 flex-1 rounded-[var(--radius-button)] border-2 border-[var(--border-ui)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" />
+        <input value={correo} onChange={(e) => setCorreo(e.target.value)} placeholder="correo@ejemplo.com" type="email" className="h-11 flex-1 rounded-[var(--radius-button)] border-2 border-[var(--border-ui)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" />
+        <button
+          type="button"
+          onClick={() => void agregar()}
+          disabled={enviando || !correo.trim() || !nombre.trim()}
+          className="inline-flex h-11 shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent)] px-5 text-base font-semibold text-[var(--bg)] active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100 [touch-action:manipulation]"
+        >
+          {enviando ? 'Agregando…' : 'Agregar administradora'}
+        </button>
+      </div>
+      {mensaje && <p className={`text-sm font-medium ${mensaje.tipo === 'error' ? 'text-[var(--danger)]' : 'text-[var(--accent)]'}`}>{mensaje.texto}</p>}
+    </Tarjeta>
   );
 }
 
