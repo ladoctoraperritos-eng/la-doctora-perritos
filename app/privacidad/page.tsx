@@ -9,8 +9,9 @@ export default function Privacidad() {
       </p>
       <h2 className="mt-6 text-lg font-semibold">Qué datos recogemos</h2>
       <p className="mt-2">
-        Tu correo, los datos de tu perro (nombre, edad, peso, medicamentos, comida, vacunas y controles) y los registros
-        de quién realizó cada cuidado.
+        Tu correo y los datos de tu perro: nombre, edad, peso, raza, foto, número de microchip (si lo tiene), nombre y
+        teléfono de su responsable, medicamentos, comida, vacunas y controles, y los registros de quién realizó cada
+        cuidado. Si invitas a alguien a cuidar contigo, guardamos su nombre y correo para darle acceso.
       </p>
       <h2 className="mt-6 text-lg font-semibold">Para qué los usamos</h2>
       <p className="mt-2">

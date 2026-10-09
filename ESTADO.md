@@ -344,3 +344,221 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Preguntarles qué esperarían de un aviso, en qué horario les sirve y si prefieren WhatsApp o correo.
 - Decisión según resultados: si la mayoría recibe los avisos, web push puede bastar por ahora. Si no los reciben o no instalan la app, integrar WhatsApp (después de conectar Supabase).
 - Mientras tanto: pedir el permiso de notificaciones de forma clara en el onboarding, para no rehacerlo después.
+
+## Decisiones técnicas — Base de datos y acceso (2026-10-05, Fase 4 auditoría, capa 1)
+- Proyecto Supabase: `mrucrkwilrtqtbyvuyfz` (región us-east-1), organización del usuario. Repo GitHub privado: `ladoctoraperritos-eng/la-doctora-perritos`.
+- Modelo: "hogar" = familia. Tablas: `hogares`, `miembros_hogar` (dueño/miembro), `perros`, `tutores`, `cuidados`, `registros`, `notas`, `veterinarios` (una fila por tipo habitual/urgencia). Migración `modelo_inicial_hogar`.
+- RLS activo en todas las tablas: solo miembros del hogar leen/escriben (`public.es_miembro`, security invoker). Alta de hogar por función `crear_hogar` (la cuenta que lo crea queda como dueña, en una sola transacción).
+- Aviso de seguridad `authenticated_security_definer_function_executable` sobre `crear_hogar`: INTENCIONAL (debe poder llamarla la cuenta registrada; valida auth.uid()).
+- Acceso: enlace mágico por correo (Supabase Auth, `signInWithOtp`). Código en `lib/supabase.ts` y `lib/auth.ts`. Solo clave anon en el navegador; `service_role` NUNCA en el código.
+- Pendiente de configurar en el panel de Supabase: Authentication → URL Configuration (Site URL `http://localhost:3000`, Redirect `http://localhost:3000/app`). Correo: el envío integrado de Supabase es de prueba; migrar a Resend con dominio propio antes de vender.
+- Estado de la app: el inicio de sesión ya envía el enlace real. Los datos de la app AÚN están en localStorage; la sincronización con las tablas es la siguiente capa.
+- Verificado: tsc ✓ · build ✓ · advisors seguridad: solo el aviso intencional.
+
+## Checkpoint (2026-10-05) — compactación
+- Fase actual: Fase 4 de la auditoría aprobada (plan «todo»). Capa 1 (base de datos + acceso) hecha en código y en Supabase.
+- Próximo paso: configurar URLs de Supabase (usuario), probar el enlace de acceso, luego sincronizar localStorage → tablas por hogar.
+- Pendiente: pagos (webhook Hotmart), límites de plan en servidor, notificaciones, páginas legales.
+
+## Correcciones de uso real (2026-10-05)
+- Logo de la esquina: versión nítida 144 px (`public/brand/logo-marca.png`). Verificado a 375 px.
+- Alimento: cálculo real (gramos en el paquete + gramos por toma + tomas al día), compartido entre perros (`racion`, `guardarComida`, `diasDeComida` en `lib/app.ts`). Compila; PENDIENTE de prueba en navegador.
+- SOS: lista neutra (sin franja roja). El rojo queda para la etiqueta de emergencia del detalle.
+- SOS: «Heridas abiertas y hemorragias» dividida según la tabla de gravedad del ebook: «Hemorragia o herida profunda» (emergencia) y «Cortes leves y raspones» (urgencia). Texto del ebook (módulo 4, pág. 44 y tabla de triage pág. 69).
+- Supabase: base y acceso por enlace listos (ver «Decisiones técnicas — Base de datos y acceso»). PENDIENTE: sincronizar los datos del navegador con la base.
+
+## Sincronización con la base de datos (2026-10-05)
+- Tablas rehechas con identificadores de texto (la app usa textos como id). Migración `ids_texto_y_racion` (las tablas estaban vacías). Columna `racion` en cuidados.
+- Prueba de aislamiento (en transacción, revertida): la cuenta A ve solo sus perros; la de otra familia ve 0.
+- `lib/sincronizar.ts`: al entrar con sesión, si la familia existe en la nube trae sus datos (reemplazan los del navegador); si no, crea la familia y sube lo del navegador. Cada cambio sube solo lo distinto; lo quitado se borra en la nube.
+- `lib/app.ts`: `alCambiarEstado` (aviso de cambios) y `cargarDesdeNube` (carga sin reenviar).
+- `components/app/SincronizarNube.tsx` montado en `app/app/(con-nav)/layout.tsx`. Sin sesión, la app sigue local.
+- Datos que NO se sincronizan (quedan en el navegador): correo y tutor que usa este aparato (`yo`).
+- Fotos: se guardan como texto dentro de la fila. Migrar a almacenamiento de archivos antes de tener muchos usuarios.
+- Verificado: tsc ✓ · eslint ✓ (1 aviso previo) · build ✓ · seguridad: solo `crear_hogar` (intencional).
+- PENDIENTE: prueba de inicio de sesión real con el usuario; indicador visible cuando falla la subida (hoy solo queda marcado en memoria: `huboFalloNube`).
+
+## Problemas conocidos (2026-10-06) — pasada de cierre
+- SYNC-NUBE-SIN-VERIFICAR: el enlace de acceso está listo y la cuenta existe (1 usuario), pero la familia aún no se creó en `hogares` porque la app no ha abierto con esa sesión en el mismo navegador. Pendiente: confirmar la primera subida (tablas con filas) y luego probar un cambio de punta a punta.
+- SYNC-SIN-AVISO: si una subida falla, solo queda marcado en memoria (`huboFalloNube`). Falta mostrar un aviso visible en la app.
+- ALIMENTO-SIN-PRUEBA-NAVEGADOR: el cálculo de días con varios perros compila pero no se ha probado en el navegador.
+- FOTOS-EN-TEXTO: las fotos se guardan dentro de la fila de la base. Migrar a almacenamiento de archivos antes de muchos usuarios.
+- CORREO-Y-YO-LOCALES: el correo y el tutor de este aparato no se sincronizan (quedan en el navegador).
+- SOS-CONTENIDO-REVISAR: los textos de «Hemorragia» y «Cortes leves» vienen del ebook; la creadora debe revisarlos.
+- LEAKED-PASSWORD: aviso de seguridad de Supabase no aplica (acceso por enlace, sin contraseña).
+- Cambios sin commit: se hará commit solo cuando lo pidas.
+
+## Aviso de fallo de nube (2026-10-06)
+- `lib/sincronizar.ts`: el último estado que llegó a la nube se guarda aparte; si una subida falla, el siguiente intento incluye todo lo pendiente. `suscribirNube`, `huboFalloNube`, `reintentarNube`.
+- `components/app/AvisoNube.tsx` montado en el layout compartido: aviso visible en todas las pestañas con botón «Reintentar».
+- Verificado: tsc ✓ · eslint ✓ · build ✓. Probado el flujo real en Supabase (marca «telmisaltan» llegó a `registros`). El aviso en sí no se ha visto en pantalla porque requiere que la subida falle.
+- Problema cerrado: SYNC-SIN-AVISO (ver «Problemas conocidos»).
+
+## Dirección visual premium (2026-10-06, pedido del usuario con imagen de referencia)
+- Paleta aplicada en `components/landing/tokens.css` (los tokens son globales y la landing los usa): marfil `#F8F5EE` (fondo), blanco cálido `#FFFCF8` (superficies), sage `#E6ECE5` (secundario), petróleo `#0B6B63` (acento), verde oscuro `#20332F` (texto), durazno `#E7A27E` (solo decorativo).
+- Ajuste AA: el gris verdoso pedido (#687873) da 4.3:1 sobre marfil y no cumple. Se usa `--text-secondary: #5A6A65` (5.2:1).
+- Durazno: nunca como texto (1.9:1 sobre marfil).
+- Radios: tarjetas 22 px, controles 16 px. Sombras suaves. Acento plano (sin degradé) en el botón principal.
+- Bordes: tarjetas de la app usan `--border-suave` (casi invisible). Los controles conservan `--border-ui` por contraste.
+- Tipografía: `--font-serif` (DM Serif Display) solo en títulos de pantalla y nombre de la mascota. La landing sigue con DM Sans (`--font-display` sin cambios para no romper sus títulos en negrita).
+- Fondo: sin mesh; marfil plano. Barra inferior: fondo blanco cálido, indicador sage, sin borde visible.
+- Rojo: se revisó: solo SOS, errores, borrar, atrasado e intensidad fuerte. Sin usos decorativos.
+- NO cambiado: iconos, lógica, navegación, datos, textos, onboarding y paywall.
+- PENDIENTE: revisor-visual formal de Hoy (pantalla principal, obligatoria) y revisión de Historial, Perros, Yo. Las fotos grandes de la mascota (punto 9) no se han aplicado: el perro de ejemplo no tiene foto.
+- PENDIENTE de decisión: la FICHA-ARTE aprobada (paleta/tipografía) queda superada por esta dirección. Hay que actualizarla con el cambio.
+
+## Hoy · revisor visual (2026-10-06) — NO LISTA todavía
+- Veredicto escrito por el revisor en `docs/revisiones/hoy-veredicto.md`. Screenshot: `docs/revisiones/hoy-375.png`.
+- Última pasada: usabilidad 29/40 · craft 14/20 (mínimo para la pantalla principal: 36/40 y 16/20). Fidelidad a la referencia: FIEL (1 desvío, corregido después de esa revisión: anillo a color plano).
+- Corregido en esta ronda: botón principal sin fondo (error mío al cambiar el degradé), filas sin borde, chips suaves, tarjetas destacadas con borde y sombra suaves, un solo color de marca para tipos de cuidado, anillo plano.
+- BLOQUEANTE de decisión: «Próximamente» muestra 6 ítems sin agrupar y mezcla un vencido con futuros. Propuesta: máximo 3 visibles + «Ver todo», y vencidos en bloque propio. Pendiente de aprobación de la usuaria (cambia UX).
+- Por verificar: que la barra inferior no tape la última fila en un teléfono real.
+- FICHA-ARTE.md actualizada con la dirección premium (sección 2026-10-06).
+
+## Comparación con la referencia nueva (2026-10-06) — pendiente de decisiones
+- Hecho: «Siguiente cuidado» como bloque petróleo con texto y botón invertidos (dirección de la referencia). Tipos y compilación OK.
+- Todavía NO se parece a la referencia por composición, no por color:
+  1. FOTOS del perro: la referencia tiene la foto grande como protagonista. La app no tiene foto de ejemplo. Opciones: fotos reales de la usuaria o la foto de marca existente (`public/brand/perro-golden-onboarding.webp`) como ejemplo.
+  2. TEXTOS de la referencia («Hola, Camila», «Todo su cuidado, en un lugar»): cambian copy; el usuario pidió no tocar textos en esta etapa. Pendiente de aprobación.
+  3. ESTRUCTURA de la referencia: fila de avatares «Mis mascotas», tarjeta de la mascota con foto, cuadrícula de accesos (Historial / Documentos), tarjeta «Urgencias». Cambia el Home: pendiente de aprobación.
+  4. NAVEGACIÓN: la referencia muestra 4 pestañas; la app tiene 5. Se mantienen 5 (el usuario pidió no cambiar navegación).
+
+## Hoy · rediseño de inicio según referencia (2026-10-06, aprobado por la usuaria)
+- Hecho: saludo «Hola, {nombre}», tagline «Cuidado que se siente cerca», fila de avatares de mascotas (reemplaza el selector de chips; misma función), bloque petróleo de la mascota activa con foto a sangre (o huella si no tiene foto), accesos rápidos (Historial, Mascotas), tarjeta Urgencias con borde rojo (lleva a SOS).
+- Decisiones: «Documentos» de la referencia NO existe como función: se usa «Mascotas». Foto de marca no se usa como ejemplo: la ficha de Floppy en datos de ejemplo tiene una imagen de huella (dato de ejemplo).
+- Verificado: tsc ✓ · eslint ✓ · build ✓ · scrollWidth 375 ✓.
+- Revisor (5.ª pasada, antes del tagline y la foto a sangre): 27/40 · 13/20 · NO FIEL (3 desvíos). Veredicto en `docs/revisiones/hoy-veredicto.md`.
+- PENDIENTE (bloqueantes): (1) «Próximamente» con 6 ítems y vencidos mezclados (decisión de UX). (2) Anillo «1 /4» y «3 por hacer hoy» muestran cifras distintas en el primer viewport: revisar la fuente de cada conteo (datos, no diseño). (3) Revisar de nuevo tras (1) y (2).
+- Pendiente: 4 pestañas en la referencia vs 5 en la app: se mantienen 5.
+
+## Home · segunda iteración de rediseño (2026-10-06)
+- Hecho: encabezado editorial; progreso en texto («Todo listo por hoy») con barra fina en lugar del anillo; mascota protagonista con foto integrada y degradado; «Siguiente cuidado» y «Todo al día» sin caja pesada; filas de cuidados con separadores; accesos como píldoras; Urgencias sin borde rojo fuerte.
+- Compilación y lint OK. Sin cambios de lógica, datos ni navegación.
+- Revisor (6.ª pasada): fidelidad FIEL (1 desvío menor). Usabilidad 27/40 · craft 12/20 → NO LISTA. Veredicto en `docs/revisiones/hoy-veredicto.md`.
+- Bloqueante de decisión: «Próximamente» (6 filas) — propuesta: 3 visibles + «Ver todo», vencidos aparte.
+- A revisar: la barra inferior se ve translúcida sobre la tarjeta en la captura de página completa; confirmar en teléfono real que no tapa contenido (el fondo de la barra es sólido).
+
+## Hoy · decisión de cierre (2026-10-06)
+- La usuaria eligió dejar Hoy como está (opción A). Funcional y fiel a la referencia; el revisor visual la deja en NO LISTA (usabilidad 26/40, craft 13/20).
+- Pendientes sin decidir: «Deshacer» de vencidas dura 6 s; vencidas no aparecen en «Hecho hoy».
+- Pendiente técnico menor: el botón «Marcar como hecho» usa la clase de degradé (plano en la práctica).
+- Pendiente: confirmar en teléfono real que la barra inferior no tapa contenido.
+- Sin commit (se hace cuando la usuaria lo pida).
+
+## Encuadre de fotos (2026-10-06, pedido de la usuaria)
+- Problema: al subir una foto, el recorte era al centro y la cabeza del perro quedaba cortada.
+- Hecho: al subir la foto aparece una vista circular con dos deslizadores (izquierda/derecha, arriba/abajo) para centrar la cabeza. El recorte final (480 px) se hace al guardar. Aplica a mascotas (`components/app/Perros.tsx`) y a fotos de personas (`components/app/Yo.tsx`).
+- Por defecto el encuadre queda a 50 % horizontal y 30 % vertical (la cabeza suele estar arriba).
+- Compila, lint OK. NO verificado en pantalla: la cuenta de prueba tiene el límite de mascotas de su plan y no deja abrir el formulario en la prueba automática.
+- Limitación: para cambiar el encuadre de una foto ya guardada hay que volver a subirla (la original no se guarda).
+
+## Sistema tipográfico unificado (2026-10-06, pedido de la usuaria)
+- Serif (`--font-serif`, DM Serif Display) SOLO en: titular de la Home «Todo su cuidado, en un lugar» y nombre de la mascota protagonista (banner, ficha y resumen).
+- Sans (DM Sans) para todo lo demás: saludo, fecha, frase de marca (sin cursiva, color secundario), títulos de sección (`text-lg font-semibold`), subtítulos, listas, botones, navegación, badges.
+- Títulos de pantalla de Historial, Mascotas, SOS, Yo y Resumen pasan a sans (`text-2xl font-semibold`).
+- Pesos: se usa semibold (600) como peso de títulos en lugar de bold (700), para que no compitan con el hero.
+- Verificado en vista de teléfono (375 px): Home se ve con una sola familia de estilos por nivel. tsc ✓ · eslint ✓.
+
+## Pesos unificados en todas las pantallas (2026-10-06)
+- Todo `font-bold` y `font-extrabold` de `components/app` pasa a `font-semibold` (32 cambios). Títulos de sección: `text-lg font-semibold`.
+- PENDIENTE: escala de tamaños compartida (los tamaños de tarjetas y descripciones siguen variando entre pestañas).
+- tsc ✓ · eslint ✓.
+
+## Escala de tamaños unificada (2026-10-08)
+- Sin outliers: solo quedan 5 tamaños en toda la app (`text-3xl` serif, `text-2xl` título de pantalla, `text-lg` sección/tarjeta, `text-base` cuerpo, `text-sm` etiqueta). Se plegaron los `text-xl` sueltos de Historial, Perros y Yo a `text-lg`, y el nombre de mascota en Resumen de `text-4xl` a `text-3xl` (igual que en la ficha y la Home).
+- Verificado en Mascotas a 375 px: título, nombre de cada mascota, texto y badges en la escala nueva. Build ✓.
+- Nota: la vista previa de este navegador quedó con sesión real de la usuaria (Camila, Toffee y Luna). No se tocó ningún dato: solo se navegó para verificar estilos.
+
+## Historial: resumen sin ranking (2026-10-08, pedido de la usuaria)
+- Se quitaron las barras comparativas por persona (sensación de competencia). Nueva tarjeta «Esta semana»: total de cuidados registrados, cuántos cuidadores participaron y el último registro («Quien registró qué de qué perro · cuándo»), más el texto «Todo queda registrado para que nadie tenga que preguntar quién hizo qué.»
+- Filtro secundario de persona visible como píldoras (Todos / nombre / nombre), fuera de la hoja de filtros. Usa el mismo estado `persona` que ya existía: no se duplicó lógica.
+- Sin cambios en los datos ni en el historial cronológico de abajo.
+- Verificado con la cuenta real de la usuaria: «22 cuidados registrados», «2 cuidadores participaron», último registro de Diego. tsc ✓ · eslint ✓ · build ✓.
+
+## SOS: sin medicamentos ni dosis (2026-10-08, pedido de la usuaria)
+- Motivo: el contenido del SOS todavía no tiene el visto bueno de un veterinario; no debe recomendar ninguna sustancia ni dosis, para que nadie lo lea como sustituto de atención veterinaria.
+- «Envenenamiento o intoxicación» (lib/sos.ts): se quitó «dale carbón activado o agua oxigenada al 3%…». El paso de contactar al veterinario ahora incluye «No le des nada por tu cuenta: sigue solo lo que te indiquen por teléfono.»
+- «Cortes leves y raspones»: se quitó «desinfecta con clorhexidina»; queda «lava la zona con agua limpia o suero fisiológico».
+- Revisado el resto del contenido: no queda ninguna otra sustancia, producto ni dosis recomendada. El aviso «Esta guía no reemplaza a tu veterinario» ya existe en la pantalla de SOS.
+- Verificado en pantalla (375 px) y build.
+
+## Landing: iteración final para el MVP (2026-10-08)
+- Hero rediseñado: dos columnas en escritorio (copy a la izquierda, Panel de Hoy a la derecha como protagonista); en móvil sigue copy → CTA → teléfono. Se quitó la foto antigua de portada.
+- Nuevas capturas reales con datos de ejemplo (no datos de la usuaria): `public/screens/hoy.png`, `historial.png`, `mascotas.png`, `sos.png`. Se borraron las antiguas (`familia.png`, `ficha.png`, `perros.png`) y la foto `hero-mujer-golden.jpg`: ya no queda ningún visual del diseño anterior.
+- «La app por dentro» pasa a mostrar exactamente HOY / HISTORIAL / MASCOTAS / SOS, con un título corto (nuevo prop `titulo` en `AppPorDentro`) y el copy exacto pedido.
+- Historial, paso 3 del mecanismo: copy de coordinación («Cuando alguien lo marca, los demás lo ven. Sin "pensé que se lo habías dado tú"») en vez de tono de supervisión.
+- Precio: el titular ya no usa «al día» (antes "$0,08 al día"); ahora «Pruébala gratis 7 días. Después, desde US$29 al año», con «Equivale a US$2,42 al mes» como línea secundaria. Anual sigue siendo el recomendado.
+- Sin cambios: onboarding, paywall, base de datos, lógica de la app, panel de administrador (no existe todavía).
+- Verificado: tsc ✓ · eslint ✓ · build ✓ · revisado en pantalla (escritorio): hero, mecanismo, galería de pantallas y precio.
+- PENDIENTE: revisor-visual formal del hero (es una de las 4 pantallas del dinero); no se corrió en esta pasada. Revisar la landing completa en móvil.
+
+## Landing hero: segunda pasada del revisor (2026-10-08)
+- Corregido: radio del marco del teléfono (usaba 32px fijo, ahora var(--radius-card)); título un poco más chico en el teléfono.
+- 2.ª revisión: usabilidad 33/40 · craft 16/20 (pasa) · copy 19/20 (pasa). Solo falta el gate de usabilidad (36/40); el título sigue en 3 líneas a 375 px pero no se acorta el copy porque el usuario lo fijó explícitamente.
+- build ✓ tras los ajustes. Veredicto detallado en docs/revisiones/landing-hero-veredicto.md (de la 2.ª pasada; no se corrió una 3.ª).
+- Se pausó aquí: la usuaria pidió pasar a revisar todo el onboarding (sigue pendiente, ver sección «Problemas conocidos» de abajo).
+
+## Problemas conocidos (2026-10-08) — onboarding PENDIENTE (veredicto sin aprobar)
+- El onboarding está pendiente: su veredicto en docs/revisiones/onboarding-veredicto.md viene fallido (29/40 · 14/20 · copy 13/20) desde la última ronda (2026-09-24). No se ha vuelto a pasar el revisor porque, por decisión anotada esa misma fecha, se detuvo la iteración de diseño del embudo hasta tener datos reales. Sigue pendiente de ese revisor.
+- 2026-10-08: la usuaria pidió una revisión estructural del flujo (menos pantallas, foto opcional, una sola prioridad configurada, orden del paywall, lenguaje neutro). Diagnóstico de solo lectura presentado y APROBADO por la usuaria. En construcción: ver avance más abajo. El onboarding sigue pendiente de un nuevo veredicto del revisor-visual hasta cerrar esta pasada.
+
+## Onboarding: reconstrucción del flujo aprobado (2026-10-08)
+- Pantallas finales: 1) Nombre + foto opcional (sin «perro», placeholder huella neutra) → 2) Qué quiere dejar de recordar (sin cambios) → 3) Elegir una prioridad (NUEVA; se salta sola si solo eligió una) → 4) Configurar solo esa prioridad (medicamento+stock fusionados en una pantalla; alimento y vacuna ya estaban en una; cuidadores igual; documentos/emergencia con mensaje corto nuevo, pantalla «info») → 5) Avisos (sin cambios) → 6) Carga breve con copy nuevo → 7) Primera victoria (sin cambios de estructura, ahora con foto real o huella) → 8) Paywall con el correo recién después del CTA de decisión.
+- Pasos reducidos: de hasta 9-10 pantallas (si elegía varias cosas, se configuraban todas seguidas) a 6-7 siempre, porque solo se configura UNA prioridad. Lo que no se configura queda disponible dentro de la app.
+- Se movió al interior de la app (no se pregunta en el onboarding): documentos/recetas reales, invitar cuidadores de verdad, detalle de alimento (marca/gramos) — ya no se pedían antes tampoco, se mantiene.
+- Foto: persiste en `Respuestas.foto` (lib/onboarding.ts) y se usa en la Primera victoria. Si no hay foto, placeholder de huella (nunca una foto genérica de otro perro; se quitó `perro-golden-onboarding.webp` del onboarding).
+- Nombre: persiste igual que antes (`Respuestas.nombre`); el título de la pantalla 1 ya no dice «perro», dice «¿Cómo se llama?».
+- Panel de la primera victoria: usa solo datos reales (ya lo hacía `armarPanel`; verificado en vivo con un caso real — eligió medicamento+vacuna, priorizó medicamento, y el Panel solo mostró el medicamento).
+- Paywall: correo pedido DESPUÉS de tocar «Empezar mis 7 días gratis» (antes aparecía fijo en la página, antes de cualquier decisión). Verificado en vivo: plan → botón → aparece el correo con foco automático → «Continuar al pago» → checkout (sin tocar `lib/hotmart.ts` ni la lógica de pago).
+- Lenguaje neutro: «mascota» en la pantalla 1 en vez de «perro»; sin pronombres de género en ningún texto (ya no los había).
+- NO se agregó: pregunta de sexo/macho-hembra (no hay ese dato en el modelo; se dejaría para la ficha de la mascota si algún día hace falta); sistema de eventos/analítica (no existía infraestructura previa, no se creó una nueva — pendiente aparte si se quiere medir el embudo).
+- Verificado de punta a punta en vista de teléfono (375 px): nombre+foto, dos prioridades elegidas → pantalla de prioridad con las 2 opciones, medicamento con stock fusionado, avisos, carga, primera victoria (solo medicamento, foto placeholder), paywall (correo después del botón, línea de tiempo con fechas reales). tsc ✓ · eslint ✓ · build ✓.
+- PENDIENTE: volver a pasar el revisor-visual (sigue NO LISTA del 2026-09-24; esta reconstrucción no se ha revisado todavía — hace falta nueva captura + revisor antes de declarar el onboarding terminado).
+
+## Onboarding: corrección del bug del revisor (2026-10-08)
+- Causa raíz: la página entera usaba el scroll del documento; la barra fija de abajo (`sticky bottom-0`) quedaba flotando sobre el contenido en vez de ir detrás, en cualquier pregunta que no cupiera en una pantalla (medicamento+stock fusionados).
+- Arreglo: cada paso del onboarding ahora tiene SU PROPIO scroll (el encabezado con la barra de progreso queda fijo arriba, el contenido se desplaza en su propio espacio, el botón queda fijo abajo). Se agregó también un margen de reserva para que el último campo nunca quede tapado.
+- Verificado: el botón ya no se superpone; «30 días» y «No lo sé» quedan visibles al hacer scroll. tsc ✓ · eslint ✓ · build ✓.
+- Pendiente de decisión del usuario (no se tocó, es un pedido explícito suyo): la pantalla «¿Qué te gustaría dejar de tener que recordar?» tiene 6 tarjetas, por encima del umbral de 4-5 del gate de carga cognitiva — el usuario pidió mantener esas 6 opciones tal cual.
+
+## Panel de administración construido (2026-10-08)
+- Acceso: tabla `admins` (user_id) con RLS activo y SIN políticas para anon/authenticated — fail-closed: solo el servidor, con la clave service_role (nunca llega al navegador), puede leerla. Primera administradora: la cuenta real de la dueña.
+- Verificación EN EL SERVIDOR (`lib/supabase-admin.ts`): cada ruta de `/api/admin/*` valida el token de sesión (`auth.getUser`) y confirma contra `admins` con la clave de servicio antes de devolver cualquier dato — nunca basta con ocultar el botón (evita IDOR). `app/admin/page.tsx` es solo la vista: si el servidor rechaza, no hay datos que mostrar.
+- Rutas: `GET /api/admin/resumen` (usuarios, uso, avisos automáticos, errores; ventas/negocio/IA marcados «Sin datos» con el motivo, nunca inventados), `GET /api/admin/usuarios` (lista real con correo desde `auth.users`), `POST /api/admin/invitar` (agrega una persona a mano con correo+nombre: crea la cuenta y reenvía el acceso si ya existía).
+- Tablas nuevas: `admins`, `event_log` (el cliente solo inserta sus propios eventos; vacía hasta que se empiecen a registrar pasos del onboarding), `error_log` (igual, alimentada desde `app/error.tsx`, el Error Boundary de Next.js), `acquisition_spend` (vacía, lista para cuando haya gasto de adquisición que cargar).
+- Métricas REALES calculadas hoy mismo con las tablas que ya existían: familias totales/activas 7-30 días, mascotas, cuidados, registros marcados como hechos (gráfico de 14 días), lista de usuarios con correo real y última actividad.
+- Avisos automáticos: banner arriba del panel («Todo en orden» o alertas), calculado con las mismas consultas, sin infraestructura aparte.
+- Verificado: tsc ✓ · eslint ✓ · build ✓ (3 rutas dinámicas). Probado en vivo con la cuenta real de la dueña (enlace de un solo uso generado para la prueba, no se guardó ni se mostró en el chat): panel cargó con 1 familia, 2 mascotas, 6 cuidados, 0 errores — datos reales, no de ejemplo. Confirmado que la API rechaza sin token (401) y con token inválido (401).
+- Revisor visual: 1.ª pasada 26/40 · 9/20, NO LISTA (emoji prohibido, correo cortado sin forma de verlo completo, jerga sin traducir, gráfico vacío sin explicación). Corregidos los 4 puntos; 2.ª pasada en curso.
+- PENDIENTE: no se probó en vivo el botón «Agregar» (enviaría un correo real) — queda para probarlo junto con la usuaria. Ventas/Negocio/IA seguirán en «Sin datos» hasta conectar el webhook de Hotmart y/o IA real.
+
+## Pulido tras 2.ª/3.ª ronda de revisor (2026-10-08)
+- Onboarding: título de «olvidos» unificado al mismo tamaño que el resto; fondo con el mismo mesh sutil que ya usa el resto de la app. 3.ª revisión: 34/40 · 15/20 · copy 17/20 (NO LISTA por 2 y 1 puntos); el bug del botón tapando contenido quedó confirmado como corregido. 4.ª revisión: 36/40 · 18/20 · copy N/A → **CONFIRMADA LISTA.** Veredicto en docs/revisiones/onboarding-veredicto.md. Pendientes NO bloqueantes (opcionales, de gusto): pista visual de scroll en la pantalla de medicamento, defaults inteligentes en fichas, fondo un poco más visible.
+- Panel de administración: encabezado con «Volver a la app» y «Salir»; entrada escalonada en tarjetas y avisos; números con conteo animado; barras del gráfico que crecen al cargar; mismo fondo con profundidad. 2.ª revisión: 32/40 · 12/20 (NO LISTA: sin salida del panel, cero movimiento, fondo plano) — los tres corregidos. 3.ª revisión: 29/40 · 14/20 (NO LISTA: gráfico casi invisible con poca actividad, alturas desparejas en tarjetas de Usuarios, estados sin_acceso/error sin botón) — los tres corregidos. 4.ª revisión: 33/40 · 14/20 (NO LISTA — 5 defectos: gráfico de 14 días aún poco visible con pocos datos, tres tarjetas «Sin datos» seguidas con el mismo peso visual que datos reales, mensaje del formulario de invitar sin auto-dismiss, buscador sin autofocus/atajo, «Volver a la app»/«Salir» sin diferenciación visual).
+- tsc ✓ · eslint ✓ · build ✓ tras todos los cambios de esta ronda.
+
+## Panel de administración: rondas 5 y 6 de ajustes (2026-10-08)
+- Ronda 5: corregidos 3 de los 5 defectos de la 4.ª ronda (SinDatos compacta, Volver/Salir diferenciados, mensaje con auto-dismiss). 5.ª revisión: 24/40 · 11/20 — BAJÓ respecto a la 4.ª (33/14) porque el revisor esta vez sí llegó a ver, con sesión y datos reales, la sección «Ventas y negocio» exponiendo jerga técnica y una ruta de archivo interna («webhook», «docs/sistema/18-...») y acrónimos sin traducir (LTV, CAC) directo a la dueña no técnica — una violación real de la regla de comunicación del SO, no solo un gusto de diseño. Corregido: los 3 textos de «Sin datos» (resumen/route.ts) reescritos en lenguaje simple; altura mínima visible en las barras del gráfico de 14 días; autoFocus en el buscador; título del encabezado pasado a la tipografía serif de marca (antes solo lo usaba el resto de la app, no el panel).
+- Ronda 6: el cambio de fuente serif ROMPIÓ el encabezado (el título se partía palabra por palabra en 3 líneas a 375px, por falta de `min-w-0 flex-1` en el contenedor) — bug propio, no señalado por el revisor como tal pero sí como defecto #1. Corregido: `min-w-0 flex-1` en el bloque del título + tamaño bajado a `text-2xl` en vez de `text-3xl` para que entre en 1-2 líneas. 6.ª revisión: 30/40 · 10/20, NO LISTA. Defectos restantes: 4 cajas «Sin datos» seguidas sin agrupar (ruido repetitivo), ningún botón tiene `whileTap` (falta la baseline de movimiento #4 del SO), buscador sin botón de limpiar, todo el panel vive en el mismo plano visual (SinDatos totalmente plana, sin nivel «hundido»).
+- Progreso real en 6 rondas: 26/9 → 32/12 → 29/14 → 33/14 → 24/11 → 30/10. El craft (diseño) lleva 6 rondas sin cruzar 14-16/20 y viene bajando las últimas 2 — señal de rendimientos decrecientes en esta pantalla concreta (panel interno, no es una de las 4 pantallas del dinero). Se detiene aquí la iteración automática del revisor para no seguir dando vueltas; el panel es funcional, seguro (ver auditoría de seguridad de esta misma fecha) y legible, pero no cruza el gate formal de diseño ≥36/16. Pendiente: decisión de la usuaria — seguir puliendo (agrupar «Sin datos», agregar whileTap, dar profundidad) o aceptar el estado actual y avanzar.
+- Verificado: tsc ✓ · build ✓ tras cada cambio.
+- Sin commitear/subir a GitHub: pendiente de pedirlo explícitamente a la usuaria.
+
+## Auditoría de seguridad y pulido de toda la app (2026-10-08) — 7 de 8 puntos CORREGIDOS
+- Revisión directa de las reglas reales de la base de datos (no solo el código): confirmado que todas las tablas de datos de las familias tienen su candado (RLS) activo y correcto, que la clave maestra nunca llega al navegador y que el panel de administración valida en el servidor. Reporte de 8 hallazgos entregado a la usuaria; aprobó corregir todos («ambas» — seguir puliendo el panel Y arreglar la auditoría).
+- **CORREGIDO — el crítico (invitar cuidadores de verdad):** nueva tabla `invitaciones_hogar` (hogar_id, correo) + función seguridad-definer `aceptar_invitacion()` (migraciones `invitaciones_hogar` y `bloquear_llamadas_directas_funciones` en Supabase, proyecto mrucrkwilrtqtbyvuyfz). `lib/sincronizar.ts`: `iniciarNube()` ahora llama `aceptar_invitacion()` ANTES de `crear_hogar` — si la persona que entra tiene una invitación pendiente a su correo, se une a ESA familia en vez de crear una vacía; nueva función `invitarCuidador()`. `components/app/Yo.tsx`: al guardar un cuidador con correo, además de guardarlo como contacto, se crea la invitación en la nube y se le manda un enlace de acceso real (`enviarEnlaceDeAcceso`, reusa el login existente — no hace falta Resend). Botón cambia a «Enviando su acceso…» mientras tanto. El admin de `/api/admin/invitar` queda igual (sigue siendo para clientes nuevos, no para cuidadores de una familia existente — ahí nunca estuvo mal).
+- **CORREGIDO — candado extra entre perro/cuidado y familia:** 3 triggers (`candado_cuidados`, `candado_registros`, `candado_notas`) que impiden guardar un cuidado/registro/nota cuyo perro o cuidado no pertenezca a la misma familia declarada — antes solo se comprobaba el hogar_id, no la relación cruzada.
+- **CORREGIDO — fotos movidas a Storage:** bucket privado `fotos` (política: solo miembros de esa familia, por carpeta `hogar_id/...`). `lib/sincronizar.ts`: al subir una foto nueva (`data:` URL) se sube al bucket y la fila solo guarda la ruta; al bajar de la nube, la ruta se convierte en una URL firmada de 7 días para mostrarla. Cuidado puesto a propósito: si el perro se edita por otro motivo y su foto ya está en Storage, NO se reenvía la URL firmada (se omite la columna) para no pisar la ruta guardada con un enlace temporal — `fotoParaGuardar()` en sincronizar.ts. Las 2 fotos reales que ya existían (base64 viejo) se migran solas la próxima vez que se editen; mientras tanto se siguen viendo igual (comprobado en vivo con Playwright + la cuenta real: 0 imágenes rotas, 0 errores de consola).
+- **CORREGIDO — `/privacidad` desactualizada:** ahora menciona foto, chip, responsable y teléfono del perro, y que se guarda nombre/correo de quien se invita.
+- **CORREGIDO — sin cabeceras de seguridad:** `next.config.ts` ahora manda X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy y Strict-Transport-Security en todas las rutas.
+- **CORREGIDO — IDs débiles:** `lib/app.ts` `nuevoId()` pasó de `Date.now()+4 caracteres al azar` a `crypto.randomUUID()`.
+- **CORREGIDO — índices de rendimiento faltantes:** `error_log.user_id` y `event_log.hogar_id`.
+- **PENDIENTE (no se puede hacer por código):** activar «protección de contraseñas filtradas» en Supabase — es un interruptor en el panel de Supabase (Authentication → Policies), no un archivo del repo. 2 minutos, hay que hacerlo la usuaria o dar acceso para hacerlo.
+- Verificado tras cada capa: `get_advisors` (seguridad) de Supabase sin alertas nuevas (las únicas funciones SECURITY DEFINER marcadas — `crear_hogar` y `aceptar_invitacion` — están revisadas y correctamente guardadas con `auth.uid()`/`auth.jwt()`, no aceptan nada del que llama que no sea su propia sesión); tsc ✓ · build ✓ tras cada cambio de código.
+
+## Panel de administración: rondas 7 y 8, SE DETIENE AQUÍ la iteración (2026-10-08)
+- Ronda 7 (33/40→30/40 · 10/20→14/20): confirmó las 4 correcciones de la ronda 6 (título ya no se parte, Ventas/Negocio/IA agrupadas, cajas «Sin datos» con fondo hundido, botones con `active:scale`). Defectos nuevos: `autoFocus` del buscador saltaba el foco/teclado a mitad de pantalla antes de leer los avisos; loading inicial sin skeleton; sin paginación/orden/exportación en Usuarios y Errores; el aviso «todo en orden» pesaba igual que los informativos; identidad apoyada solo en tipografía/color. Corregido: se quitó `autoFocus`; el aviso «ok» ahora tiene un tinte propio del color de acento.
+- Ronda 8 (29/40 · 13/20): confirma los 2 arreglos anteriores. Defecto nuevo: el texto de «Ventas y negocio» se repetía palabra por palabra en los avisos de arriba Y en la sección de abajo. Corregido: se quitaron los 2 avisos duplicados de `resumen/route.ts` (arriba solo queda «todo en orden» o la alerta de errores; el detalle vive una sola vez, en su sección).
+- Progreso en 8 rondas: usabilidad 26→32→29→33→24→30→30→29 (meseta entre 24-33, nunca cruza 36). Craft 9→12→14→14→11→10→14→13 (meseta entre 10-14, nunca cruza 16). Los defectos que quedan (skeleton de carga, paginación/orden/exportación de listas, un elemento de identidad de marca propio como hairline degradado) son construcciones más grandes, no ajustes rápidos — y este es un panel INTERNO (solo lo usa la dueña), no una de las 4 pantallas del dinero.
+- DECISIÓN: se detiene la iteración automática del revisor en 8 rondas. El panel es seguro, funcional, sin jerga, con datos reales y sin errores de consola. Queda documentado qué le falta para «premium» (skeleton, paginación, un detalle de marca) por si se retoma en una sesión futura — no es necesario para operar el negocio hoy (1 cliente real, bajo volumen).
+- Verificado: tsc ✓ · build ✓ tras cada cambio. Todo lo de esta sesión (auditoría + panel) sigue sin subir a GitHub.
