@@ -83,9 +83,10 @@ function diferencias(antes: EstadoApp, despues: EstadoApp, hogar: string) {
     if (despues.veterinarioUrgencia) filas.push(aVet('urgencia', despues.veterinarioUrgencia, hogar));
     if (filas.length) subir.push({ tabla: 'veterinarios', clave: 'hogar_id,tipo', filas });
   }
-  const hogarA = JSON.stringify([antes.plan, antes.ajustes]);
-  const hogarB = JSON.stringify([despues.plan, despues.ajustes]);
-  return { subir, borrar, hogarCambio: hogarA !== hogarB };
+  // El plan ya no lo escribe el navegador (solo el servidor, al confirmar un pago real) — acá solo
+  // se vigilan los ajustes propios de la persona (avisos, racha, etc.).
+  const hogarCambio = JSON.stringify(antes.ajustes) !== JSON.stringify(despues.ajustes);
+  return { subir, borrar, hogarCambio };
 }
 
 /** Las fotos nunca viven como texto largo dentro de la fila: antes de guardar, se suben al lugar
@@ -104,7 +105,7 @@ async function subirFotosDeLote(c: SupabaseClient, hogar: string, tabla: string,
 
 async function enviar(c: SupabaseClient, hogar: string, cambios: ReturnType<typeof diferencias>, despues: EstadoApp): Promise<void> {
   if (cambios.hogarCambio) {
-    const { error } = await c.from('hogares').update({ plan: despues.plan, ajustes: despues.ajustes }).eq('id', hogar);
+    const { error } = await c.from('hogares').update({ ajustes: despues.ajustes }).eq('id', hogar);
     if (error) throw error;
   }
   // Primero lo que otras filas necesitan (perros, tutores, cuidados), luego lo que depende de ellos.

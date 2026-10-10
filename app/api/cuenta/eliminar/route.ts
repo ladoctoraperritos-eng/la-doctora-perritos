@@ -17,7 +17,10 @@ export async function POST(req: Request) {
   const { admin, user } = v;
 
   const { data: miembros, error: errMiembros } = await admin.from('miembros_hogar').select('hogar_id').eq('user_id', user.id);
-  if (errMiembros) return NextResponse.json({ motivo: 'No pudimos revisar tu familia: ' + errMiembros.message }, { status: 500 });
+  if (errMiembros) {
+    console.error('[cuenta/eliminar] no se pudo leer la familia del usuario', user.id, errMiembros);
+    return NextResponse.json({ motivo: 'No pudimos revisar tu familia. Intenta de nuevo en un momento.' }, { status: 500 });
+  }
 
   for (const m of miembros ?? []) {
     const { count } = await admin.from('miembros_hogar').select('user_id', { count: 'exact', head: true }).eq('hogar_id', m.hogar_id);
@@ -25,11 +28,17 @@ export async function POST(req: Request) {
       // Eres la única persona de esta familia: se borra la familia completa (cascada a perros,
       // cuidados, registros, tutores, notas, veterinarios, invitaciones).
       const { error } = await admin.from('hogares').delete().eq('id', m.hogar_id);
-      if (error) return NextResponse.json({ motivo: 'No pudimos borrar tus datos: ' + error.message }, { status: 500 });
+      if (error) {
+        console.error('[cuenta/eliminar] no se pudo borrar el hogar', m.hogar_id, error);
+        return NextResponse.json({ motivo: 'No pudimos borrar tus datos. Intenta de nuevo en un momento.' }, { status: 500 });
+      }
     } else {
       // Hay más personas cuidando en esta familia: solo se quita TU acceso, no los datos de todos.
       const { error } = await admin.from('miembros_hogar').delete().eq('hogar_id', m.hogar_id).eq('user_id', user.id);
-      if (error) return NextResponse.json({ motivo: 'No pudimos quitar tu acceso: ' + error.message }, { status: 500 });
+      if (error) {
+        console.error('[cuenta/eliminar] no se pudo quitar el acceso', user.id, m.hogar_id, error);
+        return NextResponse.json({ motivo: 'No pudimos quitar tu acceso. Intenta de nuevo en un momento.' }, { status: 500 });
+      }
     }
   }
 
@@ -37,7 +46,10 @@ export async function POST(req: Request) {
   await admin.from('admins').delete().eq('user_id', user.id);
 
   const { error: errAuth } = await admin.auth.admin.deleteUser(user.id);
-  if (errAuth) return NextResponse.json({ motivo: 'Borramos tus datos, pero no pudimos cerrar tu cuenta de acceso: ' + errAuth.message }, { status: 500 });
+  if (errAuth) {
+    console.error('[cuenta/eliminar] no se pudo cerrar la cuenta de acceso', user.id, errAuth);
+    return NextResponse.json({ motivo: 'Borramos tus datos, pero no pudimos cerrar tu cuenta de acceso. Escríbenos para terminarlo.' }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
