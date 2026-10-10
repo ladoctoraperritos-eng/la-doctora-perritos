@@ -481,7 +481,7 @@ function BannerMascota({ perro, pendientes }: { perro: Perro; pendientes: number
       <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(90deg,var(--accent)_30%,transparent_62%)]" />
       <div className="relative flex min-h-56 flex-col justify-end p-6">
         <p className="text-3xl leading-none [font-family:var(--font-serif)]">{perro.nombre}</p>
-        <p className="mt-2 text-base text-[var(--bg)]/85">{pendientes > 0 ? `${pendientes} por hacer hoy` : "Su cuidado, al día"}</p>
+        <p className="mt-2 text-base text-[var(--bg)]/85">{pendientes > 0 ? `${pendientes} pendiente${pendientes === 1 ? '' : 's'}` : 'Al día'}</p>
       </div>
     </motion.section>
   );
@@ -548,6 +548,8 @@ export default function Hoy() {
   const total = pendientes.length + hechos.length;
   const activo = e.perros.find((p) => p.id === perroId);
   const [siguiente, ...resto] = pendientes;
+  // El banner debe mostrar al mismo perro del «Siguiente cuidado» de abajo (si hay filtro, ese manda).
+  const perroBanner = activo ?? siguiente?.perro ?? e.perros[0];
   const mana = manana(e, perroId);
   const vencidas = futuros.filter((f) => f.dias < 0);
   const restoAtrasado = resto.filter((f) => f.faltan < 0);
@@ -573,21 +575,21 @@ export default function Hoy() {
         )}
         <main className="flex flex-1 flex-col gap-6 px-6 pb-24 pt-6">
           <header className="flex items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-[var(--text-secondary)]">Hola, {e.tutores.find((t) => t.id === e.yo)?.nombre ?? 'Tú'}</p>
-                <p className="text-sm text-[var(--text-secondary)]">{fechaLarga(ahora)}</p>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">Cuidado que se siente cerca</p>
-                <h1 className="mt-1 text-3xl font-normal leading-tight tracking-[-0.01em] [font-family:var(--font-serif)]">Todo su cuidado, en un lugar</h1>
-              </div>
+            <div className="min-w-0">
+              <p className="text-sm text-[var(--text-secondary)]">
+                Hola, {e.tutores.find((t) => t.id === e.yo)?.nombre ?? 'Tú'} · {fechaLarga(ahora)}
+              </p>
+              <p className="mt-0.5 text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Todo su cuidado, en un lugar</p>
             </div>
-            <LogoMarca />
+            <Link href="/app/yo" aria-label="Ir a tu cuenta" className="shrink-0 [touch-action:manipulation]">
+              <LogoMarca />
+            </Link>
           </header>
 
           {total > 0 && (
             <motion.div {...entrada(0)} className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-lg font-semibold leading-snug">
+                <p className="text-2xl font-semibold leading-snug">
                   {hechos.length === total ? (
                     'Todo listo por hoy'
                   ) : (
@@ -599,17 +601,22 @@ export default function Hoy() {
                 <RachaBadge dias={e.ajustes.racha?.dias ?? 0} celebrar={celebrarRacha} />
               </div>
               <p className="text-sm text-[var(--text-secondary)]">
-                <ContadorAnimado n={hechos.length} /> de {total} cuidados de {varios ? "tus perros" : (activo ?? e.perros[0]).nombre}
+                <ContadorAnimado n={hechos.length} /> de {total} {total === 1 ? 'cuidado' : 'cuidados'} de {varios ? "tus perros" : (activo ?? e.perros[0]).nombre}
               </p>
               <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-[var(--surface-2)]" aria-hidden="true">
-                <div className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-500" style={{ width: `${(hechos.length / total) * 100}%` }} />
+                <motion.div
+                  className="h-full rounded-full bg-[var(--accent)]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(hechos.length / total) * 100}%` }}
+                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                />
               </div>
             </motion.div>
           )}
 
           <FilaMascotas perros={e.perros} activo={perroId} onElegir={setPerroId} />
 
-          {(activo ?? e.perros[0]) && <BannerMascota perro={activo ?? e.perros[0]} pendientes={pendientes.filter((p) => p.perro.id === (activo ?? e.perros[0]).id).length} />}
+          {perroBanner && <BannerMascota perro={perroBanner} pendientes={pendientes.filter((p) => p.perro.id === perroBanner.id).length} />}
 
           {siguiente ? (
             <Tarjeta fila={siguiente} varios={varios} onHecho={() => hacer(siguiente.cuidado.id, siguiente.cuidado.nombre)} />
@@ -626,7 +633,7 @@ export default function Hoy() {
               <div>
                 <p className="text-base font-semibold leading-tight">Todo al día{activo ? ` con ${activo.nombre}` : ''}</p>
                 <p className="mt-1 text-base text-[var(--text-secondary)]">
-                  {mana.cuantos > 0 ? `Mañana: ${mana.cuantos} cuidados, desde las ${mana.primera}.` : 'No queda nada por hoy.'}
+                  {mana.cuantos > 0 ? `Mañana: ${mana.cuantos} ${mana.cuantos === 1 ? 'cuidado' : 'cuidados'}, desde las ${mana.primera}.` : 'No queda nada por hoy.'}
                 </p>
                 {futuros[0] && (
                   <p className="mt-1 text-base text-[var(--text-secondary)]">
@@ -647,28 +654,31 @@ export default function Hoy() {
             </motion.section>
           )}
 
-          {restoAtrasado.length + vencidas.length > 0 && (
-            <section aria-label="Atrasados">
-              <h2 className="mb-2 text-lg font-semibold text-[var(--danger)]">Atrasados</h2>
-              <ul className="flex flex-col divide-y divide-[var(--border-suave)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4">
-                {restoAtrasado.map((f, i) => (
-                  <FilaPendiente key={f.cuidado.id} fila={f} varios={varios} i={i + 2} onHecho={() => hacer(f.cuidado.id, f.cuidado.nombre)} />
-                ))}
-                {vencidas.map((f, i) => (
-                  <FilaVencida key={f.cuidado.id} fila={f} varios={varios} i={i + 2 + restoAtrasado.length} onHecho={() => hacerVencida(f)} />
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {restoAlDia.length > 0 && (
-            <section aria-label="Pendiente hoy">
-              <h2 className="mb-2 text-lg font-semibold">Siguientes de hoy</h2>
-              <ul className="flex flex-col divide-y divide-[var(--border-suave)] rounded-[var(--radius-card)] bg-[var(--surface)] px-4">
-                {restoAlDia.map((f, i) => (
-                  <FilaPendiente key={f.cuidado.id} fila={f} varios={varios} i={i + 2} onHecho={() => hacer(f.cuidado.id, f.cuidado.nombre)} />
-                ))}
-              </ul>
+          {(restoAtrasado.length + vencidas.length > 0 || restoAlDia.length > 0) && (
+            <section aria-label="Pendientes de hoy" className="flex flex-col gap-4 rounded-[var(--radius-card)] bg-[var(--surface)] p-4">
+              {restoAtrasado.length + vencidas.length > 0 && (
+                <div>
+                  <h2 className="mb-2 text-lg font-semibold text-[var(--danger)]">Atrasados</h2>
+                  <ul className="flex flex-col divide-y divide-[var(--border-suave)]">
+                    {restoAtrasado.map((f, i) => (
+                      <FilaPendiente key={f.cuidado.id} fila={f} varios={varios} i={i + 2} onHecho={() => hacer(f.cuidado.id, f.cuidado.nombre)} />
+                    ))}
+                    {vencidas.map((f, i) => (
+                      <FilaVencida key={f.cuidado.id} fila={f} varios={varios} i={i + 2 + restoAtrasado.length} onHecho={() => hacerVencida(f)} />
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {restoAlDia.length > 0 && (
+                <div>
+                  <h2 className="mb-2 text-lg font-semibold">Siguientes de hoy</h2>
+                  <ul className="flex flex-col divide-y divide-[var(--border-suave)]">
+                    {restoAlDia.map((f, i) => (
+                      <FilaPendiente key={f.cuidado.id} fila={f} varios={varios} i={i + 2} onHecho={() => hacer(f.cuidado.id, f.cuidado.nombre)} />
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           )}
 

@@ -57,7 +57,7 @@ function frecuencia(c: Cuidado): string {
   if (c.hora) return `Todos los días · ${c.hora}`;
   if (c.proxima) {
     const d = diasHasta(c.proxima, new Date());
-    return d >= 0 ? `Queda para ~${d} días` : 'Se acabó';
+    return d >= 0 ? `Queda para ~${d} ${d === 1 ? 'día' : 'días'}` : 'Se acabó';
   }
   return '—';
 }
