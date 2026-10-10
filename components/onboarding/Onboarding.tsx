@@ -471,9 +471,9 @@ export default function Onboarding() {
                 {fotoOriginal ? (
                   <EncuadreFoto fuente={fotoOriginal} enfoque={fotoEnfoque} onCambiar={setFotoEnfoque} nombre={nombre} />
                 ) : (
-                  <div className="mt-6 flex flex-col items-center gap-3">
-                    <span aria-hidden="true" className="inline-flex size-24 items-center justify-center rounded-full bg-[var(--chip-bg)]">
-                      <PawPrint size={36} color="var(--accent)" />
+                  <div className="flex flex-1 flex-col items-center justify-center gap-4">
+                    <span aria-hidden="true" className="borde-degradado inline-flex size-40 items-center justify-center rounded-full bg-[var(--chip-bg)] shadow-[var(--shadow-1)]">
+                      <PawPrint size={56} color="var(--accent)" />
                     </span>
                     <input ref={entradaFoto} id="foto-mascota" type="file" accept="image/*" className="sr-only" onChange={(e) => { void elegirFoto(e.target.files?.[0]); e.target.value = ''; }} />
                     <button

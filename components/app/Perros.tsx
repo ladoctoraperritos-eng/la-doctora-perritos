@@ -10,11 +10,11 @@
 //   baseline: entrada escalonada · tap con escala · hoja con transición · estados vacío/carga/límite del plan
 //   estados: cargando (esqueleto) · vacío por sección · límite de plan · error de validación · confirmación al borrar
 
-import { useRef, useState, useSyncExternalStore } from 'react';
+import { useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { motion, MotionConfig } from 'motion/react';
 import type { Cpu } from 'lucide-react';
-import { User } from 'lucide-react';
+import { ClipboardList, User } from 'lucide-react';
 import { Hoja } from './Hoja';
 import { FilaNota, FormNota } from './Bitacora';
 import { Avatar, ChipIcono, entrada, LogoMarca, textoDias, tono } from './Hoy';
@@ -473,11 +473,27 @@ export function EncuadreFoto({ fuente, enfoque, onCambiar, nombre }: { fuente: s
       <p className="text-center text-sm text-[var(--text-secondary)]">Mueve los deslizadores hasta que se vea la cabeza.</p>
       <label className="flex w-full flex-col gap-1 text-base font-semibold">
         Izquierda y derecha
-        <input type="range" min={0} max={100} value={enfoque.x} onChange={(ev) => onCambiar({ ...enfoque, x: Number(ev.target.value) })} className="w-full accent-[var(--accent)]" />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={enfoque.x}
+          onChange={(ev) => onCambiar({ ...enfoque, x: Number(ev.target.value) })}
+          className="deslizador-nativo w-full"
+          style={{ '--valor': enfoque.x } as CSSProperties}
+        />
       </label>
       <label className="flex w-full flex-col gap-1 text-base font-semibold">
         Arriba y abajo
-        <input type="range" min={0} max={100} value={enfoque.y} onChange={(ev) => onCambiar({ ...enfoque, y: Number(ev.target.value) })} className="w-full accent-[var(--accent)]" />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={enfoque.y}
+          onChange={(ev) => onCambiar({ ...enfoque, y: Number(ev.target.value) })}
+          className="deslizador-nativo w-full"
+          style={{ '--valor': enfoque.y } as CSSProperties}
+        />
       </label>
     </div>
   );
@@ -838,7 +854,16 @@ export default function Perros() {
   );
 }
 
+/** Cuenta cuántos de los datos opcionales de la ficha (raza, edad, peso, chip, responsable,
+ * teléfono) le faltan a un perro — son los mismos que alimentan el resumen para el veterinario. */
+function camposFaltantes(p: Perro): number {
+  return [p.raza, p.nacimiento, p.pesoKg, p.chip, p.responsable, p.telefono].filter((v) => v === undefined).length;
+}
+
 function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: Date; limite: number; onAbrir: (id: string) => void; onAgregar: () => void }) {
+  // Cuando la ficha de un perro está a medio llenar, se lo recuerda aquí abajo — además de evitar que
+  // la pantalla quede con un hueco vacío cuando hay pocas mascotas, es información real que falta.
+  const incompleto = e.perros.find((p) => camposFaltantes(p) >= 3) ?? null;
   return (
     <>
       <header className="flex items-start justify-between gap-4">
@@ -887,6 +912,22 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
         <img src="/brand/accion-agregar.png" alt="" width={22} height={22} className="object-contain" />
         Agregar mascota
       </button>
+      {incompleto && (
+        <motion.button
+          {...entrada(e.perros.length + 1)}
+          type="button"
+          onClick={() => onAbrir(incompleto.id)}
+          className="flex items-start gap-3 rounded-[var(--radius-card)] bg-[var(--surface)] p-4 text-left shadow-[var(--shadow-1)] transition-transform duration-150 active:scale-[0.98] [touch-action:manipulation]"
+        >
+          <span aria-hidden="true" className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-button)]" style={{ background: 'color-mix(in oklab, var(--accent) 16%, var(--surface))' }}>
+            <ClipboardList size={22} color="var(--accent)" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-base font-semibold">Completa la ficha de {incompleto.nombre}</span>
+            <span className="block text-sm text-[var(--text-secondary)]">Raza, peso, microchip y más — sirve para el resumen que le muestras a su veterinario</span>
+          </span>
+        </motion.button>
+      )}
     </>
   );
 }
