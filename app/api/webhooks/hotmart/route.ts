@@ -12,8 +12,8 @@ import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { clienteAdmin } from '@/lib/supabase-admin';
 import { verificarHotmart } from '@/lib/hotmart-verify';
-import { estadoParaEvento, esEventoInformativo, planParaOferta, EVENTO_CAMBIO_PLAN } from '@/lib/hotmart-fsm';
-import { enviarCorreoDeAcceso } from '@/lib/email';
+import { estadoParaEvento, esEventoInformativo, planParaOferta, esOfertaAnual, EVENTO_CAMBIO_PLAN, EVENTO_CARRITO_ABANDONADO } from '@/lib/hotmart-fsm';
+import { enviarCorreoDeAcceso, enviarCorreoEbook, enviarCorreoPagoFallido, enviarCorreoCancelacion, enviarCorreoCarritoAbandonado } from '@/lib/email';
 
 export const runtime = 'nodejs'; // necesita node:crypto y el cuerpo crudo de la petición
 
@@ -87,6 +87,19 @@ export async function POST(req: Request) {
   }
 
   const payloadHash = crypto.createHash('sha256').update(cuerpoCrudo).digest('hex');
+
+  // 5a. Carrito abandonado: solo manda el correo de recuperación, no toca el acceso de nadie.
+  if (evento === EVENTO_CARRITO_ABANDONADO) {
+    const { error: errDupe } = await admin.from('hotmart_eventos_procesados').insert({ event_id: eventId, tipo_evento: evento, payload_hash: payloadHash });
+    if (errDupe) {
+      await registrar(eventId, evento, 'duplicado');
+      return NextResponse.json({ received: true, result: 'duplicate' });
+    }
+    const { ok, motivo } = await enviarCorreoCarritoAbandonado(email, nombre);
+    await registrar(eventId, evento, ok ? 'aplicado' : 'error');
+    if (!ok) console.error('[webhook hotmart] no se pudo mandar el correo de carrito abandonado', { motivo });
+    return NextResponse.json({ received: true, result: ok ? 'applied' : 'error' });
+  }
 
   // 5. Cambio de plan (mensual<->anual, o Esencial<->Familia): no cambia el estado de pago.
   if (evento === EVENTO_CAMBIO_PLAN) {
@@ -175,7 +188,32 @@ export async function POST(req: Request) {
     }
   }
 
-  // 9. Siempre 200 cuando se tomó una decisión (incluido duplicado/ilegal): así Hotmart deja de
+  // 9. Avisos que no tienen que ver con crear acceso: pago fallido (dunning) y cancelación
+  //    (win-back). Solo en eventos recién aplicados, nunca en duplicados/ilegales.
+  if (resultado === 'aplicado' && estado === 'applied') {
+    const hogarId = data?.hogar_id as string | undefined;
+    if (hogarId && nuevoEstado === 'past_due') {
+      const { ok, motivo } = await enviarCorreoPagoFallido(email, nombre, 5);
+      if (!ok) console.error('[webhook hotmart] no se pudo avisar el pago fallido', { motivo });
+    }
+    if (hogarId && nuevoEstado === 'cancelled') {
+      const { data: hogarAccesoUntil } = await admin.from('hogares').select('access_until').eq('id', hogarId).maybeSingle();
+      const fecha = hogarAccesoUntil?.access_until ? new Date(hogarAccesoUntil.access_until).toLocaleDateString('es') : undefined;
+      const { ok, motivo } = await enviarCorreoCancelacion(email, nombre, fecha);
+      if (!ok) console.error('[webhook hotmart] no se pudo avisar la cancelación', { motivo });
+    }
+    // Regalo del plan anual: una sola vez, solo al confirmar el primer cobro real ('active', no 'trialing').
+    if (hogarId && nuevoEstado === 'active' && esOfertaAnual(codigoOferta)) {
+      const { data: hogarEbook } = await admin.from('hogares').select('ebook_enviado').eq('id', hogarId).maybeSingle();
+      if (hogarEbook && hogarEbook.ebook_enviado === false) {
+        const { ok, motivo } = await enviarCorreoEbook(admin, email, nombre);
+        if (ok) await admin.from('hogares').update({ ebook_enviado: true }).eq('id', hogarId);
+        else console.error('[webhook hotmart] no se pudo mandar el ebook, se reintenta en el próximo aviso', { motivo });
+      }
+    }
+  }
+
+  // 10. Siempre 200 cuando se tomó una decisión (incluido duplicado/ilegal): así Hotmart deja de
   //    reintentar. Solo los 4xx/5xx de arriba (no autorizado, cuerpo inválido, error real) hacen
   //    que Hotmart vuelva a intentar.
   return NextResponse.json({ received: true, result: estado ?? 'ok' });

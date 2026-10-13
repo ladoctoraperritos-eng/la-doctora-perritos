@@ -490,6 +490,7 @@ function SeccionConfiguracion({ resumen, token }: { resumen: Resumen; token: str
         <p className="text-base font-semibold">{resumen.admin.correo}</p>
       </Tarjeta>
       <PanelAdministradores token={token} />
+      <PanelProbarCorreos token={token} />
       <div>
         <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Acceso manual a la app</p>
         <p className="mb-3 text-sm text-[var(--text-secondary)]">
@@ -498,6 +499,68 @@ function SeccionConfiguracion({ resumen, token }: { resumen: Resumen; token: str
         <FormularioInvitar token={token} />
       </div>
     </section>
+  );
+}
+
+const TIPOS_CORREO: { valor: string; etiqueta: string }[] = [
+  { valor: 'acceso', etiqueta: 'Acceso post-compra' },
+  { valor: 'ebook', etiqueta: 'Regalo (ebook)' },
+  { valor: 'pago_fallido', etiqueta: 'Pago fallido' },
+  { valor: 'cancelacion', etiqueta: 'Cancelación' },
+  { valor: 'carrito', etiqueta: 'Carrito abandonado' },
+  { valor: 'bienvenida_d1', etiqueta: 'Bienvenida día 1' },
+  { valor: 'bienvenida_d3', etiqueta: 'Bienvenida día 3' },
+  { valor: 'bienvenida_d7', etiqueta: 'Bienvenida día 7' },
+];
+
+/** Manda cualquier correo del negocio a la casilla de la propia administradora — para probar
+ * que se vean bien y que lleguen, sin tocar datos de ningún cliente real. */
+function PanelProbarCorreos({ token }: { token: string }) {
+  const [enviando, setEnviando] = useState<string | null>(null);
+  const [mensaje, setMensaje] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+
+  const probar = async (tipo: string) => {
+    setEnviando(tipo);
+    setMensaje(null);
+    try {
+      const r = await pedir<{ correo: string }>('/api/admin/probar-correo', token, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo }),
+      });
+      setMensaje({ tipo: 'ok', texto: `Enviado a ${r.correo}. Revisa tu correo (y spam).` });
+    } catch (e) {
+      setMensaje({ tipo: 'error', texto: e instanceof Error ? e.message : 'No se pudo enviar.' });
+    } finally {
+      setEnviando(null);
+    }
+  };
+
+  return (
+    <div>
+      <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Probar correos</p>
+      <p className="mb-3 text-sm text-[var(--text-secondary)]">
+        Te manda cualquiera de los correos del negocio a tu propia casilla, para que confirmes que se ven bien y que llegan.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {TIPOS_CORREO.map((t) => (
+          <button
+            key={t.valor}
+            type="button"
+            disabled={enviando !== null}
+            onClick={() => void probar(t.valor)}
+            className="inline-flex min-h-11 items-center rounded-full border-2 border-[var(--border-ui)] bg-[var(--surface)] px-4 text-sm font-semibold disabled:opacity-50 [touch-action:manipulation]"
+          >
+            {enviando === t.valor ? 'Enviando…' : t.etiqueta}
+          </button>
+        ))}
+      </div>
+      {mensaje && (
+        <p role="status" className={`mt-3 text-sm font-semibold ${mensaje.tipo === 'ok' ? 'text-[var(--accent)]' : 'text-[var(--danger)]'}`}>
+          {mensaje.texto}
+        </p>
+      )}
+    </div>
   );
 }
 

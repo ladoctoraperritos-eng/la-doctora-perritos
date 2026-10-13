@@ -19,6 +19,7 @@ const EVENTO_A_ESTADO: Record<string, EstadoPago> = {
 };
 
 export const EVENTO_CAMBIO_PLAN = 'SWITCH_PLAN';
+export const EVENTO_CARRITO_ABANDONADO = 'ABANDONED_CART'; // (verificar) — confirmar nombre exacto en la primera prueba real
 
 /** Eventos que SOLO se registran (bitácora) pero no cambian el acceso todavía. */
 const EVENTOS_INFORMATIVOS = new Set([
@@ -52,4 +53,11 @@ const OFERTA_A_PLAN: Record<string, 'esencial' | 'familia'> = {
 export function planParaOferta(codigoOferta: string | undefined): 'esencial' | 'familia' {
   if (!codigoOferta) return 'esencial';
   return OFERTA_A_PLAN[codigoOferta] ?? 'esencial';
+}
+
+/** El ebook de regalo es solo del plan ANUAL (cualquiera de los dos planes). */
+const OFERTAS_ANUALES = new Set(['tnvge31b', 'f888hid4']);
+
+export function esOfertaAnual(codigoOferta: string | undefined): boolean {
+  return !!codigoOferta && OFERTAS_ANUALES.has(codigoOferta);
 }

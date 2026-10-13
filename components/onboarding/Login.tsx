@@ -40,6 +40,8 @@ export default function Login() {
       setEstado({ tipo: 'sistema', texto: 'El acceso a la app se activa pronto. Todavía no podemos enviarte el enlace.' });
     else if (r.motivo === 'error_envio')
       setEstado({ tipo: 'sistema', texto: 'No pudimos enviar el enlace en este momento. Intenta de nuevo en unos minutos.' });
+    else if (r.motivo === 'demasiado_pronto')
+      setEstado({ tipo: 'sistema', texto: 'Ya te enviamos un enlace hace un momento. Revisa tu correo (y spam) antes de pedir otro.' });
     else setEstado({ tipo: 'correo_invalido', texto: 'Revisa el correo: parece que falta algo.' });
   };
 
