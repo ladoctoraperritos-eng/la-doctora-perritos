@@ -13,6 +13,7 @@ import crypto from 'node:crypto';
 import { clienteAdmin } from '@/lib/supabase-admin';
 import { verificarHotmart } from '@/lib/hotmart-verify';
 import { estadoParaEvento, esEventoInformativo, planParaOferta, EVENTO_CAMBIO_PLAN } from '@/lib/hotmart-fsm';
+import { enviarCorreoDeAcceso } from '@/lib/email';
 
 export const runtime = 'nodejs'; // necesita node:crypto y el cuerpo crudo de la petición
 
@@ -155,18 +156,20 @@ export async function POST(req: Request) {
       const { data: hogarActual } = await admin.from('hogares').select('acceso_creado').eq('id', hogarId).maybeSingle();
       if (hogarActual && hogarActual.acceso_creado === false) {
         const origen = new URL(req.url).origin;
-        const { error: errInvite } = await admin.auth.admin.inviteUserByEmail(email, {
-          data: { nombre },
-          redirectTo: `${origen}/app`,
-        });
-        // "already registered" es un éxito a efectos de acceso (la cuenta ya existe, solo falta
-        // vincularla) — cualquier otro error se deja para que el próximo reintento lo resuelva.
-        const yaExiste = errInvite && /already registered|already exists/i.test(errInvite.message);
-        if (!errInvite || yaExiste) {
-          await admin.from('hogares').update({ acceso_creado: true }).eq('id', hogarId);
-          if (yaExiste) await admin.auth.signInWithOtp({ email, options: { emailRedirectTo: `${origen}/app` } }); // igual le reenvía el enlace
+        // Crear la cuenta SIN que Supabase mande su propio correo (email_confirm:true evita el
+        // de verificación) — el correo de verdad lo manda Resend más abajo, con o sin cuenta
+        // nueva, usando siempre el mismo enlace generado por Supabase.
+        const { error: errCrear } = await admin.auth.admin.createUser({ email, email_confirm: true, user_metadata: { nombre } });
+        const yaExiste = errCrear && /already registered|already exists/i.test(errCrear.message);
+        if (!errCrear || yaExiste) {
+          const { ok, motivo } = await enviarCorreoDeAcceso(admin, email, `${origen}/app`, nombre);
+          if (ok) {
+            await admin.from('hogares').update({ acceso_creado: true }).eq('id', hogarId);
+          } else {
+            console.error('[webhook hotmart] cuenta creada pero el correo falló, se reintenta en el próximo aviso', { motivo });
+          }
         } else {
-          console.error('[webhook hotmart] no se pudo crear la cuenta de acceso', { codigo: errInvite.code });
+          console.error('[webhook hotmart] no se pudo crear la cuenta de acceso', { codigo: errCrear.code });
         }
       }
     }

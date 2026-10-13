@@ -3,6 +3,7 @@
 
 import { NextResponse } from 'next/server';
 import { verificarAdmin } from '@/lib/supabase-admin';
+import { enviarCorreoDeAcceso } from '@/lib/email';
 
 export const runtime = 'nodejs';
 
@@ -25,20 +26,15 @@ export async function POST(req: Request) {
   if (!nombre) return NextResponse.json({ motivo: 'Escribe un nombre.' }, { status: 400 });
 
   const origen = new URL(req.url).origin;
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(correo, {
-    data: { nombre },
-    redirectTo: `${origen}/app`,
-  });
+  const { data, error } = await admin.auth.admin.createUser({ email: correo, email_confirm: true, user_metadata: { nombre } });
+  const yaExiste = error && (error.status === 422 || /already registered|already exists/i.test(error.message));
 
-  if (error) {
-    // Ya existe: le reenviamos el enlace de acceso en vez de fallar en seco.
-    if (error.status === 422 || /already registered|already exists/i.test(error.message)) {
-      const { error: errorOtp } = await admin.auth.signInWithOtp({ email: correo, options: { emailRedirectTo: `${origen}/app` } });
-      if (errorOtp) return NextResponse.json({ motivo: 'Esa cuenta ya existe y no pudimos reenviarle el acceso: ' + errorOtp.message }, { status: 500 });
-      return NextResponse.json({ ok: true, reenviado: true });
-    }
+  if (error && !yaExiste) {
     return NextResponse.json({ motivo: 'No pudimos crear la cuenta: ' + error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, reenviado: false, userId: data.user?.id });
+  const { ok, motivo } = await enviarCorreoDeAcceso(admin, correo, `${origen}/app`, nombre);
+  if (!ok) return NextResponse.json({ motivo: 'La cuenta existe pero no pudimos mandar el acceso: ' + motivo }, { status: 500 });
+
+  return NextResponse.json({ ok: true, reenviado: !!yaExiste, userId: data?.user?.id });
 }
