@@ -85,6 +85,26 @@ function ImporteAnimado({ texto }: { texto: string }) {
   return <>US${conDecimales ? valor.toFixed(2).replace('.', ',') : Math.round(valor)}</>;
 }
 
+/** Cuenta animada simple (sin decimales) — reutilizada aquí para el número de respuestas,
+ * igual que ya hace el resultado del onboarding (efecto IKEA: recordar la inversión en el
+ * momento del precio, regla del 02B). */
+function ContadorAnimado({ n }: { n: number }) {
+  const reduce = useReducedMotion();
+  const [valor, setValor] = useState(reduce ? n : 0);
+  const previo = useRef(reduce ? n : 0);
+  useEffect(() => {
+    if (reduce) {
+      setValor(n);
+      previo.current = n;
+      return;
+    }
+    const controles = animate(previo.current, n, { duration: 0.5, ease: 'easeOut', onUpdate: (v) => setValor(Math.round(v)) });
+    previo.current = n;
+    return () => controles.stop();
+  }, [n, reduce]);
+  return <>{valor}</>;
+}
+
 /** Tarjeta de plan (anual / mensual): el importe REAL que se cobra es lo más grande. */
 function TarjetaPeriodo({
   activa,
@@ -339,6 +359,9 @@ export default function Paywall() {
           {hayPrueba()
             ? `Durante los próximos ${CONDICIONES.prueba.dias} días, deja que La Doctora Perritos recuerde por ti.`
             : 'Deja que La Doctora Perritos recuerde por ti.'}
+        </p>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          Armado con tus <ContadorAnimado n={n} /> respuestas sobre {nombre || 'tu perro'}.
         </p>
         <ul className="mt-4 flex flex-col gap-3" aria-label="Lo que ya armaste">
           {lista.map((a, i) => (
