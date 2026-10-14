@@ -9,6 +9,7 @@ import {
   enviarCorreoCancelacion,
   enviarCorreoCarritoAbandonado,
   enviarCorreoBienvenidaDia,
+  enviarCorreoAvisoDiario,
 } from '@/lib/email';
 
 export const runtime = 'nodejs';
@@ -56,6 +57,14 @@ export async function POST(req: Request) {
     case 'bienvenida_d7':
       resultado = await enviarCorreoBienvenidaDia(email, 7);
       break;
+    case 'aviso_diario': {
+      const manana = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+      resultado = await enviarCorreoAvisoDiario(email, {
+        pendientesHoy: [{ nombre: 'Apoquel', hora: '08:00', perro: 'Rocky' }],
+        proximos: [{ nombre: 'Vacuna antirrábica', perro: 'Rocky', proxima: manana }],
+      });
+      break;
+    }
     default:
       return NextResponse.json({ motivo: 'Tipo de correo desconocido.' }, { status: 400 });
   }

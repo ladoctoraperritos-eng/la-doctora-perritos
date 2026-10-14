@@ -511,6 +511,7 @@ const TIPOS_CORREO: { valor: string; etiqueta: string }[] = [
   { valor: 'bienvenida_d1', etiqueta: 'Bienvenida día 1' },
   { valor: 'bienvenida_d3', etiqueta: 'Bienvenida día 3' },
   { valor: 'bienvenida_d7', etiqueta: 'Bienvenida día 7' },
+  { valor: 'aviso_diario', etiqueta: 'Aviso diario (lo que toca hoy)' },
 ];
 
 /** Manda cualquier correo del negocio a la casilla de la propia administradora — para probar

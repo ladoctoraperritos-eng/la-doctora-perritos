@@ -160,3 +160,39 @@ export async function enviarCorreoBienvenidaDia(email: string, dia: 1 | 3 | 7): 
   const m = MENSAJES_BIENVENIDA[dia];
   return enviar(email, m.asunto, plantilla(m.titulo, m.parrafos));
 }
+
+/** El aviso diario: sustituye por ahora a la notificación push (que todavía no existe — ver
+ * ESTADO.md). Se manda una vez al día (límite del plan gratis de hosting) con dos bloques: lo que
+ * toca HOY (tiene hora fija, aún sin marcar) y lo que se acerca (vacunas, baños, reposición de
+ * stock, dentro del margen de anticipación que cada hogar eligió). Nunca se manda si ambos
+ * bloques están vacíos — un correo sin nada que decir es peor que ningún correo. */
+export async function enviarCorreoAvisoDiario(
+  email: string,
+  datos: {
+    pendientesHoy: { nombre: string; hora: string; perro: string }[];
+    proximos: { nombre: string; perro: string; proxima: string }[];
+  }
+): Promise<ResultadoEnvio> {
+  const filaHoy = (i: { nombre: string; hora: string; perro: string }) =>
+    `<li style="margin:0 0 10px;"><strong>${i.hora}</strong> — ${i.nombre} de ${i.perro}</li>`;
+  const filaProxima = (i: { nombre: string; perro: string; proxima: string }) => {
+    const fecha = new Date(i.proxima + 'T00:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short' });
+    return `<li style="margin:0 0 10px;">${i.nombre} de ${i.perro} — ${fecha}</li>`;
+  };
+  const bloqueHoy = datos.pendientesHoy.length
+    ? `<h2 style="font-size:17px;margin:24px 0 8px;">Hoy</h2><ul style="padding-left:20px;margin:0;">${datos.pendientesHoy.map(filaHoy).join('')}</ul>`
+    : '';
+  const bloqueProximos = datos.proximos.length
+    ? `<h2 style="font-size:17px;margin:24px 0 8px;">Se acerca</h2><ul style="padding-left:20px;margin:0;">${datos.proximos.map(filaProxima).join('')}</ul>`
+    : '';
+  const html = `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#20332f;">
+      <h1 style="font-size:22px;">Esto es lo que toca 🐾</h1>
+      ${bloqueHoy}
+      ${bloqueProximos}
+      <p style="margin:28px 0;"><a href="https://www.ladoctoraperritos.com/app" style="background:#0b6b63;color:#fff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:600;display:inline-block">Abrir mi Panel →</a></p>
+      <p style="color:#5a6a65;font-size:14px;">Puedes cambiar estos avisos en Yo → Avisos. ¿Dudas? Escríbenos a ${CONTACTO}</p>
+    </div>
+  `;
+  return enviar(email, 'Esto es lo que toca hoy', html);
+}
