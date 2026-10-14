@@ -5,9 +5,9 @@
 // prueba (hoy → aviso → cobro, con fechas reales) → garantía y pago seguro. El botón (fijo abajo) lleva
 // al checkout de Hotmart de ese plan y periodo (lib/hotmart.ts).
 
-import { useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { MotionConfig, motion } from 'motion/react';
+import { animate, MotionConfig, motion, useReducedMotion } from 'motion/react';
 import { Check } from 'lucide-react';
 import { addDays, CONDICIONES, formatFecha, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { urlCheckout, type PeriodoPago } from '@/lib/hotmart';
@@ -43,17 +43,46 @@ function Selector<T extends string>({
             type="button"
             aria-pressed={on}
             onClick={() => onChange(o.id)}
-            className={`min-h-14 rounded-[var(--radius-button)] px-3 py-2 text-base font-semibold active:scale-[0.98] [touch-action:manipulation] ${
-              on ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-[var(--shadow-1)] outline outline-2 outline-[var(--accent)]' : 'text-[var(--text-secondary)]'
+            className={`flex min-h-14 items-center gap-1.5 rounded-[var(--radius-button)] px-2.5 py-2 text-left text-base font-semibold active:scale-[0.98] [touch-action:manipulation] ${
+              on ? 'borde-destacado text-[var(--text-primary)] shadow-[var(--shadow-1)]' : 'border border-transparent text-[var(--text-secondary)]'
             }`}
           >
-            <span className="block">{o.texto}</span>
-            {o.detalle && <span className={`block text-sm font-medium ${on ? 'text-[var(--accent)]' : ''}`}>{o.detalle}</span>}
+            <span
+              aria-hidden="true"
+              className={`inline-flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? 'border-[var(--accent)] bg-[var(--accent)]' : 'border-[var(--border-ui)]'}`}
+            >
+              {on && <Check size={11} color="var(--bg)" strokeWidth={3} />}
+            </span>
+            <span>
+              <span className="block">{o.texto}</span>
+              {o.detalle && <span className={`block text-sm font-medium ${on ? 'text-[var(--accent)]' : ''}`}>{o.detalle}</span>}
+            </span>
           </button>
         );
       })}
     </div>
   );
+}
+
+/** El precio es el dato héroe de una pantalla de venta: cuenta animado al cargar y al cambiar
+ * de plan/periodo, nunca aparece estático (baseline obligatoria de animación — DESIGN-CORE). */
+function ImporteAnimado({ texto }: { texto: string }) {
+  const reduce = useReducedMotion();
+  const conDecimales = texto.includes(',');
+  const destino = parseFloat(texto.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+  const [valor, setValor] = useState(reduce ? destino : 0);
+  const previo = useRef(reduce ? destino : 0);
+  useEffect(() => {
+    if (reduce) {
+      setValor(destino);
+      previo.current = destino;
+      return;
+    }
+    const controles = animate(previo.current, destino, { duration: 0.45, ease: 'easeOut', onUpdate: setValor });
+    previo.current = destino;
+    return () => controles.stop();
+  }, [destino, reduce]);
+  return <>US${conDecimales ? valor.toFixed(2).replace('.', ',') : Math.round(valor)}</>;
 }
 
 /** Tarjeta de plan (anual / mensual): el importe REAL que se cobra es lo más grande. */
@@ -80,8 +109,8 @@ function TarjetaPeriodo({
       role="radio"
       aria-checked={activa}
       onClick={onElegir}
-      className={`relative flex w-full flex-col items-start gap-2 rounded-[var(--radius-card)] border-2 p-4 pt-5 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
-        activa ? 'border-[var(--accent)] bg-[color-mix(in_oklab,var(--accent)_8%,var(--surface))] shadow-[var(--shadow-2)]' : 'border-[var(--border-ui)] bg-[var(--surface)]'
+      className={`relative flex w-full flex-col items-start gap-2 rounded-[var(--radius-card)] p-4 pt-5 text-left transition-colors duration-200 active:scale-[0.98] [touch-action:manipulation] ${
+        activa ? 'borde-destacado shadow-[var(--shadow-2)]' : 'border border-[var(--border-ui)] bg-[var(--surface)]'
       }`}
     >
       {insignia && (
@@ -97,10 +126,12 @@ function TarjetaPeriodo({
       >
         {activa && <Check size={14} color="var(--bg)" strokeWidth={3} />}
       </span>
-      <span className="flex-1">
+      <span className="flex flex-1 flex-col justify-center gap-1">
         <span className="block text-base font-semibold text-[var(--text-secondary)]">{titulo}</span>
         <span className="flex flex-wrap items-baseline gap-x-1">
-          <span aria-live="polite" className="text-2xl font-bold tabular-nums">{importe}</span>
+          <span aria-live="polite" className="text-lg font-bold tabular-nums">
+            <ImporteAnimado texto={importe} />
+          </span>
           <span className="text-base text-[var(--text-secondary)]">{unidad}</span>
         </span>
         {nota && <span className="block text-sm text-[var(--text-secondary)]">{nota}</span>}
@@ -122,39 +153,36 @@ function LineaTiempo({ importe, unidad }: { importe: string; unidad: string }) {
   const dias = CONDICIONES.prueba.dias;
   const avisoDia = Math.max(dias - 2, 1);
   const pasos = [
-    { imagen: '/brand/destello.png', cuando: 'Hoy · US$0', texto: 'Acceso completo al cuidado de tu perro.' },
+    { imagen: '/brand/destello.png', cuando: 'Hoy · US$0', texto: 'Acceso completo a la app.' },
     {
       imagen: '/brand/aviso.png',
       cuando: `Día ${avisoDia} · Te avisamos`,
-      texto: `Te recordamos que tu prueba está por terminar${inicio ? ` (${formatFecha(addDays(inicio, avisoDia))})` : ''}.`,
+      texto: `Antes de que termine tu prueba${inicio ? ` (${formatFecha(addDays(inicio, avisoDia))})` : ''}.`,
     },
     {
       imagen: '/brand/tarjeta.png',
       cuando: `${inicio ? formatFecha(addDays(inicio, dias)) : `Día ${dias + 1}`} · ${importe}${unidad}`,
-      texto: 'Solo si decides continuar. Si cancelas antes, no pagas nada.',
+      texto: 'Solo si sigues. Cancela antes y no pagas.',
     },
   ];
   return (
-    <section aria-label="Cómo funciona tu prueba" className="mt-6">
-      <h2 className="text-lg font-bold">Cómo funciona tu prueba</h2>
-      <ol className="mt-3 flex flex-col">
-        {pasos.map((p, i) => {
-          return (
-            <li key={p.cuando} className="relative flex gap-4 pb-4 last:pb-0">
-              {i < pasos.length - 1 && <span aria-hidden="true" className="absolute left-5 top-11 bottom-1 w-0.5 bg-[var(--border-ui)]" />}
-              <span className="relative inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.imagen} alt="" width={20} height={20} className="object-contain" />
-              </span>
-              <span>
-                <span className="block text-base font-semibold">{p.cuando}</span>
-                <span className="block text-sm text-[var(--text-secondary)]">{p.texto}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-    </section>
+    <ol className="flex flex-col">
+      {pasos.map((p, i) => {
+        return (
+          <li key={p.cuando} className="relative flex gap-4 pb-4 last:pb-0">
+            {i < pasos.length - 1 && <span aria-hidden="true" className="absolute left-5 top-11 bottom-1 w-0.5 bg-[var(--border-ui)]" />}
+            <span className="relative inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.imagen} alt="" width={20} height={20} className="object-contain" />
+            </span>
+            <span>
+              <span className="block text-base font-semibold">{p.cuando}</span>
+              <span className="block text-sm text-[var(--text-secondary)]">{p.texto}</span>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -179,8 +207,42 @@ function beneficios(r: Respuestas, comparte: boolean): string[] {
 export default function Paywall() {
   const r = useSyncExternalStore(suscribir, obtener, () => VACIAS);
   const recomendado = planRecomendado(r);
+  // Si ya habías elegido plan/periodo en una visita anterior, lo recordamos (heurística de
+  // reconocimiento: no hacer que alguien que ya decidió vuelva a decidir de cero).
   const [elegido, setElegido] = useState<IdPlan | null>(null);
   const [periodo, setPeriodo] = useState<PeriodoPago>('anio');
+  // Carga lo guardado DESPUÉS de montar (nunca en el render inicial, que debe coincidir con el
+  // del servidor) para no pelear con la elección real del usuario. Los refs evitan que el efecto
+  // de guardado reescriba encima en el primer disparo, antes de que termine de cargar.
+  const planMontado = useRef(false);
+  const periodoMontado = useRef(false);
+  useEffect(() => {
+    try {
+      const planGuardado = window.localStorage.getItem('ldp-paywall-plan');
+      if (planGuardado === 'esencial' || planGuardado === 'familia') setElegido(planGuardado);
+      const periodoGuardado = window.localStorage.getItem('ldp-paywall-periodo');
+      if (periodoGuardado === 'mes') setPeriodo('mes');
+    } catch {}
+  }, []);
+  useEffect(() => {
+    if (!planMontado.current) {
+      planMontado.current = true;
+      return;
+    }
+    if (!elegido) return;
+    try {
+      window.localStorage.setItem('ldp-paywall-plan', elegido);
+    } catch {}
+  }, [elegido]);
+  useEffect(() => {
+    if (!periodoMontado.current) {
+      periodoMontado.current = true;
+      return;
+    }
+    try {
+      window.localStorage.setItem('ldp-paywall-periodo', periodo);
+    } catch {}
+  }, [periodo]);
   const plan: IdPlan = elegido ?? recomendado;
   const P = PLANES[plan];
   const nombre = r.nombre.trim();
@@ -194,6 +256,7 @@ export default function Paywall() {
   const [intento, setIntento] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [aceptaLegal, setAceptaLegal] = useState(false);
+  const [yendoAlPago, setYendoAlPago] = useState(false);
   const campoCorreo = useRef<HTMLInputElement>(null);
   const correoActual = correo ?? r.correo;
   const correoOk = correoValido(correoActual);
@@ -220,8 +283,12 @@ export default function Paywall() {
     }
     actualizar({ correo: correoActual.trim() });
     const destino = urlCheckout(plan, periodo, correoActual);
-    if (destino) window.location.assign(destino);
-    else setGuardado(true);
+    if (destino) {
+      setYendoAlPago(true);
+      window.location.assign(destino);
+    } else {
+      setGuardado(true);
+    }
   };
   const etiquetaBoton = hayPrueba() ? `Empezar mis ${CONDICIONES.prueba.dias} días gratis` : 'Empezar ahora';
 
@@ -246,7 +313,15 @@ export default function Paywall() {
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]">
+    <div
+      className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 pt-4 text-[var(--text-primary)] [font-family:var(--font-body)]"
+      style={{
+        backgroundImage:
+          'radial-gradient(720px 480px at 50% -10%, color-mix(in oklab, var(--accent) 18%, transparent) 0%, transparent 60%), ' +
+          'radial-gradient(560px 380px at 100% 15%, color-mix(in oklab, var(--accent-2) 14%, transparent) 0%, transparent 55%)',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       <div className="flex items-center gap-2">
         <Link href="/onboarding" className="inline-flex size-11 items-center justify-center rounded-full text-[var(--text-secondary)]" aria-label="Volver">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -257,9 +332,10 @@ export default function Paywall() {
 
       <main className="flex flex-1 flex-col pt-4">
         <h1 className="text-balance text-3xl font-bold leading-tight">
-          El cuidado de <span className="text-[var(--accent)]">{nombre || 'tu perro'}</span> ya está bajo control
+          El cuidado de {nombre || 'tu perro'} ya está <span className="text-[var(--accent)]">bajo control</span>
         </h1>
         <p className="mt-2 text-lg text-[var(--text-secondary)]">
+          Se acabó el <span className="font-semibold text-[var(--text-primary)]">&ldquo;¿ya le di el medicamento, o no?&rdquo;</span>.{' '}
           {hayPrueba()
             ? `Durante los próximos ${CONDICIONES.prueba.dias} días, deja que La Doctora Perritos recuerde por ti.`
             : 'Deja que La Doctora Perritos recuerde por ti.'}
@@ -281,15 +357,15 @@ export default function Paywall() {
           ))}
         </ul>
 
-        <section aria-label="Elige tu plan" className="mt-8 flex flex-col gap-3">
+        <section aria-label="Elige tu plan" className="mt-8 flex flex-col gap-3 rounded-[var(--radius-card)] bg-[var(--elevated)] p-4">
           <h2 className="text-lg font-bold">¿Cuántos perros cuidas?</h2>
           <Selector<IdPlan>
             etiqueta="Plan según cuántos perros tienes"
             activo={plan}
             onChange={setElegido}
             opciones={[
-              { id: 'esencial', texto: '1 o 2 perros', detalle: 'Plan Esencial' },
-              { id: 'familia', texto: '3 a 5 perros', detalle: 'Plan Familia' },
+              { id: 'esencial', texto: '1-2 perros', detalle: 'Esencial' },
+              { id: 'familia', texto: '3-5 perros', detalle: 'Familia' },
             ]}
           />
           <div role="radiogroup" aria-label="Cada cuánto pagas" className="mt-4 grid grid-cols-2 gap-3">
@@ -314,6 +390,7 @@ export default function Paywall() {
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="mt-8"
           >
+            <p className="text-sm font-semibold text-[var(--accent)]">Último paso</p>
             <h2 className="text-lg font-bold">¿A qué correo te enviamos tu acceso?</h2>
             <p className="mt-1 text-base text-[var(--text-secondary)]">Con este correo entras al Panel de {nombre || 'tu perro'}. Sin contraseñas: te mandamos un enlace.</p>
             <label htmlFor="correo" className="sr-only">
@@ -368,28 +445,49 @@ export default function Paywall() {
           </motion.section>
         )}
 
-        {hayPrueba() && <LineaTiempo importe={importe} unidad={unidad} />}
-
-        <section aria-label="Tu tranquilidad" className="borde-degradado mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
+        <section aria-label="Cómo funciona tu prueba y tu tranquilidad" className="borde-degradado mt-6 flex flex-col gap-4 rounded-[var(--radius-card)] p-4 shadow-[var(--shadow-1)]">
+          {hayPrueba() && (
+            <>
+              <h2 className="text-lg font-bold">Cómo funciona tu prueba</h2>
+              <LineaTiempo importe={importe} unidad={unidad} />
+              <div aria-hidden="true" className="h-px bg-[var(--border-ui)]" />
+            </>
+          )}
+          <h2 className="text-lg font-bold">Tu tranquilidad</h2>
           {hayGarantia() && (
-            <div className="flex items-start gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/garantia.png" alt="" width={24} height={24} className="mt-0.5 shrink-0 object-contain" />
+            <div className="flex items-center gap-4">
+              <span className="relative inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/garantia.png" alt="" width={20} height={20} className="object-contain" />
+              </span>
               <p className="text-base">
                 <strong className="font-semibold">
                   {hayPrueba() ? `${CONDICIONES.prueba.dias} días gratis + ` : ''}
                   {CONDICIONES.garantia.dias} días de garantía
                 </strong>
-                <span className="block text-sm text-[var(--text-secondary)]">
-                  Si continúas y no estás conforme, tienes {CONDICIONES.garantia.dias} días de garantía sobre tu primer pago.
-                </span>
+                <span className="block text-sm text-[var(--text-secondary)]">Sobre tu primer pago, sin preguntas.</span>
               </p>
             </div>
           )}
-          <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/candado.png" alt="" width={20} height={20} className="shrink-0 object-contain" />
-            <p className="text-base font-medium">Pago seguro procesado por Hotmart</p>
+          <div className="flex items-center gap-4">
+            <span className="relative inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/candado.png" alt="" width={18} height={18} className="object-contain" />
+            </span>
+            <p className="text-base">
+              <span className="font-medium">Pago seguro por Hotmart</span>
+              <span className="block text-sm text-[var(--text-secondary)]">Tarjeta de crédito o débito</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="relative inline-flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--chip-bg)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/accion-descargar.png" alt="" width={18} height={18} className="object-contain" />
+            </span>
+            <p className="text-base">
+              <span className="font-medium">Tus datos nunca se borran</span>
+              <span className="block text-sm text-[var(--text-secondary)]">Aunque canceles, los descargas cuando quieras</span>
+            </p>
           </div>
         </section>
 
@@ -410,8 +508,17 @@ export default function Paywall() {
           {hayPrueba() ? 'Hoy US$0' : `Hoy ${importe}`} · Luego {importe}
           {unidad} 
         </p>
-        <button type="button" onClick={decidido ? empezar : decidir} className={boton}>
-          {decidido ? 'Continuar al pago' : etiquetaBoton}
+        <button type="button" onClick={decidido ? empezar : decidir} disabled={yendoAlPago} className={boton}>
+          {yendoAlPago ? (
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-[var(--bg)] border-t-transparent" />
+              Te llevamos al pago…
+            </span>
+          ) : decidido ? (
+            'Continuar al pago'
+          ) : (
+            etiquetaBoton
+          )}
         </button>
         {guardado && (
           <div role="status" className="flex flex-col items-center gap-1 text-center">

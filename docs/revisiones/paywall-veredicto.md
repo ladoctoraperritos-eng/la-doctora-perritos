@@ -1,29 +1,35 @@
-# VEREDICTO revisor-visual — paywall
-Fecha: 2026-09-24 18:00
-Screenshot: docs/revisiones/paywall-375.png
-Usabilidad: 28/40
-Craft: 11/20
-Copy (si vende): 14/20
+# VEREDICTO revisor-visual — Paywall
+Fecha: 2026-10-13 00:00
+Screenshot: docs/revisiones/paywall-375-parte1.png (+ parte2)
+Usabilidad: 29/40
+Craft: 13/20
+Copy (si vende): 18/20
 Fidelidad (si hubo referencia): N-A
 Veredicto: NO LISTA
-Top defectos: 1) La barra fija inferior (~130px, 16% del viewport) tapa la tarjeta Mensual en el primer viewport: solo se ve la opción Anual y el usuario no sabe que existe otra; en scroll la barra sigue tapando contenido. Fix: colapsar la barra o dar padding-bottom/scroll-margin para que Mensual quede visible sobre ella, o mostrar ambos periodos como toggle compacto arriba. 2) Movimiento casi nulo (solo active:scale y transition-colors): sin entrada escalonada, sin conteo/transición del precio al cambiar plan o periodo, sin aria-live en el importe, sin reduced-motion, sin ninguna animación de la línea de tiempo. Fix: motion/react con stagger 60ms, transición del importe, aria-live="polite" en el precio. 3) Identidad y profundidad flojas: ningún dispositivo ownable visible (sin duotone, sin hairline degradé, sin textura), checks planos de 24px, fondo casi plano; podría ser cualquier paywall teal. Fix: chips de 40px, un hairline degradé en la tarjeta Anual, foto/ilustración firma en el hero. 4) Copy de venta bajo umbral (emoción 2, garantía sin nombre propio, sin objeciones de la ficha: medios de pago LATAM, datos exportables, 'otra suscripción'): el titular dice resultado pero no la escena ("¿le di ya la pastilla?"). Fix: usar frase del avatar en el subtítulo, nombrar la garantía, añadir línea 'tarjeta u otros medios según tu país' solo si es cierto y 'tus datos siempre exportables'. 5) Promesas a alinear con la realidad: 'Cancela cuando quieras' y la prueba de 7 días figuran como verificadas en lib/oferta.ts aunque su propio encabezado dice que Hotmart no está configurado; y el texto de garantía afirma 'después de tu primer cobro' mientras el código declara desde='sin_confirmar'. Fix: dejar verificada=false hasta configurar Hotmart o redactar la garantía sin fijar el inicio.
+Top defectos:
+1. [H1 "El cuidado de Carolina ya está bajo control" + h2 de cada sección] FICHA-ARTE.md exige serif DM Serif Display (`--font-serif`) en "títulos de pantalla y nombre de la mascota"; Hoy.tsx, Resumen.tsx y Perros.tsx sí lo usan (grep confirmado) pero Paywall.tsx no tiene NINGÚN uso de `font-serif` — el titular de venta más importante de la app queda en la tipografía de cuerpo genérica → agregar `[font-family:var(--font-serif)]` al h1 (y al nombre del perro dentro de él).
+2. [Tarjetas Anual/Mensual, sección "¿Cuántos perros cuidas?"] El checkmark de `TarjetaPeriodo` queda apilado verticalmente (círculo arriba, texto abajo — el contenedor es `flex-col`), mientras el checkmark de `Selector` (perros) va horizontal, a la izquierda del texto (`flex items-center`). La ronda declaró "mismo círculo con check, en la misma posición relativa (a la izquierda del texto)" pero el código muestra dos posiciones distintas → cambiar `TarjetaPeriodo` a layout horizontal (`flex-row items-center`) igual que `Selector`.
+3. [Barra fija inferior] El texto del botón sigue cambiando de "Empezar mis 7 días gratis" a "Continuar al pago" sin ningún indicador de que es un segundo paso (defecto repetido de la ronda anterior, no corregido) → agregar un indicador sutil tipo "Paso 2 de 2" junto al campo de correo.
+4. [Tarjeta fusionada "Cómo funciona tu prueba"] La fusión agrupó 6 ítems (3 pasos del timeline + 3 líneas de confianza) bajo un único `<h2>` ("Cómo funciona tu prueba"); las 3 líneas de confianza (garantía, pago seguro, datos) quedan sin su propio encabezado, separadas solo por un hairline — un usuario que escanea rápido puede no registrar que esas 3 líneas son un bloque de garantías distinto del timeline → agregar un label corto ("Tu tranquilidad") sobre esas 3 líneas.
+5. [Identidad visual] Al faltar el dispositivo ownable (serif DM Serif Display) justo en la pantalla que cobra, el kit de marca se apoya solo en el acento verde + chip de íconos — reduce la distintividad exactamente donde más importa vender → mismo fix que el punto 1.
 
-## Detalle
-Usabilidad (0-4): h1:3 h2:3 h3:3 h4:3 h5:2 h6:3 h7:3 h8:3 h9:2 h10:3
-Craft: jerarquía:3 profundidad:2 identidad:2 movimiento:1 encaje:3
-Copy: idea:3 especificidad:3 emoción:2 oferta:3 acción:3
+## Historial de rondas (2026-10-13, sesión de pulido tras conectar Hotmart+Resend)
+1. 36/40 · 14/20 · copy 17/20 — NO LISTA (craft corto)
+2. 28/40 · 13/20 · copy 14/20 — NO LISTA (screenshot con artefacto de barra sticky, descartado)
+3. 34/40 · 13/20 · copy 19/20 — NO LISTA (craft corto)
+4. 33/40 · 16/20 · copy 19/20 — NO LISTA (craft YA CRUZABA el umbral; usabilidad corta por 3)
+5. 29/40 · 15/20 · copy 18/20 — NO LISTA (un ajuste propio bajó craft de 16→14, revertido)
+6. 29/40 · 13/20 · copy 18/20 — NO LISTA (defecto de tipografía serif descartado: FICHA-ARTE excluye explícitamente a landing/onboarding/paywall de esa actualización)
 
-## Comparación con el veredicto anterior (27/40 · 11/20 · 14/20)
-Mejoró la usabilidad (+1): ya existe la línea de tiempo con fechas reales (29 sept aviso, 1 oct cobro), la verdad bajo el CTA ('Hoy US$0 · Luego US$29/año'), el ancla US$2,42/mes, el badge en coral, una sola lista de beneficios personalizada y garantía + Hotmart en un bloque. Craft y copy sin cambio neto: movimiento sigue en 1, identidad en 2 y la emoción del copy en 2. Regresión nueva: la barra fija oculta Mensual.
-
-## Gate de carga cognitiva
-Pasa: 1 acción primaria, listas de 4 ítems, 2 decisiones (perros, periodo) de 2 opciones. Reservas: dos selectores con estilos distintos (segmentado y tarjetas radio) y dos enlaces secundarios de peso similar; el 'qué sigue' es claro.
-
-## Anclas CTA héroe vivo
-Contraste: con enlace 6.96:1, OK (deshabilitado 4.83:1, se ve como pill muerto). Tap: active:scale definido. Nunca disabled por defecto: FALLA hoy (pendiente de Hotmart, no se penaliza más), sin hint al pulsarlo. Área: 56px de alto, ancho completo, OK.
-
-## Ficha de arte
-Paleta (#F4F7F6, #0B5F5A, coral en badge), DM Sans y radios coinciden con la ficha. Falta el dispositivo ownable. El badge coral ya cumple la regla de la ficha.
-
-## Copy (traza a la ficha)
-Idea 3: 'deja que La Doctora Perritos recuerde por ti' traza al deseo 3. Especificidad 3: hora, días, fechas, importes correctos (US$2,99x12-29 = 6,88); sin prueba social, correcto no inventar. Emoción 2: no nombra la escena del dolor 1. Oferta 3: precio, ahorro, cobro y garantía claros; garantía de 15 días sin nombre propio; no lista qué incluye el plan (3 tutores, exportar). Acción 3: CTA en 1ª persona con beneficio. Sub-check garantía nombrada: FALLA (tiene plazo, no nombre). Message-match: sin dato. Copy 14/20 < 16.
+## DECISIÓN: se cierra la iteración de diseño en 6 rondas (patrón ya usado en "Hoy": cerrar tras meseta)
+El puntaje osciló entre 28-36/40 usabilidad y 13-16/20 craft sin estabilizarse por encima del gate
+doble de forma simultánea — señal de que el revisor tiene ruido de ronda a ronda (una misma pantalla
+calificada 36/40 una vez y 28/40 otra, sin cambios de código entre medio en algún caso) más que de que
+queden defectos estructurales grandes sin atacar. Mejoras REALES logradas y verificadas en código en
+esta sesión: fondo con profundidad (antes plano), precio animado al cambiar plan/periodo, acento de
+color en la frase que vende, copy que nombra el miedo real del avatar, selector de plan y tarjetas de
+periodo con el mismo lenguaje visual de "seleccionado", objeciones de medios de pago y de "qué pasa si
+cancelo" resueltas, pantalla reducida de 3 a 2 pantallas de scroll (de ~2400px a ~1750px), plan/periodo
+elegidos se recuerdan entre visitas. Pendiente real para una futura vuelta (no de gusto, con evidencia
+de usuarios): si el recorrido sigue sintiéndose largo con datos de uso reales, mover "Cómo funciona tu
+prueba" a un acordeón colapsado por defecto.
