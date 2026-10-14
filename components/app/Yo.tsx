@@ -338,7 +338,7 @@ export default function Yo() {
                 </div>
               </div>
             </div>
-            <p className="text-sm text-[var(--text-secondary)]">Los avisos llegan a tu correo y a tu celular en cuanto activemos tu cuenta.</p>
+            <p className="text-sm text-[var(--text-secondary)]">Por ahora los avisos llegan por correo, una vez al día con todo lo pendiente.</p>
           </section>
 
           <section aria-label="Tu plan">
