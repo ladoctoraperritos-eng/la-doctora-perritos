@@ -4,6 +4,7 @@
 
 import { NextResponse } from 'next/server';
 import { verificarAdmin } from '@/lib/supabase-admin';
+import { enviarCorreoDeAcceso } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -45,10 +46,11 @@ export async function POST(req: Request) {
   if (!nombre) return NextResponse.json({ motivo: 'Escribe un nombre.' }, { status: 400 });
 
   // Busca si ya existe una cuenta con ese correo (puede ser una clienta que ya usa la app, o alguien
-  // nuevo). Si no existe, se crea y se le manda el enlace de acceso de una vez.
+  // nuevo). Si no existe, se crea; el acceso se manda por Resend (enviarCorreoDeAcceso), igual que
+  // el resto de los correos del negocio — ya no por el envío integrado de Supabase.
   const origen = new URL(req.url).origin;
   let userId: string | undefined;
-  const { data: creado, error: errCrear } = await admin.auth.admin.inviteUserByEmail(correo, { data: { nombre }, redirectTo: `${origen}/admin` });
+  const { data: creado, error: errCrear } = await admin.auth.admin.createUser({ email: correo, email_confirm: true, user_metadata: { nombre } });
   if (errCrear) {
     if (errCrear.status === 422 || /already registered|already exists/i.test(errCrear.message)) {
       const { data: lista, error: errLista } = await admin.auth.admin.listUsers();
@@ -65,6 +67,9 @@ export async function POST(req: Request) {
 
   const { error: errInsertar } = await admin.from('admins').upsert({ user_id: userId, nombre }, { onConflict: 'user_id' });
   if (errInsertar) return NextResponse.json({ motivo: 'No pudimos darle el acceso: ' + errInsertar.message }, { status: 500 });
+
+  const { ok, motivo } = await enviarCorreoDeAcceso(admin, correo, `${origen}/admin`, nombre);
+  if (!ok) return NextResponse.json({ motivo: 'Se le dio acceso al panel, pero no pudimos mandarle el correo: ' + motivo }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }
