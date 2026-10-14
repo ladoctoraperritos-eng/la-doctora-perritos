@@ -355,10 +355,7 @@ export default function Paywall() {
           El cuidado de {nombre || 'tu perro'} ya está <span className="text-[var(--accent)]">bajo control</span>
         </h1>
         <p className="mt-2 text-lg text-[var(--text-secondary)]">
-          Se acabó el <span className="font-semibold text-[var(--text-primary)]">&ldquo;¿ya le di el medicamento, o no?&rdquo;</span>.{' '}
-          {hayPrueba()
-            ? `Durante los próximos ${CONDICIONES.prueba.dias} días, deja que La Doctora Perritos recuerde por ti.`
-            : 'Deja que La Doctora Perritos recuerde por ti.'}
+          Se acabó el <span className="font-semibold text-[var(--text-primary)]">&ldquo;¿ya le di el medicamento, o no?&rdquo;</span>
         </p>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
           Armado con tus <ContadorAnimado n={n} /> respuestas sobre {nombre || 'tu perro'}.
