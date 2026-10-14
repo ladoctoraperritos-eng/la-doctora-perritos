@@ -54,7 +54,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 3. ¿Tendré que llenar una ficha enorme? — No. Empiezas con un solo medicamento o comida, en [b]un minuto[/b]. El resto lo agregas cuando quieras.
 4. ¿Y si el aviso no me llega? — Te avisamos por la app y por correo de respaldo. En iPhone, te guiamos para instalarla en tu pantalla de inicio.
 5. ¿Qué pasa con mis datos si dejo de pagar? — Siguen siendo tuyos: puedes descargarlos siempre y [b]nunca los borramos de golpe[/b].
-6. ¿Reemplaza a mi veterinario? — No. Organiza y recuerda; [b]no diagnostica ni receta[/b]. Ante una duda de salud, consulta a tu veterinario.
+6. ¿Es seguro pagar? ¿aceptan tarjeta? — Sí. El pago lo procesa [b]Hotmart[/b], usada por miles de personas en Latinoamérica, con tarjeta de crédito o débito.
 
 ## 9. CTA final
 - H2: Imagina abrir la app y [acento]tener todo claro[/acento]

@@ -241,8 +241,8 @@ export default function LandingPage() {
             respuestaMarked: 'Siguen siendo tuyos: puedes descargarlos siempre y [b]nunca los borramos de golpe[/b].',
           },
           {
-            pregunta: '¿Reemplaza a mi veterinario?',
-            respuestaMarked: 'No. Organiza y recuerda; [b]no diagnostica ni receta[/b]. Ante una duda de salud, consulta a tu veterinario.',
+            pregunta: '¿Es seguro pagar? ¿aceptan tarjeta?',
+            respuestaMarked: 'Sí. El pago lo procesa [b]Hotmart[/b], usada por miles de personas en Latinoamérica, con tarjeta de crédito o débito.',
           },
         ]}
       />
