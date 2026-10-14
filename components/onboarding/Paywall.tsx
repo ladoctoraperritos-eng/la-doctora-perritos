@@ -9,6 +9,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { animate, MotionConfig, motion, useReducedMotion } from 'motion/react';
 import { Check } from 'lucide-react';
+import { track } from '@vercel/analytics';
 import { addDays, CONDICIONES, formatFecha, hayGarantia, hayPrueba } from '@/lib/oferta';
 import { urlCheckout, type PeriodoPago } from '@/lib/hotmart';
 import { actualizar, armarPanel, contarRespuestas, obtener, planRecomendado, suscribir, VACIAS, type IdPlan, type Respuestas } from '@/lib/onboarding';
@@ -304,6 +305,7 @@ export default function Paywall() {
     actualizar({ correo: correoActual.trim() });
     const destino = urlCheckout(plan, periodo, correoActual);
     if (destino) {
+      track('checkout_click', { plan, periodo });
       setYendoAlPago(true);
       window.location.assign(destino);
     } else {
