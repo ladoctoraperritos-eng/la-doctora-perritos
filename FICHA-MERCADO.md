@@ -6,6 +6,13 @@
 - Fecha de investigación: 2026-09-23 · **Vence el:** 2027-03-23
 - Pasarela elegida: Hotmart (cuenta pendiente de crear por la creadora)
 
+## 0. COMISIÓN REAL DE HOTMART (2026-10-14, verificado)
+- Fuente: help.hotmart.com/es/article/208298448 («¿Cuáles son las tarifas cobradas por Hotmart?»), 2026-10-14.
+- Tarifa en USD: microtransacción (venta ≤US$15) = 9,9% + US$0,10 · transacción general (venta >US$15) = 9,9% + US$1,00.
+- Con los 4 precios reales: Esencial mensual US$2,99 → queda US$2,59 (~87%) · Esencial anual US$29 → queda US$25,13 (~87%) · Familia mensual US$4,99 → queda US$4,40 (~88%) · Familia anual US$49 → queda US$43,15 (~88%). Hotmart se queda con ~13%, no el 20-35% especulado antes de tener el dato real.
+- Chile no está en la lista de países con impuesto extra sobre la tarifa de Hotmart (esa lista es: Unión Europea personal, Países Bajos, EE.UU./Texas, México empresarial, Colombia) — no aplica a esta cuenta.
+- Costo de infraestructura por clienta (Supabase/Vercel/Resend): hoy ≈US$0, todo en plan gratis. Pasa a pesar solo cuando se suba a planes pagos (decisión ya tomada: esperar a las primeras clientas pagando antes de subir Supabase a Pro).
+
 ## 1. PRECIO
 - Precios de competidores (mensual): DogLog US$3,99 (doglogapp.com, 2026-09-23) · Bitpet $3.990 CLP, 1 mes (bitpet.cl/app, 2026-09-23) · Ruffo Premium US$1,99 y Superhéroe US$4,99 (ruffo-app.com/planes, 2026-09-23) · 11pets €1,99 (App Store, 2026-09-23)
 - Anual: DogLog US$39,99 · Ruffo US$14,99 / US$39,99 · Bitpet $35.880 CLP · 11pets €19,99
