@@ -1,6 +1,6 @@
 export const metadata = { title: "Privacidad · La Doctora Perritos" };
 
-const ACTUALIZADO = "9 de octubre de 2026";
+const ACTUALIZADO = "13 de octubre de 2026";
 const RESPONSABLE = "C&D GROUP SPA";
 const CONTACTO = "contacto@ladoctoraperritos.com";
 
@@ -47,6 +47,9 @@ export default function Privacidad() {
         </li>
         <li>
           <strong className="font-semibold">Hotmart</strong> — procesa el pago de tu suscripción (nombre, correo y datos de pago los recibe directamente Hotmart; nosotros nunca vemos ni guardamos el número de tu tarjeta).
+        </li>
+        <li>
+          <strong className="font-semibold">Resend</strong> — manda los correos del negocio (el enlace para entrar a tu cuenta, avisos sobre tu pago o tu suscripción); recibe tu correo y tu nombre únicamente para enviártelos.
         </li>
       </ul>
       <p className="mt-2">

@@ -2,7 +2,7 @@ import { CONDICIONES, hayGarantia } from "@/lib/oferta";
 
 export const metadata = { title: "Reembolsos · La Doctora Perritos" };
 
-const ACTUALIZADO = "9 de octubre de 2026";
+const ACTUALIZADO = "13 de octubre de 2026";
 
 export default function Reembolsos() {
   const d = CONDICIONES.garantia.desde;
@@ -36,8 +36,8 @@ export default function Reembolsos() {
               {CONDICIONES.contacto}
             </a>{" "}
             con el correo que usaste para comprar, dentro del plazo de garantía. Te confirmamos y gestionamos el
-            reembolso con Hotmart; cuando esté conectado el proceso automático de Hotmart, esta página se
-            actualizará para reflejarlo.
+            reembolso con Hotmart. En cuanto Hotmart confirma la devolución, tu acceso se desactiva automáticamente
+            en la app.
           </p>
           <h2 className="mt-8 text-lg font-semibold">Cómo cancelar tu suscripción</h2>
           <p className="mt-2">
