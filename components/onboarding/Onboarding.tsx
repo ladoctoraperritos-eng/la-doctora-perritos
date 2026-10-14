@@ -416,7 +416,7 @@ export default function Onboarding() {
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10"
-          style={{ background: 'radial-gradient(700px 420px at 50% -10%, color-mix(in oklab, var(--accent) 8%, transparent) 0%, transparent 60%)' }}
+          style={{ background: 'radial-gradient(760px 480px at 50% -10%, color-mix(in oklab, var(--accent) 17%, transparent) 0%, transparent 60%)' }}
         />
         <div className="shrink-0 px-6 pt-4">
           <div className="-mt-2 mb-1 flex items-center justify-between">
@@ -604,7 +604,7 @@ export default function Onboarding() {
             {/* Reserva el alto de la barra fija: en pantallas con varias preguntas (p. ej. medicamento +
                 stock), sin esto la barra queda flotando ENCIMA del contenido en vez de debajo. */}
             <div className="h-36 shrink-0" aria-hidden="true" />
-            <div className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-2 bg-gradient-to-t from-[var(--bg)] from-75% to-transparent px-6 pb-4 pt-8">
+            <div className="sticky bottom-0 z-10 -mx-6 mt-auto flex flex-col gap-2 bg-gradient-to-t from-[var(--bg)] from-60% to-transparent px-6 pb-4 pt-10">
               {(
                 <div id="ayuda" role="status" aria-live="polite">
                   {error && error !== LIMITE && (
@@ -866,7 +866,7 @@ function Resultado({ nombre, r, entrada }: { nombre: string; r: Respuestas; entr
           </p>
         )}
         <Link href="/paywall" className={botonPrimario}>
-          {hayPrueba() ? 'Probar gratis con ' + nombre : 'Ver planes para ' + nombre}
+          {hayPrueba() ? 'Quiero cuidar a ' + nombre + ' sin olvidos' : 'Quiero ver los planes para ' + nombre}
         </Link>
       </div>
     </motion.main>
