@@ -1,6 +1,6 @@
 export const metadata = { title: "Privacidad · La Doctora Perritos" };
 
-const ACTUALIZADO = "13 de octubre de 2026";
+const ACTUALIZADO = "16 de octubre de 2026";
 const RESPONSABLE = "C&D GROUP SPA";
 const CONTACTO = "contacto@ladoctoraperritos.com";
 
@@ -60,9 +60,9 @@ export default function Privacidad() {
 
       <h2 className="mt-8 text-lg font-semibold">Cookies y analítica</h2>
       <p className="mt-2">
-        No usamos cookies de publicidad ni herramientas de analítica de terceros (como Google Analytics o píxeles de
-        redes sociales). Solo guardamos en tu navegador lo mínimo para que tu sesión funcione y recuerde tus datos
-        entre visitas.
+        No usamos cookies de publicidad. Para contar cuántas personas visitan la página usamos Vercel Analytics, una
+        herramienta que no usa cookies ni te sigue entre sitios. Aparte de eso, solo guardamos en tu navegador lo
+        mínimo para que tu sesión funcione y recuerde tus datos entre visitas.
       </p>
 
       <h2 className="mt-8 text-lg font-semibold">Tus derechos sobre tus datos</h2>
