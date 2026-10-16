@@ -308,7 +308,7 @@ export default function Yo() {
           <section aria-label="Avisos" className="flex flex-col gap-4">
             <div>
               <h2 className="mb-2 text-lg font-semibold">Avisos</h2>
-              <Interruptor activo={e.ajustes.avisoHora} onCambiar={(v) => ajuste({ avisoHora: v })} etiqueta="A la hora de cada cuidado" detalle="Medicamentos y suplementos, justo a la hora que fijaste" />
+              <Interruptor activo={e.ajustes.avisoHora} onCambiar={(v) => ajuste({ avisoHora: v })} etiqueta="A la hora de cada cuidado" detalle="Medicamentos y suplementos, en tu correo del día" />
             </div>
             <div className="rounded-[var(--radius-card)] border border-[var(--border-suave)] p-3">
               <p className="mb-2 text-base font-semibold">Avisos anticipados</p>

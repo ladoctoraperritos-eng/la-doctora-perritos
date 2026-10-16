@@ -3,8 +3,8 @@
 Todo el copy se traza a FICHA-AVATAR.md (Carolina). Sin testimonios ni cifras inventadas. Marcadores: [acento]…[/acento] · [b]…[/b].
 Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué toca, qué falta, quién ya lo hizo).
 
-## 1. Hero  (traza: dolor #2 de la ficha — coordinación entre tutores, el ángulo que la competencia no resuelve; ancla emocional miedo a olvidar → tranquilidad)
-- H1: Que no haya que preguntar [acento]quién le dio qué[/acento]
+## 1. Hero  (traza: dolor #1 y deseo #1 de la ficha; ancla emocional miedo a olvidar → tranquilidad — decisión de la usuaria 2026-10-16: vuelve a esta versión)
+- H1: Que cuidar a tu perro no dependa de tu [acento]memoria[/acento]
 - Subtítulo: Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]
 - CTA: Empezar mis 7 días gratis
 - Franja de confianza (solo hechos de la oferta): Sin cobro hoy · cancela cuando quieras · garantía de 15 días

@@ -78,7 +78,7 @@ export default function LandingPage() {
         appName="La Doctora Perritos"
         logo={LOGO}
         loginHref="/login"
-        h1Marked="Que no haya que preguntar [acento]quién le dio qué[/acento]"
+        h1Marked="Que cuidar a tu perro no dependa de tu [acento]memoria[/acento]"
         subtitleMarked="Medicamentos, alimento, controles y [b]quién hizo qué[/b]. Todo en un solo lugar."
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
