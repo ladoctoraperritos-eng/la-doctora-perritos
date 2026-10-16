@@ -234,7 +234,7 @@ export default function LandingPage() {
           },
           {
             pregunta: '¿Y si el aviso no me llega?',
-            respuestaMarked: 'Te avisamos por la app y por correo de respaldo. En iPhone, te guiamos para instalarla en tu pantalla de inicio.',
+            respuestaMarked: 'Te mandamos un correo todos los días con lo que toca. Revisa también la carpeta de spam la primera vez.',
           },
           {
             pregunta: '¿Qué pasa con mis datos si dejo de pagar?',

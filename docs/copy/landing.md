@@ -52,7 +52,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 1. ¿Para eso no pongo una alarma? — Una alarma suena; no te dice [b]quién lo dio ni cuánto queda[/b]. El Panel de Hoy sí.
 2. ¿Otra suscripción más? — Cuesta menos que un solo antiparasitario. Pruebas 7 días gratis y cancelas cuando quieras.
 3. ¿Tendré que llenar una ficha enorme? — No. Empiezas con un solo medicamento o comida, en [b]un minuto[/b]. El resto lo agregas cuando quieras.
-4. ¿Y si el aviso no me llega? — Te avisamos por la app y por correo de respaldo. En iPhone, te guiamos para instalarla en tu pantalla de inicio.
+4. ¿Y si el aviso no me llega? — Te mandamos un correo todos los días con lo que toca. Revisa también la carpeta de spam la primera vez.
 5. ¿Qué pasa con mis datos si dejo de pagar? — Siguen siendo tuyos: puedes descargarlos siempre y [b]nunca los borramos de golpe[/b].
 6. ¿Es seguro pagar? ¿aceptan tarjeta? — Sí. El pago lo procesa [b]Hotmart[/b], usada por miles de personas en Latinoamérica, con tarjeta de crédito o débito.
 
