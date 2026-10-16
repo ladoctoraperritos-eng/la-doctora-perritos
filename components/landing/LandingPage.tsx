@@ -225,12 +225,12 @@ export default function LandingPage() {
           {
             pregunta: '¿Otra suscripción más?',
             respuestaMarked: PRUEBA
-              ? `Cuesta menos que un solo antiparasitario. Pruebas ${DIAS_PRUEBA} días y cancelas cuando quieras.`
-              : 'Cuesta menos que un solo antiparasitario y cancelas cuando quieras.',
+              ? `Puedes probar todas sus funciones durante ${DIAS_PRUEBA} días sin pagar. Si te sirve, continúas desde ${P.anualTotal} al año; si no, cancelas.`
+              : `Cuida a tu perro desde ${P.anualTotal} al año y cancelas cuando quieras.`,
           },
           {
             pregunta: '¿Tendré que llenar una ficha enorme?',
-            respuestaMarked: 'No. Empiezas con un solo medicamento o comida, en [b]un minuto[/b]. El resto lo agregas cuando quieras.',
+            respuestaMarked: 'No. [b]Empiezas en pocos pasos con un solo cuidado.[/b] El resto lo agregas cuando quieras.',
           },
           {
             pregunta: '¿Y si el aviso no me llega?',
@@ -238,7 +238,7 @@ export default function LandingPage() {
           },
           {
             pregunta: '¿Qué pasa con mis datos si dejo de pagar?',
-            respuestaMarked: 'Siguen siendo tuyos: puedes descargarlos siempre y [b]nunca los borramos de golpe[/b].',
+            respuestaMarked: 'Tus datos siguen siendo tuyos. Puedes [b]descargarlos cuando quieras[/b] y decidir cuándo eliminarlos.',
           },
           {
             pregunta: '¿Es seguro pagar? ¿aceptan tarjeta?',

@@ -50,10 +50,10 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 
 ## 8. FAQ  (objeciones 1-5 de la ficha + límite legal)
 1. ¿Para eso no pongo una alarma? — Una alarma suena; no te dice [b]quién lo dio ni cuánto queda[/b]. El Panel de Hoy sí.
-2. ¿Otra suscripción más? — Cuesta menos que un solo antiparasitario. Pruebas 7 días gratis y cancelas cuando quieras.
-3. ¿Tendré que llenar una ficha enorme? — No. Empiezas con un solo medicamento o comida, en [b]un minuto[/b]. El resto lo agregas cuando quieras.
+2. ¿Otra suscripción más? — Puedes probar todas sus funciones durante 7 días sin pagar. Si te sirve, continúas desde US$29 al año; si no, cancelas.
+3. ¿Tendré que llenar una ficha enorme? — No. [b]Empiezas en pocos pasos con un solo cuidado.[/b] El resto lo agregas cuando quieras.
 4. ¿Y si el aviso no me llega? — Te mandamos un correo todos los días con lo que toca. Revisa también la carpeta de spam la primera vez.
-5. ¿Qué pasa con mis datos si dejo de pagar? — Siguen siendo tuyos: puedes descargarlos siempre y [b]nunca los borramos de golpe[/b].
+5. ¿Qué pasa con mis datos si dejo de pagar? — Tus datos siguen siendo tuyos. Puedes [b]descargarlos cuando quieras[/b] y decidir cuándo eliminarlos.
 6. ¿Es seguro pagar? ¿aceptan tarjeta? — Sí. El pago lo procesa [b]Hotmart[/b], usada por miles de personas en Latinoamérica, con tarjeta de crédito o débito.
 
 ## 9. CTA final
