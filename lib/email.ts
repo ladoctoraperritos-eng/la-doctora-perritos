@@ -63,6 +63,7 @@ export async function enviarCorreoDeAcceso(
     plantilla(`${saludo} 🐾`, [
       'Tu cuenta de La Doctora Perritos ya está activa. Entra con el botón de abajo — no necesitas contraseña.',
       `Si el botón no funciona, entra en <a href="https://www.ladoctoraperritos.com/login">www.ladoctoraperritos.com/login</a> con este mismo correo.`,
+      'Tip: agrega la app a la pantalla de inicio de tu celular para abrirla como cualquier otra app. En iPhone: toca el botón de compartir en Safari y elige "Añadir a pantalla de inicio". En Android: toca el menú de Chrome (los tres puntos) y elige "Instalar app" o "Añadir a pantalla de inicio".',
     ], { texto: 'Entrar a la app', enlace: data.properties.action_link })
   );
 }
