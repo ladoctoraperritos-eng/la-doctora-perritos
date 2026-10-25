@@ -33,6 +33,7 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Umbral: ≥300 visitas y ≥8% clic-a-checkout (≥24 clics) o ≥3 pagos de desconocidos.
 - KILL CRITERIA: plazo 14 días desde publicar la landing. Si <8% clic o 0 pagos con 300+ visitas → reformular ángulo (máx. 2 veces); a la 3ª sin señal, se mata la idea. Sin señal NO se gasta en ads.
 - Riesgo asumido: se construye la app en paralelo, sin señal de pago previa (informado al usuario).
+- **PLAZO EXTENDIDO (2026-10-25):** el primer plazo (14-oct → 28-oct) venció sin tráfico externo real — la usuaria no había empezado a compartir el link todavía. Decisión: pedir extensión y arrancar la difusión real desde el 2026-10-26 → nuevo vencimiento **2026-11-09** (14 días desde ese arranque). Mismo umbral y mismo kill criteria de arriba, solo se corre la fecha.
 
 ## Pendiente
 - FICHA-AVATAR: BORRADOR, faltan ≥2 frases reales de la audiencia (comentarios/DMs) y aprobación del usuario.
