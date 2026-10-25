@@ -7,6 +7,7 @@
 import { usePathname } from 'next/navigation';
 import { Menu, type SeccionApp } from '@/components/app/Menu';
 import AvisoNube from '@/components/app/AvisoNube';
+import RequiereSesion from '@/components/app/RequiereSesion';
 import SincronizarNube from '@/components/app/SincronizarNube';
 
 const SECCION_POR_RUTA: { prefijo: string; seccion: SeccionApp }[] = [
@@ -21,11 +22,13 @@ export default function LayoutApp({ children }: { children: React.ReactNode }) {
   const activa = SECCION_POR_RUTA.find((s) => pathname.startsWith(s.prefijo))?.seccion ?? 'hoy';
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
-      <SincronizarNube />
-      <AvisoNube />
-      {children}
-      <Menu activa={activa} />
-    </div>
+    <RequiereSesion>
+      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
+        <SincronizarNube />
+        <AvisoNube />
+        {children}
+        <Menu activa={activa} />
+      </div>
+    </RequiereSesion>
   );
 }
