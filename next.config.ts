@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // El globo "N" de desarrollo tapa contenido en las capturas de revisión.
   devIndicators: false,
+  // Mantiene Next.js al día automáticamente solo con parches de seguridad (no con cambios de
+  // comportamiento ni versiones mayores) — evita que esto vuelva a quedar atrás.
+  experimental: {
+    agentUpgrade: "security",
+  },
   async headers() {
     return [
       {
