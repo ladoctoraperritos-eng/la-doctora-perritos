@@ -112,7 +112,7 @@ export default function Resumen() {
   }
 
   const ahora = new Date();
-  const suyos = e.cuidados.filter((c) => c.perroId === perro.id);
+  const suyos = e.cuidados.filter((c) => c.perroId === perro.id && !c.detenido);
   const tratamiento = suyos.filter((c) => TIPOS_TRATAMIENTO.includes(c.tipo) && c.hora);
   const suplementos = suyos.filter((c) => TIPOS_SUPLEMENTO.includes(c.tipo));
   const salud = suyos.filter((c) => TIPOS_SALUD.includes(c.tipo)).sort((a, b) => (a.proxima ?? '9999').localeCompare(b.proxima ?? '9999'));

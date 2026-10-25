@@ -20,9 +20,9 @@ import { FilaNota, FormNota } from './Bitacora';
 import { Avatar, ChipIcono, entrada, LogoMarca, textoDias, tono } from './Hoy';
 import {
   claveDia,
+  detenerCuidado,
   diasHasta,
   edadTexto,
-  eliminarCuidado,
   eliminarPerro,
   guardarComida,
   guardarCuidado,
@@ -189,7 +189,7 @@ function Fichas<T extends string | number>({ titulo, opciones, valor, onElegir }
 }
 
 /** Confirmación en dos pasos para borrar: nada se pierde con un toque. */
-export function Borrar({ etiqueta, aviso, onConfirmar }: { etiqueta: string; aviso: string; onConfirmar: () => void }) {
+export function Borrar({ etiqueta, aviso, confirmar = 'Sí, borrar', onConfirmar }: { etiqueta: string; aviso: string; confirmar?: string; onConfirmar: () => void }) {
   const [seguro, setSeguro] = useState(false);
   if (!seguro) {
     return (
@@ -208,7 +208,7 @@ export function Borrar({ etiqueta, aviso, onConfirmar }: { etiqueta: string; avi
           Cancelar
         </button>
         <button type="button" onClick={onConfirmar} className="inline-flex min-h-12 items-center justify-center rounded-[var(--radius-button)] bg-[var(--danger)] text-base font-semibold text-[var(--bg)] [touch-action:manipulation]">
-          Sí, borrar
+          {confirmar}
         </button>
       </div>
     </div>
@@ -402,10 +402,11 @@ function FormCuidado({ perroId, cuidado, tipoInicial, otros, companeros, onListo
       </div>
       {cuidado && (
         <Borrar
-          etiqueta="Borrar este cuidado"
-          aviso="Se borra también su historial. Esto no se puede deshacer."
+          etiqueta="Dejar de recordar este cuidado"
+          aviso="Ya no te lo vamos a recordar. Su historial se conserva."
+          confirmar="Sí, dejar de recordar"
           onConfirmar={() => {
-            eliminarCuidado(cuidado.id);
+            detenerCuidado(cuidado.id);
             onListo();
           }}
         />
@@ -878,7 +879,7 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
       <ul className="flex flex-col gap-3">
         {e.perros.map((p, i) => {
           const { pendientes } = hoy(e, p.id, ahora);
-          const vencidos = e.cuidados.filter((c) => c.perroId === p.id && c.proxima && diasHasta(c.proxima, ahora) < 0).length;
+          const vencidos = e.cuidados.filter((c) => c.perroId === p.id && !c.detenido && c.proxima && diasHasta(c.proxima, ahora) < 0).length;
           const edad = edadTexto(p.nacimiento, ahora);
           return (
             <motion.li key={p.id} {...entrada(i)}>
@@ -935,7 +936,7 @@ function Lista({ e, ahora, limite, onAbrir, onAgregar }: { e: EstadoApp; ahora: 
 function Ficha({ e, perro, ahora, onVolver, onHoja }: { e: EstadoApp; perro: Perro; ahora: Date; onVolver: () => void; onHoja: (h: HojaEstado) => void }) {
   const [verTodo, setVerTodo] = useState(false);
   const notas = e.notas.filter((n) => n.perroId === perro.id).sort((a, b) => `${b.dia} ${b.hora}`.localeCompare(`${a.dia} ${a.hora}`));
-  const suyos = e.cuidados.filter((c) => c.perroId === perro.id);
+  const suyos = e.cuidados.filter((c) => c.perroId === perro.id && !c.detenido);
   const porFecha = (a: Cuidado, b: Cuidado) => (a.proxima ?? '9999').localeCompare(b.proxima ?? '9999');
   const salud = suyos.filter((c) => TIPOS_SALUD.includes(c.tipo)).sort(porFecha);
   const botiquin = suyos.filter((c) => TIPOS_BOTIQUIN.includes(c.tipo)).sort((a, b) => (a.hora ?? '99').localeCompare(b.hora ?? '99'));

@@ -66,6 +66,9 @@ export interface Cuidado {
   cada?: number;
   /** Solo para alimento: cuánto se come y cuánto queda. */
   racion?: Racion;
+  /** Ya no se recuerda ni cuenta como pendiente, pero su historial de marcas se conserva íntegro
+   * (a diferencia de borrarlo del todo, que se lleva también su historial). */
+  detenido?: boolean;
 }
 /** Alimento: cuánto queda en el paquete y cuánto come este perro. Si varios perros comparten la
  * misma comida, `grupo` los une: el consumo de todos se suma y los días salen de ese total. */
@@ -318,7 +321,7 @@ export function marcarHecho(cuidadoId: string, ahora: Date): string {
 
 /** Cuántos cuidados con hora tiene mañana y el primero (los diarios se repiten). */
 export function manana(e: EstadoApp, perroId: string | null): { cuantos: number; primera?: string } {
-  const horas = e.cuidados.filter((c) => c.hora && (!perroId || c.perroId === perroId)).map((c) => c.hora as string).sort();
+  const horas = e.cuidados.filter((c) => c.hora && !c.detenido && (!perroId || c.perroId === perroId)).map((c) => c.hora as string).sort();
   return { cuantos: horas.length, primera: horas[0] };
 }
 export function deshacer(registroId: string): void {
@@ -352,7 +355,7 @@ export function hoy(e: EstadoApp, perroId: string | null, ahora: Date): { pendie
   const pendientes: FilaHoy[] = [];
   const hechos: FilaHoy[] = [];
   for (const c of e.cuidados) {
-    if (!c.hora || (perroId && c.perroId !== perroId)) continue;
+    if (!c.hora || c.detenido || (perroId && c.perroId !== perroId)) continue;
     const perro = e.perros.find((p) => p.id === c.perroId);
     if (!perro) continue;
     const registro = e.registros.find((r) => r.cuidadoId === c.id && r.dia === dia);
@@ -371,7 +374,7 @@ export interface FilaProxima {
 export function proximos(e: EstadoApp, perroId: string | null, ahora: Date): FilaProxima[] {
   const filas: FilaProxima[] = [];
   for (const c of e.cuidados) {
-    if (!c.proxima || (perroId && c.perroId !== perroId)) continue;
+    if (!c.proxima || c.detenido || (perroId && c.perroId !== perroId)) continue;
     const perro = e.perros.find((p) => p.id === c.perroId);
     if (perro) filas.push({ cuidado: c, perro, dias: diasHasta(c.proxima, ahora) });
   }
@@ -426,9 +429,11 @@ export function guardarComida(base: Cuidado, racion: Racion, otrosPerroIds: stri
   cambiar({ ...e, cuidados });
 }
 
-export function eliminarCuidado(id: string): void {
+/** Deja de recordar este cuidado (ya no aparece pendiente ni próximo), pero conserva su historial
+ * de marcas completo — no se borra nada, a diferencia de lo que hacía antes esta misma acción. */
+export function detenerCuidado(id: string): void {
   const e = obtenerApp();
-  cambiar({ ...e, cuidados: e.cuidados.filter((c) => c.id !== id), registros: e.registros.filter((r) => r.cuidadoId !== id) });
+  cambiar({ ...e, cuidados: e.cuidados.map((c) => (c.id === id ? { ...c, detenido: true } : c)) });
 }
 /** «Lo hice hoy»: guarda la fecha y, si se repite, recalcula la próxima. */
 export function registrarSalud(cuidadoId: string, ahora: Date): { registroId: string; anterior: Cuidado | undefined } {

@@ -51,6 +51,7 @@ export async function GET(req: Request) {
       .from('cuidados')
       .select('id, perro_id, nombre, hora, proxima')
       .eq('hogar_id', hogar.id)
+      .eq('detenido', false)
       .in('perro_id', perros.map((p) => p.id as string));
     if (!cuidados || cuidados.length === 0) continue;
 
