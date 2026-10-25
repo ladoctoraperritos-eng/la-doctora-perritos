@@ -24,6 +24,10 @@ export async function GET(req: Request) {
   if (usuariosAuth.error) return NextResponse.json({ motivo: 'No pudimos leer las cuentas: ' + usuariosAuth.error.message }, { status: 500 });
 
   const emailPorUser = new Map(usuariosAuth.data.users.map((u) => [u.id, u.email ?? 'Sin correo']));
+  // `banned_until` en el futuro (Supabase usa un valor muy lejano, no un booleano) == acceso bloqueado.
+  const accesoBloqueadoPorUser = new Map(
+    usuariosAuth.data.users.map((u) => [u.id, !!u.banned_until && new Date(u.banned_until).getTime() > Date.now()])
+  );
   const duenoPorHogar = new Map((miembros.data ?? []).map((m) => [m.hogar_id, m.user_id]));
   const perrosPorHogar = new Map<string, number>();
   for (const p of perros.data ?? []) perrosPorHogar.set(p.hogar_id, (perrosPorHogar.get(p.hogar_id) ?? 0) + 1);
@@ -35,9 +39,11 @@ export async function GET(req: Request) {
       const duenoId = duenoPorHogar.get(h.id);
       return {
         hogarId: h.id,
+        duenoId: duenoId ?? null,
         nombre: h.nombre,
         plan: h.plan,
         correo: duenoId ? (emailPorUser.get(duenoId) ?? 'Sin correo') : 'Sin dueño asignado',
+        accesoBloqueado: duenoId ? (accesoBloqueadoPorUser.get(duenoId) ?? false) : false,
         perros: perrosPorHogar.get(h.id) ?? 0,
         creadoEn: h.creado_en,
         ultimaActividad: ultimaActividadPorHogar.get(h.id) ?? null,

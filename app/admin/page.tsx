@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, MotionConfig, motion, type Variants } from 'motion/react';
-import { AlertTriangle, Copy, CreditCard, Megaphone, Sparkles, Receipt, X } from 'lucide-react';
+import { AlertTriangle, Copy, CreditCard, Lock, Megaphone, Sparkles, Receipt, Unlock, X } from 'lucide-react';
 import { clienteSupabase } from '@/lib/supabase';
 import { Aviso, BannerEstado, CONTENEDOR_PANEL, Dato, ITEM_PANEL, Tarjeta, Titulo, VacioPremium } from '@/components/admin/ui';
 import { Embudo, GraficoAreaUso, GraficoBarrasUso } from '@/components/admin/charts';
@@ -31,9 +31,11 @@ interface Resumen {
 
 interface FilaUsuario {
   hogarId: string;
+  duenoId: string | null;
   nombre: string;
   plan: string;
   correo: string;
+  accesoBloqueado: boolean;
   perros: number;
   creadoEn: string;
   ultimaActividad: string | null;
@@ -211,7 +213,7 @@ export default function PanelAdmin() {
                 >
                   {seccion === 'inicio' && <SeccionInicio resumen={resumen} hayAlertas={hayAlertas} />}
                   {seccion === 'ventas' && <SeccionVentas resumen={resumen} />}
-                  {seccion === 'usuarios' && <SeccionUsuarios resumen={resumen} usuarios={usuarios} token={token} busqueda={busqueda} setBusqueda={setBusqueda} buscadorRef={buscadorRef} />}
+                  {seccion === 'usuarios' && <SeccionUsuarios resumen={resumen} usuarios={usuarios} setUsuarios={setUsuarios} token={token} busqueda={busqueda} setBusqueda={setBusqueda} buscadorRef={buscadorRef} />}
                   {seccion === 'mascotas' && <SeccionMascotas resumen={resumen} />}
                   {seccion === 'suscripciones' && <SeccionSuscripciones />}
                   {seccion === 'uso' && <SeccionUso resumen={resumen} />}
@@ -315,6 +317,7 @@ function SeccionVentas({ resumen }: { resumen: Resumen }) {
 function SeccionUsuarios({
   resumen,
   usuarios,
+  setUsuarios,
   token,
   busqueda,
   setBusqueda,
@@ -322,6 +325,7 @@ function SeccionUsuarios({
 }: {
   resumen: Resumen;
   usuarios: FilaUsuario[];
+  setUsuarios: (v: FilaUsuario[] | ((prev: FilaUsuario[] | null) => FilaUsuario[] | null)) => void;
   token: string;
   busqueda: string;
   setBusqueda: (v: string) => void;
@@ -362,19 +366,82 @@ function SeccionUsuarios({
         <div className="flex flex-col divide-y divide-[var(--border-suave)]">
           {filtrados.length === 0 && <p className="py-4 text-sm text-[var(--text-secondary)]">Sin resultados.</p>}
           {filtrados.map((u) => (
-            <div key={u.hogarId} className="flex items-center justify-between gap-3 py-3">
-              <div className="min-w-0">
-                <CorreoConCopiar correo={u.correo} />
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {u.perros} mascota{u.perros === 1 ? '' : 's'} · Plan {u.plan} · Desde {fecha(u.creadoEn)}
-                </p>
-              </div>
-              <span className="shrink-0 text-sm text-[var(--text-secondary)]">{u.ultimaActividad ? `Activo ${fecha(u.ultimaActividad)}` : 'Sin actividad'}</span>
-            </div>
+            <FilaUsuarioAcceso key={u.hogarId} u={u} token={token} setUsuarios={setUsuarios} />
           ))}
         </div>
       </Tarjeta>
     </section>
+  );
+}
+
+/** Fila de la tabla de usuarios con el botón de quitar/restaurar acceso. Bloquea el inicio de
+ * sesión del dueño de esa familia — sus perros, cuidados e historial NUNCA se tocan (ver
+ * /api/admin/acceso: usa ban_duration de Supabase, nada se borra). */
+function FilaUsuarioAcceso({
+  u,
+  token,
+  setUsuarios,
+}: {
+  u: FilaUsuario;
+  token: string;
+  setUsuarios: (v: FilaUsuario[] | ((prev: FilaUsuario[] | null) => FilaUsuario[] | null)) => void;
+}) {
+  const [procesando, setProcesando] = useState(false);
+
+  const cambiarAcceso = async () => {
+    if (!u.duenoId) return;
+    const accion: 'quitar' | 'restaurar' = u.accesoBloqueado ? 'restaurar' : 'quitar';
+    const pregunta =
+      accion === 'quitar'
+        ? `¿Quitarle el acceso a ${u.correo}? No va a poder entrar a la app, pero sus datos (perros, cuidados, historial) quedan guardados.`
+        : `¿Restaurarle el acceso a ${u.correo}? Va a poder volver a entrar a la app.`;
+    if (!confirm(pregunta)) return;
+    setProcesando(true);
+    try {
+      await pedir('/api/admin/acceso', token, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: u.duenoId, accion }),
+      });
+      setUsuarios((prev) => (prev ?? []).map((x) => (x.hogarId === u.hogarId ? { ...x, accesoBloqueado: accion === 'quitar' } : x)));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo cambiar el acceso.');
+    } finally {
+      setProcesando(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-3">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <CorreoConCopiar correo={u.correo} />
+          {u.accesoBloqueado && (
+            <span className="shrink-0 rounded-full bg-[color-mix(in_oklab,var(--danger)_12%,var(--surface))] px-2 py-0.5 text-xs font-semibold text-[var(--danger)]">
+              Acceso bloqueado
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-[var(--text-secondary)]">
+          {u.perros} mascota{u.perros === 1 ? '' : 's'} · Plan {u.plan} · Desde {fecha(u.creadoEn)}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        <span className="text-sm text-[var(--text-secondary)]">{u.ultimaActividad ? `Activo ${fecha(u.ultimaActividad)}` : 'Sin actividad'}</span>
+        {u.duenoId && (
+          <button
+            type="button"
+            onClick={() => void cambiarAcceso()}
+            disabled={procesando}
+            title={u.accesoBloqueado ? 'Restaurar acceso' : 'Quitar acceso'}
+            aria-label={u.accesoBloqueado ? `Restaurar acceso a ${u.correo}` : `Quitar acceso a ${u.correo}`}
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--border-ui)] disabled:opacity-50 [touch-action:manipulation]"
+          >
+            {u.accesoBloqueado ? <Unlock size={18} /> : <Lock size={18} />}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 

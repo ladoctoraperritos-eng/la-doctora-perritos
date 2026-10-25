@@ -160,8 +160,11 @@ async function resolverFoto(c: SupabaseClient, ruta: string | null | undefined):
   return data?.signedUrl;
 }
 
-/** Trae de la nube todo lo de la familia y lo convierte a la forma de la app. */
-async function traer(c: SupabaseClient, hogar: string): Promise<EstadoApp> {
+/** Trae de la nube todo lo de la familia y lo convierte a la forma de la app. `correoSesion` es el
+ * correo real con el que la persona inició sesión — siempre manda sobre cualquier valor guardado
+ * antes (p. ej. lo que escribió en el formulario de bienvenida), para que "Yo" nunca muestre un
+ * correo viejo o de otra persona. */
+async function traer(c: SupabaseClient, hogar: string, correoSesion?: string): Promise<EstadoApp> {
   const [h, p, t, cu, r, n, v] = await Promise.all([
     c.from('hogares').select('plan, ajustes').eq('id', hogar).single(),
     c.from('perros').select('*').eq('hogar_id', hogar),
@@ -184,6 +187,7 @@ async function traer(c: SupabaseClient, hogar: string): Promise<EstadoApp> {
   ]);
   return {
     ...local,
+    correo: correoSesion ?? local.correo,
     plan: (h.data?.plan ?? local.plan) as EstadoApp['plan'],
     ajustes: { ...local.ajustes, ...(h.data?.ajustes as object | undefined) },
     perros: (p.data ?? []).map((x: Fila, i) => ({ id: x.id as string, nombre: x.nombre as string, foto: fotosPerros[i], nacimiento: opc(x.nacimiento), pesoKg: (x.peso_kg as number | null) ?? undefined, raza: opc(x.raza), notas: opc(x.notas), chip: opc(x.chip), responsable: opc(x.responsable), telefono: opc(x.telefono) })),
@@ -205,11 +209,12 @@ export async function iniciarNube(): Promise<'nube' | 'sin_sesion' | 'sin_config
   if (!sesion.session) return 'sin_sesion';
   cliente = c;
   try {
+    const correoSesion = sesion.session.user.email ?? undefined;
     const { data: membresia, error } = await c.from('miembros_hogar').select('hogar_id').limit(1);
     if (error) throw error;
     if (membresia && membresia.length > 0) {
       hogarId = membresia[0].hogar_id as string;
-      cargarDesdeNube(await traer(c, hogarId));
+      cargarDesdeNube(await traer(c, hogarId, correoSesion));
     } else {
       // Antes de crear una familia nueva y vacía, se revisa si a esta persona la invitaron a una
       // familia que ya existe (otro tutor la agregó desde «Quienes cuidan contigo»). Si es así, se
@@ -217,7 +222,7 @@ export async function iniciarNube(): Promise<'nube' | 'sin_sesion' | 'sin_config
       const { data: unida } = await c.rpc('aceptar_invitacion');
       if (unida) {
         hogarId = unida as string;
-        cargarDesdeNube(await traer(c, hogarId));
+        cargarDesdeNube(await traer(c, hogarId, correoSesion));
       } else {
         const { data: nuevo, error: errCrear } = await c.rpc('crear_hogar', { p_nombre: 'Mi hogar' });
         if (errCrear) throw errCrear;
