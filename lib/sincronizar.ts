@@ -89,6 +89,18 @@ function diferencias(antes: EstadoApp, despues: EstadoApp, hogar: string) {
   return { subir, borrar, hogarCambio };
 }
 
+/** Convierte un data URL (`data:image/jpeg;base64,...`) a Blob sin pasar por `fetch()`: en Safari
+ * de iPhone, `fetch()` sobre un data URL grande puede fallar en silencio (ni siquiera llega a
+ * intentar la subida) — decodificar el base64 a mano es más pesado en CPU pero siempre funciona. */
+function dataUrlABlob(dataUrl: string): Blob {
+  const [cabecera, base64] = dataUrl.split(',', 2);
+  const tipo = /data:([^;]+)/.exec(cabecera)?.[1] ?? 'image/jpeg';
+  const binario = atob(base64);
+  const bytes = new Uint8Array(binario.length);
+  for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+  return new Blob([bytes], { type: tipo });
+}
+
 /** Las fotos nunca viven como texto largo dentro de la fila: antes de guardar, se suben al lugar
  * hecho para archivos (Storage) y la fila solo guarda la ruta. Así cada consulta de la familia no
  * arrastra el peso completo de cada foto. */
@@ -97,7 +109,7 @@ async function subirFotosDeLote(c: SupabaseClient, hogar: string, tabla: string,
     const foto = fila.foto;
     if (typeof foto !== 'string' || !foto.startsWith('data:')) continue;
     const ruta = `${hogar}/${tabla}-${fila.id as string}.jpg`;
-    const { error } = await c.storage.from('fotos').upload(ruta, await (await fetch(foto)).blob(), { upsert: true, contentType: 'image/jpeg' });
+    const { error } = await c.storage.from('fotos').upload(ruta, dataUrlABlob(foto), { upsert: true, contentType: 'image/jpeg' });
     if (error) throw error;
     fila.foto = ruta;
   }
@@ -130,7 +142,8 @@ async function subir(despues: EstadoApp): Promise<void> {
     await enviar(cliente, hogarId, diferencias(sincronizado, despues, hogarId), despues);
     sincronizado = despues;
     fijarFallo(false);
-  } catch {
+  } catch (err) {
+    console.error('[nube] no se pudo guardar', err);
     fijarFallo(true);
   }
 }
