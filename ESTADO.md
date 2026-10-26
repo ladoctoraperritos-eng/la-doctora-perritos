@@ -784,3 +784,8 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - CORREGIDO en `lib/sincronizar.ts` (`traer()`): ahora "quién soy" se resuelve primero buscando, entre los tutores de la familia, cuál tiene el mismo correo que la sesión real (confiable entre aparatos); si nadie coincide (el caso normal de la dueña, que no guarda su propio correo), se respeta el `yo` que ya tenía el aparato; si tampoco aplica (aparato nuevo), el primer tutor de la lista.
 - De paso, se corrigió que "Invitación pendiente" nunca se quitaba: las funciones `aceptar_invitacion()` y `aceptar_invitacion_existente()` ahora también marcan `tutores.pendiente = false` al unirse de verdad (antes solo tocaban `miembros_hogar`, nunca `tutores`). Dato de Daniel corregido a mano también (ya se había unido antes de este arreglo).
 - Verificado: tsc ✓ · build ✓ · publicado y confirmado en producción vía `/api/version`. Commit `297b9f8`.
+
+## El aviso diario no le llegó a la usuaria (2026-10-26)
+- Causa: dato, no código. El cron de avisos (`app/api/cron/avisos/route.ts`) solo manda correo a hogares con `estado_pago in ('trialing','active')`. El 25-oct, al subirle el plan a Familia para que probara con 4 perros, solo se cambió la columna `plan` — `estado_pago` se quedó en `'sin_pagar'`, así que su familia (que ahora incluye a Daniel) quedó excluida del envío sin ningún aviso visible.
+- Confirmado con los logs de Supabase: el cron SÍ corrió a las 11:06 UTC (~8:06 AM Chile), pero su hogar no calificó por `estado_pago`.
+- Corregido a mano: `estado_pago = 'active'` en su hogar (mismo hogar de Daniel). Sin cambios de código — es consistente con cómo ya se le había dejado activa la cuenta antes.
