@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   const { admin } = v;
 
   const [hogares, miembros, perros, registros, usuariosAuth] = await Promise.all([
-    admin.from('hogares').select('id, nombre, plan, creado_en'),
+    admin.from('hogares').select('id, nombre, plan, estado_pago, creado_en'),
     admin.from('miembros_hogar').select('hogar_id, user_id, rol').eq('rol', 'dueno'),
     admin.from('perros').select('id, hogar_id'),
     admin.from('registros').select('hogar_id, creado_en').order('creado_en', { ascending: false }),
@@ -42,6 +42,7 @@ export async function GET(req: Request) {
         duenoId: duenoId ?? null,
         nombre: h.nombre,
         plan: h.plan,
+        estadoPago: h.estado_pago,
         correo: duenoId ? (emailPorUser.get(duenoId) ?? 'Sin correo') : 'Sin dueño asignado',
         accesoBloqueado: duenoId ? (accesoBloqueadoPorUser.get(duenoId) ?? false) : false,
         perros: perrosPorHogar.get(h.id) ?? 0,

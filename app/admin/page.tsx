@@ -34,6 +34,7 @@ interface FilaUsuario {
   duenoId: string | null;
   nombre: string;
   plan: string;
+  estadoPago: string;
   correo: string;
   accesoBloqueado: boolean;
   perros: number;
@@ -387,6 +388,7 @@ function FilaUsuarioAcceso({
   setUsuarios: (v: FilaUsuario[] | ((prev: FilaUsuario[] | null) => FilaUsuario[] | null)) => void;
 }) {
   const [procesando, setProcesando] = useState(false);
+  const activa = u.estadoPago === 'active' || u.estadoPago === 'trialing';
 
   const cambiarAcceso = async () => {
     if (!u.duenoId) return;
@@ -411,6 +413,28 @@ function FilaUsuarioAcceso({
     }
   };
 
+  const cambiarEstadoPago = async () => {
+    const accion: 'activar' | 'desactivar' = activa ? 'desactivar' : 'activar';
+    const pregunta =
+      accion === 'activar'
+        ? `¿Marcar a ${u.correo} como cuenta activa? Sin pasar por Hotmart — útil para pruebas o invitados sin cobro. Empieza a recibir el aviso diario y a usar los límites de su plan.`
+        : `¿Volver a marcar a ${u.correo} como "sin pagar"? Deja de recibir el aviso diario.`;
+    if (!confirm(pregunta)) return;
+    setProcesando(true);
+    try {
+      await pedir('/api/admin/estado-pago', token, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hogarId: u.hogarId, accion }),
+      });
+      setUsuarios((prev) => (prev ?? []).map((x) => (x.hogarId === u.hogarId ? { ...x, estadoPago: accion === 'activar' ? 'active' : 'sin_pagar' } : x)));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo cambiar el estado.');
+    } finally {
+      setProcesando(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-between gap-3 py-3">
       <div className="min-w-0">
@@ -423,11 +447,21 @@ function FilaUsuarioAcceso({
           )}
         </div>
         <p className="text-sm text-[var(--text-secondary)]">
-          {u.perros} mascota{u.perros === 1 ? '' : 's'} · Plan {u.plan} · Desde {fecha(u.creadoEn)}
+          {u.perros} mascota{u.perros === 1 ? '' : 's'} · Plan {u.plan} · {activa ? 'Cuenta activa' : 'Sin pagar'} · Desde {fecha(u.creadoEn)}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <span className="text-sm text-[var(--text-secondary)]">{u.ultimaActividad ? `Activo ${fecha(u.ultimaActividad)}` : 'Sin actividad'}</span>
+        <button
+          type="button"
+          onClick={() => void cambiarEstadoPago()}
+          disabled={procesando}
+          title={activa ? 'Marcar como sin pagar' : 'Marcar como activa (sin Hotmart)'}
+          aria-label={activa ? `Marcar a ${u.correo} como sin pagar` : `Marcar a ${u.correo} como cuenta activa`}
+          className={`inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 [touch-action:manipulation] disabled:opacity-50 ${activa ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--border-ui)]'}`}
+        >
+          <CreditCard size={18} />
+        </button>
         {u.duenoId && (
           <button
             type="button"
