@@ -198,13 +198,22 @@ async function traer(c: SupabaseClient, hogar: string, correoSesion?: string): P
     Promise.all((p.data ?? []).map((x: Fila) => resolverFoto(c, x.foto as string | null))),
     Promise.all((t.data ?? []).map((x: Fila) => resolverFoto(c, x.foto as string | null))),
   ]);
+  const tutoresCloud = (t.data ?? []).map((x: Fila, i) => ({ id: x.id as string, nombre: x.nombre as string, correo: opc(x.correo), pendiente: x.pendiente as boolean, foto: fotosTutores[i] }));
+  // Quién soy yo, de los tutores de ESTA familia: primero por correo (confiable entre aparatos —
+  // cubre a quien se unió a una familia que no es la que usó en su propio onboarding, donde "t1"
+  // de los dos coincide por casualidad); si nadie coincide, se respeta el "yo" que ya tenía este
+  // aparato (el dueño de la familia, cuyo propio tutor no necesita guardar su correo); si tampoco
+  // eso aplica (aparato nuevo), el primer tutor de la lista.
+  const yoPorCorreo = correoSesion ? tutoresCloud.find((x) => x.correo?.toLowerCase() === correoSesion.toLowerCase())?.id : undefined;
+  const yo = yoPorCorreo ?? (tutoresCloud.some((x) => x.id === local.yo) ? local.yo : tutoresCloud[0]?.id ?? local.yo);
   return {
     ...local,
     correo: correoSesion ?? local.correo,
+    yo,
     plan: (h.data?.plan ?? local.plan) as EstadoApp['plan'],
     ajustes: { ...local.ajustes, ...(h.data?.ajustes as object | undefined) },
     perros: (p.data ?? []).map((x: Fila, i) => ({ id: x.id as string, nombre: x.nombre as string, foto: fotosPerros[i], nacimiento: opc(x.nacimiento), pesoKg: (x.peso_kg as number | null) ?? undefined, raza: opc(x.raza), notas: opc(x.notas), chip: opc(x.chip), responsable: opc(x.responsable), telefono: opc(x.telefono) })),
-    tutores: (t.data ?? []).map((x: Fila, i) => ({ id: x.id as string, nombre: x.nombre as string, correo: opc(x.correo), pendiente: x.pendiente as boolean, foto: fotosTutores[i] })),
+    tutores: tutoresCloud,
     cuidados: (cu.data ?? []).map((x: Fila) => ({ id: x.id as string, perroId: x.perro_id as string, tipo: x.tipo as Cuidado['tipo'], nombre: x.nombre as string, detalle: x.detalle as string, hora: opc(x.hora), proxima: opc(x.proxima), ultima: opc(x.ultima), cada: (x.cada as number | null) ?? undefined, racion: (x.racion as Cuidado['racion']) ?? undefined, detenido: (x.detenido as boolean | null) ?? false })),
     registros: (r.data ?? []).map((x: Fila) => ({ id: x.id as string, cuidadoId: x.cuidado_id as string, dia: x.dia as string, quien: x.quien as string, hora: x.hora as string })),
     notas: (n.data ?? []).map((x: Fila) => ({ id: x.id as string, perroId: x.perro_id as string, dia: x.dia as string, hora: x.hora as string, tipo: x.tipo as Nota['tipo'], texto: x.texto as string, intensidad: (x.intensidad as Nota['intensidad']) ?? undefined, quien: x.quien as string })),
