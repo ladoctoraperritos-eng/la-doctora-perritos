@@ -226,7 +226,12 @@ export async function iniciarNube(): Promise<'nube' | 'sin_sesion' | 'sin_config
     const { data: membresia, error } = await c.from('miembros_hogar').select('hogar_id').limit(1);
     if (error) throw error;
     if (membresia && membresia.length > 0) {
-      hogarId = membresia[0].hogar_id as string;
+      // Si a esta persona la invitaron a OTRA familia después de ya tener la suya (propia y
+      // todavía vacía, sin perros), la pasa a la familia que la invitó — antes esa invitación se
+      // quedaba esperando para siempre sin aplicarse nunca, porque solo se revisaba al no tener
+      // ninguna familia todavía.
+      const { data: cambiada } = await c.rpc('aceptar_invitacion_existente');
+      hogarId = (cambiada as string | null) ?? (membresia[0].hogar_id as string);
       cargarDesdeNube(await traer(c, hogarId, correoSesion));
     } else {
       // Antes de crear una familia nueva y vacía, se revisa si a esta persona la invitaron a una
