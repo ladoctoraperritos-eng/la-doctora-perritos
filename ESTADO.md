@@ -789,3 +789,8 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - Causa: dato, no código. El cron de avisos (`app/api/cron/avisos/route.ts`) solo manda correo a hogares con `estado_pago in ('trialing','active')`. El 25-oct, al subirle el plan a Familia para que probara con 4 perros, solo se cambió la columna `plan` — `estado_pago` se quedó en `'sin_pagar'`, así que su familia (que ahora incluye a Daniel) quedó excluida del envío sin ningún aviso visible.
 - Confirmado con los logs de Supabase: el cron SÍ corrió a las 11:06 UTC (~8:06 AM Chile), pero su hogar no calificó por `estado_pago`.
 - Corregido a mano: `estado_pago = 'active'` en su hogar (mismo hogar de Daniel). Sin cambios de código — es consistente con cómo ya se le había dejado activa la cuenta antes.
+
+## Feature nueva: marcar una familia como activa desde el panel (2026-10-26, mismo día)
+- Motivo: toda familia agregada a mano desde "Agregar una persona a mano" (pruebas, invitados sin cobro) nace con `estado_pago = 'sin_pagar'` — sin pasar por Hotmart, nada lo cambia nunca, así que le pasaría lo mismo que a la usuaria (sin avisos, topes del plan gratis) a cualquier otra cuenta de prueba futura.
+- Nuevo `app/api/admin/estado-pago/route.ts` + botón (ícono de tarjeta) junto a cada familia en Usuarios del panel: marca `estado_pago` como `'active'` o de vuelta a `'sin_pagar'`, un click, sin pasar por SQL a mano. No se puso en el formulario de "Agregar una persona a mano" porque en ese momento todavía no existe la familia de esa persona (se crea recién cuando entra por primera vez) — el botón queda en Usuarios, donde sí hay una familia real a la que aplicarlo.
+- Verificado: tsc ✓ · build ✓ · publicado y confirmado en producción vía `/api/version`. Commit `822cfbf`.
