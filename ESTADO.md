@@ -34,6 +34,7 @@ Sesión 1 (validación + avatar). Flujo B. Fuente: PDF del usuario (investigaci�
 - KILL CRITERIA: plazo 14 días desde publicar la landing. Si <8% clic o 0 pagos con 300+ visitas → reformular ángulo (máx. 2 veces); a la 3ª sin señal, se mata la idea. Sin señal NO se gasta en ads.
 - Riesgo asumido: se construye la app en paralelo, sin señal de pago previa (informado al usuario).
 - **PLAZO EXTENDIDO (2026-10-25):** el primer plazo (14-oct → 28-oct) venció sin tráfico externo real — la usuaria no había empezado a compartir el link todavía. Decisión: pedir extensión y arrancar la difusión real desde el 2026-10-26 → nuevo vencimiento **2026-11-09** (14 días desde ese arranque). Mismo umbral y mismo kill criteria de arriba, solo se corre la fecha.
+- **SEGUNDA EXTENSIÓN (2026-11-13):** el arranque del 26-oct tampoco pasó — el plazo del 9-nov venció sin revisarse ni sin tráfico real. La usuaria tiene listo un banco de 12 videos animados terminados (`Editor-Reels-Camila/06-Videos-Animados-Doctora-Perritos/salidas`, temas: vacunas, golpe de calor, heridas, convulsión, botiquín, la app, etc.) y publica el primero el 2026-11-14. Nuevo vencimiento: **2026-11-28** (14 días desde ese arranque real). Mismo umbral y kill criteria de siempre.
 
 ## Pendiente
 - FICHA-AVATAR: BORRADOR, faltan ≥2 frases reales de la audiencia (comentarios/DMs) y aprobación del usuario.
