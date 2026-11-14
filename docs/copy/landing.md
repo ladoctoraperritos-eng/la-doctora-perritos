@@ -8,6 +8,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - Subtítulo: Medicamentos, comida y controles en una pantalla, y [b]quién ya lo hizo[/b]
 - CTA: Empezar mis 7 días gratis
 - Franja de confianza (solo hechos de la oferta): Sin cobro hoy · cancela cuando quieras · garantía de 15 días
+- Nota bajo la franja (2026-11-13, pedido de la usuaria — evita que la busquen en App Store/Play Store): Funciona desde el navegador de tu celular. No necesitas descargar nada.
 
 ## 2. Problema  (3 síntomas concretos)
 1. ¿No sabes si otro tutor [b]ya dio el medicamento[/b]?
@@ -49,6 +50,7 @@ Mecanismo bautizado: **el Panel de Hoy** (la pantalla "Hoy con [perro]": qué to
 - Piso legal: Respaldada por la garantía de 15 días de Hotmart  (configurar Hotmart en 15 días ANTES de publicar; garantía 15 > prueba 7)
 
 ## 8. FAQ  (objeciones 1-5 de la ficha + límite legal)
+0. ¿Tengo que descargarla? (2026-11-13, pedido de la usuaria — algunas personas la buscan en App Store/Play Store) — No. La Doctora Perritos funciona desde el navegador de tu celular o computador. Entras, la usas y, si quieres, la guardas en tu pantalla de inicio para abrirla como una app.
 1. ¿Para eso no pongo una alarma? — Una alarma suena; no te dice [b]quién lo dio ni cuánto queda[/b]. El Panel de Hoy sí.
 2. ¿Otra suscripción más? — Puedes probar todas sus funciones durante 7 días sin pagar. Si te sirve, continúas desde US$29 al año; si no, cancelas.
 3. ¿Tendré que llenar una ficha enorme? — No. [b]Empiezas en pocos pasos con un solo cuidado.[/b] El resto lo agregas cuando quieras.

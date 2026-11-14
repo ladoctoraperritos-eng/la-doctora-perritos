@@ -82,7 +82,12 @@ export default function LandingPage() {
         subtitleMarked="Medicamentos, alimento, controles y [b]quién hizo qué[/b]. Todo en un solo lugar."
         ctaLabel={CTA_LABEL}
         ctaHref={CTA_HREF}
-        socialProof={<span className="text-base font-medium">{MICROCOPY}</span>}
+        socialProof={
+          <span className="flex flex-col items-center gap-1 md:items-start">
+            <span className="text-base font-medium">{MICROCOPY}</span>
+            <span className="text-sm text-[var(--text-tertiary)]">Funciona desde el navegador de tu celular. No necesitas descargar nada.</span>
+          </span>
+        }
         visual={
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -218,6 +223,11 @@ export default function LandingPage() {
 
       <Faq
         items={[
+          {
+            pregunta: '¿Tengo que descargarla?',
+            respuestaMarked:
+              'No. La Doctora Perritos funciona desde el navegador de tu celular o computador. Entras, la usas y, si quieres, la guardas en tu pantalla de inicio para abrirla como una app.',
+          },
           {
             pregunta: '¿Para eso no pongo una alarma?',
             respuestaMarked: 'Una alarma suena; no te dice [b]quién lo dio ni cuánto queda[/b]. El Panel de Hoy sí.',

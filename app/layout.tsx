@@ -22,6 +22,15 @@ export const metadata: Metadata = {
   title: "La Doctora Perritos · Cuida y Recuerda",
   description:
     "Sabe qué necesita tu perro hoy: medicamentos, comida, vacunas y controles en una pantalla, y quién ya lo hizo.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "La Doctora Perritos",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {

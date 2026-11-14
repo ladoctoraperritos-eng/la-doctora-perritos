@@ -9,6 +9,7 @@ import { Menu, type SeccionApp } from '@/components/app/Menu';
 import AvisoNube from '@/components/app/AvisoNube';
 import RequiereSesion from '@/components/app/RequiereSesion';
 import SincronizarNube from '@/components/app/SincronizarNube';
+import TipInstalar from '@/components/app/TipInstalar';
 
 const SECCION_POR_RUTA: { prefijo: string; seccion: SeccionApp }[] = [
   { prefijo: '/app/perros', seccion: 'perros' },
@@ -26,6 +27,7 @@ export default function LayoutApp({ children }: { children: React.ReactNode }) {
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col text-[var(--text-primary)] [font-family:var(--font-body)]">
         <SincronizarNube />
         <AvisoNube />
+        {pathname === '/app' && <TipInstalar />}
         {children}
         <Menu activa={activa} />
       </div>
